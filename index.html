@@ -196,6 +196,8 @@
   /* Without this the browser keeps the footer still while a tab's content
      loads above it, which drags the page down and lands mid-tab. */
   body { overflow-anchor: none; }
+  body.no-halal .halal-part { display: none !important; }
+  .switch-row { display: flex; gap: .6rem; align-items: center; margin: .75rem 0 0; } .switch-row input { width: auto; }
   .help { width: 1.35rem; height: 1.35rem; padding: 0; border-radius: 50%; font-size: .78rem; font-weight: 700; line-height: 1; vertical-align: middle; margin-left: .3rem; }
   #tip.pinned { pointer-events: auto; max-width: 22rem; }
   .glossary summary { cursor: pointer; }
@@ -225,7 +227,7 @@
     <p id="status">Loading…</p>
     <div class="ticker" aria-label="Markets today"><div class="run" id="ticker"><span class="muted">Loading markets…</span></div></div>
   </header>
-  <div class="demo-note"><b>Demo.</b> Real data for the 501 companies in the S&P 500, frozen on 27 October 2026. Try a typo like "amazn" or "nvidea". Anything you add or save stays in your own browser. The full Trade Desk runs on its owner's Mac, with live prices for any stock, their broker and phone alerts.</div>
+  <div class="demo-note"><b>Demo.</b> Real data for the 501 companies in the S&P 500, frozen on 27 October 2026. Try a typo like "amazn" or "nvidea". Anything you add or save stays in your own browser. The full Trade Desk runs on its owner's Mac, with live prices for any stock, their broker and phone alerts. Also: <a href="family-office/">the Family Office demo, for everything a family owns</a>.</div>
 
   <nav class="tabs" role="tablist">
     <button role="tab" data-tab="plan">Plan a buy</button>
@@ -332,6 +334,7 @@
       <div><label for="cooling_off_days">For a tip or a quick trade, wait this many days before buying, optional</label><input id="cooling_off_days" type="number" min="0" max="60" step="1"></div>
     </form>
     <p><button class="primary" id="saveLimits">Save limits</button><span id="saved" class="muted" style="margin-left:.5rem"></span></p>
+    <div class="switch-row"><input type="checkbox" id="set_halal"><label for="set_halal" style="margin:0"><b>Halal checks</b>: the halal screen, the halal fund beside each plan and the purification sum. Off hides them everywhere.</label></div>
   </section>
 
   <section hidden>
@@ -609,8 +612,8 @@
 
   function renderHoldings() {
     const h = desk?.holdings || [];
-    $("holdings").innerHTML = h.length ? `<table><thead><tr><th>Stock</th><th class="num">Shares</th><th class="num">Price</th><th class="num">Today</th><th class="num">Value</th><th class="num">Gain or loss</th><th>Halal</th></tr></thead><tbody>${
-      h.map((x) => `<tr><td><b>${esc(x.symbol)}</b></td><td class="num">${x.shares}</td><td class="num">${usd(x.price)}</td><td class="num ${cls(x.change_pct)}">${pct(x.change_pct)}</td><td class="num">${usd(x.value)}</td><td class="num ${cls(x.unrealised_usd)}">${usd(x.unrealised_usd)}</td><td data-halal="${esc(x.symbol)}"><span class="skel" style="width:4rem"></span></td></tr>`).join("")
+    $("holdings").innerHTML = h.length ? `<table><thead><tr><th>Stock</th><th class="num">Shares</th><th class="num">Price</th><th class="num">Today</th><th class="num">Value</th><th class="num">Gain or loss</th><th class="halal-part">Halal</th></tr></thead><tbody>${
+      h.map((x) => `<tr><td><b>${esc(x.symbol)}</b></td><td class="num">${x.shares}</td><td class="num">${usd(x.price)}</td><td class="num ${cls(x.change_pct)}">${pct(x.change_pct)}</td><td class="num">${usd(x.value)}</td><td class="num ${cls(x.unrealised_usd)}">${usd(x.unrealised_usd)}</td><td class="halal-part" data-halal="${esc(x.symbol)}"><span class="skel" style="width:4rem"></span></td></tr>`).join("")
     }</tbody></table>` : `<p class="muted">Shows once you add stocks under Your stocks.</p>`;
     window.fillHalal?.();
   }
@@ -769,7 +772,16 @@
 
   window.deskReady = (async function () {
     try {
-      [desk, limits, journal, studies] = await Promise.all(["desk", "limits", "journal", "studies"].map((n) => mobleeApp.load(n)));
+      [desk, limits, journal, studies, window.deskSettings] = await Promise.all(["desk", "limits", "journal", "studies", "settings"].map((n) => mobleeApp.load(n)));
+      // Halal checks are a switch (Your limits); off hides everything about halal.
+      window.deskSettings = Object.assign({ halal: true }, window.deskSettings || {});
+      document.body.classList.toggle("no-halal", !window.deskSettings.halal);
+      $("set_halal").checked = !!window.deskSettings.halal;
+      $("set_halal").addEventListener("change", async () => {
+        window.deskSettings.halal = $("set_halal").checked;
+        document.body.classList.toggle("no-halal", !window.deskSettings.halal);
+        await mobleeApp.save("settings", window.deskSettings);
+      });
       journal = Array.isArray(journal) ? journal : [];
       studies = Array.isArray(studies) ? studies : [];
       renderAll();
@@ -1000,7 +1012,7 @@
         w.symbol = r.symbol; w.name = r.name || "";
         w.understood = r.corrected ? v : "";
       } },
-    { q: "How much money would you put in?", body: () => `<input id="w_in" type="number" min="1" step="any" placeholder="e.g. 5000" value="${w.amount || ""}">
+    { q: "How much money would you put in?", body: () => `${curOf(w.symbol) === "KWD" ? `<p class="muted">In Kuwaiti dinars.</p>` : ""}<input id="w_in" type="number" min="1" step="any" placeholder="e.g. 5000" value="${w.amount || ""}">
         ${desk?.account?.net_liquidation ? `<p class="muted">Your account is ${usd(desk.account.net_liquidation)}, with ${usd(desk.account.cash)} in cash.</p>` : ""}`,
       read() { const v = Number($("w_in").value); if (!(v > 0)) return "Put in an amount in dollars."; w.amount = v; } },
     { q: "Why do you want it?", body: () => `<div class="chips">${WHYS.map((x) => `<button type="button" data-v="${esc(x)}" aria-pressed="${w.why === x}">${esc(x)}</button>`).join("")}</div>
@@ -1059,11 +1071,21 @@
   const loading = (what) => `<span class="muted" style="font-size:.85rem">${what}…</span><span class="skel" style="width:80%"></span><span class="skel" style="width:55%"></span>`;
   const BADGE = { pass: "Passes the halal screen", fail: "Fails the halal screen", doubtful: "Halal: doubtful", unknown: "Halal: not checked" };
   const badge = (status, text) => `<span class="badge ${status}">${status === "pass" ? "✓" : status === "fail" ? "✕" : "?"} ${esc(text || BADGE[status])}</span>`;
+  // Halal checks are the owner's switch (Your limits); the page carries the
+  // class no-halal on <body> when they are off, and anything marked halal-part hides.
+  const halalOn = () => !document.body.classList.contains("no-halal");
   // The headline says no more than the tests do: how many passed, and how many could not be checked.
   const halalText = (d, short) => d.overall !== "pass" || d.passed == null ? null
     : `${short ? "Passes" : "Passes the halal screen on"} ${d.passed} of ${d.total}${d.unchecked ? `; ${d.unchecked} not checked` : ""}`;
   const calDays = (tradingDays) => Math.round(tradingDays * 7 / 5);
-  const money = (n) => (n < 0 ? "-$" : "$") + Math.abs(n).toLocaleString("en-US", { maximumFractionDigits: 0 });
+  // Boursa Kuwait shares (symbols ending .KW) are priced and planned in dinars;
+  // everything else in dollars. Prices of Kuwaiti shares are small, so three decimals.
+  const curOf = (sym) => /\.KW$/i.test(sym || "") ? "KWD" : "USD";
+  const money = (n, sym = w.symbol) => curOf(sym) === "KWD"
+    ? (n < 0 ? "-" : "") + "KWD " + Math.abs(n).toLocaleString("en-US", { maximumFractionDigits: 0 })
+    : (n < 0 ? "-$" : "$") + Math.abs(n).toLocaleString("en-US", { maximumFractionDigits: 0 });
+  const px = (n, sym = w.symbol) => curOf(sym) !== "KWD" ? usd(n)
+    : n == null || isNaN(n) ? "–" : "KWD " + Number(n).toLocaleString("en-US", { minimumFractionDigits: 3, maximumFractionDigits: 3 });
   const plus = (n) => (n >= 0 ? "+" : "") + money(n);
   // Every date on the page written one way: 26 Oct 2026.
   const day = (s) => {
@@ -1098,7 +1120,7 @@
       `Trade Desk check: ${w.symbol}${w.name ? ` (${w.name})` : ""}, ${money(w.amount)} for ${w.span}.`,
       p ? `Three real past stretches: good case ${end("win")}, middle ${end("middle")}, bad case ${end("loss")}${p.loss.low < 1 ? ` (lowest point on the way ${money(w.amount * p.loss.low)})` : ""}.` : "",
       h && h.enough ? `It ended higher in ${h.up[0].chance.toFixed(0)}% of past ${w.span} stretches (${separate(h.separate, w.span)})${h.market ? `, and beat the S&P 500 in ${h.market.beat_pct.toFixed(0)}% of them` : ""}.` : "",
-      f.halal ? `Halal screen: ${f.halal.overall === "pass" ? halalText(f.halal) : f.halal.overall}.` : "",
+      f.halal && halalOn() ? `Halal screen: ${f.halal.overall === "pass" ? halalText(f.halal) : f.halal.overall}.` : "",
       "A count of the past, not advice.",
     ].filter(Boolean);
     const link = window.DEMO ? location.origin + location.pathname + planHash() : "";
@@ -1143,12 +1165,12 @@
       ["Deepest fall in the bad case", (x) => x.p.loss.low < 1 ? `${Math.round(100 * (1 - x.p.loss.low))}% down` : "none"],
       ["Did better than the S&P 500", (x) => x.h.market ? `${x.h.market.beat_pct.toFixed(0)}% of the time` : null],
       ["Dividend a year", (x) => x.sum && x.sum.dividend ? `${(100 * x.sum.dividend / x.price).toFixed(1)}%` : "none"],
-      ["Halal screen", (x) => x.halal ? (x.halal.overall === "pass" ? halalText(x.halal, true) : x.halal.overall === "fail" ? "Fails" : "Doubtful") : "Not screened"],
+      halalOn() && ["Halal screen", (x) => x.halal ? (x.halal.overall === "pass" ? halalText(x.halal, true) : x.halal.overall === "fail" ? "Fails" : "Doubtful") : "Not screened"],
       ["Leaders, last 3 months", (x) => x.ins ? `${x.ins.buys_3m} buys, ${x.ins.sells_3m} sales` : null],
       ["Results due", (x) => x.sum && x.sum.earnings_date ? day(x.sum.earnings_date) : null],
     ];
     box.innerHTML = `<div class="scroll"><table><thead><tr><th>${money(w.amount)} for ${esc(w.span)}</th><th class="num">${esc(A.sym)}</th><th class="num">${esc(B.sym)}</th></tr></thead><tbody>${
-      rows.map(([label, fn]) => `<tr><td>${esc(label)}</td><td class="num">${esc(cell(A, fn))}</td><td class="num">${esc(cell(B, fn))}</td></tr>`).join("")}</tbody></table></div>
+      rows.filter(Boolean).map(([label, fn]) => `<tr><td>${esc(label)}</td><td class="num">${esc(cell(A, fn))}</td><td class="num">${esc(cell(B, fn))}</td></tr>`).join("")}</tbody></table></div>
       <p class="reasons">Side by side, never ranked: one may suit your reason and your time better than the other. ${B.p ? `${esc(B.sym)}'s middle case ran ${day(B.p.middle.from)} to ${day(B.p.middle.to)}.` : ""}</p>`;
   }
 
@@ -1160,20 +1182,22 @@
     try { ch = await api(`/api/chances?symbol=${encodeURIComponent(w.symbol)}`); }
     catch (e) { out.innerHTML = card("Could not plan this one", `<p>${esc(e.message)}</p>`); return; }
     const buy = w.price || ch.price;
+    // The account is in dollars; a plan in dinars is turned into dollars before it is set against it.
+    w.usdPer = curOf(w.symbol) === "KWD" ? ((await api("/api/quotes?symbols=KWDUSD%3DX").catch(() => []))[0] || {}).price || null : 1;
     const shares = w.amount / buy;
     const h = ch.horizons.find((x) => x.label === w.span);
     out.innerHTML =
       `<section><div class="card"><div class="top"><b>${esc(w.symbol)}</b>
-        <span>${money(w.amount)} for ${esc(w.span)}, buying ${w.when === "dip" ? `only if it drops to ${usd(buy)}` : `now at ${usd(buy)}`} (about ${shares < 10 ? shares.toFixed(2) : Math.floor(shares)} shares)</span>
-        <span class="muted">Why: ${esc(w.why)}${w.note ? `, "${esc(w.note)}"` : ""}</span><span id="p_badge"></span></div><div id="p_soon"></div>
+        <span>${money(w.amount)} for ${esc(w.span)}, buying ${w.when === "dip" ? `only if it drops to ${px(buy)}` : `now at ${px(buy)}`} (about ${shares < 10 ? shares.toFixed(2) : Math.floor(shares)} shares)</span>
+        <span class="muted">Why: ${esc(w.why)}${w.note ? `, "${esc(w.note)}"` : ""}</span><span id="p_badge" class="halal-part"></span></div><div id="p_soon"></div>
         <div class="actions"><button type="button" id="p_save">Save this plan to the journal</button>
-          ${w.when === "dip" ? `<button type="button" class="primary" id="p_alert">Alert my phone at ${usd(buy)}</button>` : ""}
+          ${w.when === "dip" ? `<button type="button" class="primary" id="p_alert">Alert my phone at ${px(buy)}</button>` : ""}
           <button type="button" id="p_again">Change my answers</button>
           <button type="button" id="p_share">${window.DEMO ? "Copy a link to this check" : "Copy this check as a message"}</button><span id="p_shared" class="muted"></span></div>
         ${coolingOffer()}</div></section>` +
       card("Win, middle and lose: played out with your money", loading("Finding real stretches"), "c_tl") +
       card("Case for and case against", loading("Gathering every fact on each side"), "c_pc") +
-      card("Halal check", loading("Reading what it does and its balance sheet"), "c_halal") +
+      card("Halal check", loading("Reading what it does and its balance sheet"), "c_halal").replace("<section>", `<section class="halal-part">`) +
       card(`What could happen in ${esc(w.span)}, in dollars`, "", "c_money") +
       card("Before you decide", loading("Putting it together"), "c_check") +
       card("Big investors: buying or selling?", loading("Reading the latest filings"), "c_inv") +
@@ -1245,7 +1269,7 @@
     fail("c_an", 3, "What analysts say (their opinion)");
     fail("c_news", 4, "Latest news");
     if (parts[5].status === "rejected") {
-      $("c_halal").innerHTML = `<h3>Halal check</h3><p>${badge("unknown", "Could not be screened")}</p><p class="muted">${esc(parts[5].reason.message)} A fund or a foreign share has to be checked by what it holds or by a scholar's list; "study ${esc(w.symbol)}" can look into it.</p>`;
+      $("c_halal").innerHTML = `<h3>Halal check</h3><p>${badge("unknown", "Could not be screened")}</p><p class="muted">${esc(parts[5].reason.message)} ${curOf(w.symbol) === "KWD" ? `Boursa Kuwait shares are not in the free company data; "study ${esc(w.symbol)}" reads the annual report for the halal check.` : `A fund or a foreign share has to be checked by what it holds or by a scholar's list; "study ${esc(w.symbol)}" can look into it.`}</p>`;
     }
     drawChecklist(facts);
     drawCase(facts);
@@ -1278,7 +1302,7 @@
     const h = f.h;
     const yieldPct = f.sum && f.sum.dividend && f.buy ? 100 * f.sum.dividend / f.buy : null;
     if (w.why === "For the dividends") {   // the reason given comes first
-      if (yieldPct) (yieldPct >= 2 ? For : Against).push(`It pays about ${yieldPct.toFixed(1)}% a year in dividends (${usd(f.sum.dividend)} a share over the last year), about ${money(w.amount * yieldPct / 100)} a year on your ${money(w.amount)}.`);
+      if (yieldPct) (yieldPct >= 2 ? For : Against).push(`It pays about ${yieldPct.toFixed(1)}% a year in dividends (${px(f.sum.dividend)} a share over the last year), about ${money(w.amount * yieldPct / 100)} a year on your ${money(w.amount)}.`);
       else if (f.sum) Against.push("It paid no dividend in the last year.");
     }
     if (h && h.enough) {
@@ -1303,7 +1327,7 @@
       if (f.ins.sells_3m > 0) Against.push(`Its own leaders sold shares ${times(f.ins.sells_3m)} in the last 3 months${f.ins.planned_3m ? `, ${f.ins.planned_3m === f.ins.sells_3m ? "all" : f.ins.planned_3m} of them planned months ahead, which say less` : ""}.`);
       // Gifts and transfers are not sales, so they go on neither side.
     }
-    if (f.halal) (f.halal.overall === "pass" ? For : Against).push(f.halal.overall === "pass" ? `${halalText(f.halal) || "Passes the halal screen on what could be checked"}.` : f.halal.overall === "fail" ? "Fails the halal screen." : "Doubtful on the halal screen.");
+    if (f.halal && halalOn()) (f.halal.overall === "pass" ? For : Against).push(f.halal.overall === "pass" ? `${halalText(f.halal) || "Passes the halal screen on what could be checked"}.` : f.halal.overall === "fail" ? "Fails the halal screen." : "Doubtful on the halal screen.");
     if (f.sum) {
       if (yieldPct && w.why !== "For the dividends") For.push(`Pays a dividend of about ${yieldPct.toFixed(1)}% a year.`);
       if (f.sum.earnings_date) {
@@ -1366,7 +1390,7 @@
   });
   addEventListener("scroll", () => { const tip = $("tip"); if (tip.classList.contains("pinned")) { tip.classList.remove("pinned"); tip.style.display = "none"; } }, { passive: true });
   const glossary = () => `<section><details class="card glossary"><summary><b>Words used on this page, in plain words</b></summary>
-    <dl>${WORDS.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join("")}</dl></details></section>`;
+    <dl>${WORDS.filter(([k]) => halalOn() || !["SPUS", "Halal screen"].includes(k)).map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join("")}</dl></details></section>`;
 
   // Price alerts set from Plan a buy, and whether they have gone off.
   window.drawAlerts = async function () {
@@ -1378,12 +1402,12 @@
     const done = new Map(fired.map((x) => [x.id, x]));
     box.innerHTML = alerts.length ? alerts.map((a) => {
       const f = done.get(a.id);
-      return `<li><span><b>${esc(a.symbol)}</b> at ${usd(a.price)} <span class="muted">${esc(a.note || "")}, set ${esc(day(a.created))}</span></span>
-        <span>${f ? `<span class="badge pass">Reached ${usd(f.price)} on ${esc(f.at.replace("T", " "))}</span>` : `<span class="badge unknown">Waiting</span>`}
+      return `<li><span><b>${esc(a.symbol)}</b> at ${px(a.price, a.symbol)} <span class="muted">${esc(a.note || "")}, set ${esc(day(a.created))}</span></span>
+        <span>${f ? `<span class="badge pass">Reached ${px(f.price, a.symbol)} on ${esc(f.at.replace("T", " "))}</span>` : `<span class="badge unknown">Waiting</span>`}
         <button type="button" data-id="${esc(a.id)}">Remove</button></span></li>`;
     }).join("") : `<li class="muted">No price alerts yet.</li>`;
     const cooling = window.DEMO ? [] : ((await mobleeApp.load("cooling").catch(() => null)) || []);
-    box.innerHTML += cooling.map((c) => `<li><span><b>${esc(c.symbol)}</b> <span class="muted">${esc(c.why)}, ${money(c.amount)} at ${usd(c.price_then)} on ${esc(day(c.made))}</span></span>
+    box.innerHTML += cooling.map((c) => `<li><span><b>${esc(c.symbol)}</b> <span class="muted">${esc(c.why)}, ${money(c.amount, c.symbol)} at ${px(c.price_then, c.symbol)} on ${esc(day(c.made))}</span></span>
       <span class="badge unknown">${c.ask_on > today() ? `Cooling off: your phone asks on ${esc(day(c.ask_on))}` : "Wait over"}</span></li>`).join("");
     box.querySelectorAll("button[data-id]").forEach((b) => b.addEventListener("click", async () => {
       await mobleeApp.save("alerts", alerts.filter((a) => a.id !== b.dataset.id));
@@ -1435,7 +1459,7 @@
     const low = (k) => p[k].low != null && p[k].low < 1 ? `<span class="muted" style="font-size:.8rem;display:block;margin-top:.3rem">Lowest point on the way: ${money(w.amount * p[k].low)} (${plus(w.amount * (p[k].low - 1))}, ${Math.round(100 * (1 - p[k].low))}% down) on ${day(p[k].low_date)}</span>` : "";
     const line = (text) => `<span class="muted" style="font-size:.8rem;display:block;margin-top:.3rem">${text}</span>`;
     const spy = (k) => (p[k].market ? line(`The S&P 500 over the same dates: ${money(w.amount * p[k].market)} (${plus(w.amount * (p[k].market - 1))})`) : "")
-      + (p[k].halal_fund ? line(`A halal S&P 500 fund (SPUS), same dates: ${money(w.amount * p[k].halal_fund)} (${plus(w.amount * (p[k].halal_fund - 1))})`) : "")
+      + (p[k].halal_fund && halalOn() ? line(`A halal S&P 500 fund (SPUS), same dates: ${money(w.amount * p[k].halal_fund)} (${plus(w.amount * (p[k].halal_fund - 1))})`) : "")
       + (dca(k) ? line(`Bought in 12 monthly parts instead: ${money(dca(k))} (${plus(dca(k) - w.amount)})`) : "");
     // The same money spread over 12 equal monthly buys along the same stretch,
     // for holds of six months or more: it softens a bad start and a good one.
@@ -1447,7 +1471,7 @@
       return v;
     };
     box.innerHTML = `<h3>Win, middle and lose: played out with your money</h3>
-      <p class="muted">Three real ${esc(w.span)} stretches from ${esc(w.symbol)}'s last ten years, out of ${p.stretches.toLocaleString("en-US")} overlapping ones${p.separate ? ` (${separate(p.separate, w.span)})` : ""}, replayed as if you had put in ${money(w.amount)}, dividends included. Press play.</p>
+      <p class="muted">Three real ${esc(w.span)} stretches from ${esc(w.symbol)}'s last ten years, out of ${p.stretches.toLocaleString("en-US")} overlapping ones${p.separate ? ` (${separate(p.separate, w.span)})` : ""}, replayed as if you had put in ${money(w.amount)}, dividends included.${curOf(w.symbol) === "KWD" ? " The free data has no Boursa Kuwait index, so the plain choice shown is the S&P 500." : ""} Press play.</p>
       <div class="tl"><div class="counters">${series.map(([k, label, c]) => `<div style="border-color:${c}"><span class="muted" style="font-size:.85rem">${label}</span><b data-k="${k}">${money(w.amount)}</b><span class="muted" style="font-size:.8rem">Really happened ${fmtDate(p[k].from)} to ${fmtDate(p[k].to)}</span>${low(k)}${spy(k)}</div>`).join("")}</div>
       <svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Value of ${money(w.amount)} over ${esc(w.span)} in three real past stretches">
         ${ticks.map((v) => `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" style="stroke:var(--line)" stroke-width="1"/><text x="${L - 6}" y="${y(v) + 4}" text-anchor="end" style="fill:var(--muted);font-size:11px">${money(v)}</text>`).join("")}
@@ -1520,10 +1544,10 @@
         <div class="tile"><span>1 time in 10, better than</span><b>${plus(w.amount * h.best_tenth / 100)}</b></div>
         ${h.market ? `<div class="tile"><span>Did better than the S&P 500</span><b>${h.market.beat_pct.toFixed(0)}% of the time</b></div>
         <div class="tile"><span>S&P 500's middle result</span><b>${plus(w.amount * h.market.middle / 100)}</b></div>` : ""}
-        ${h.halal_fund ? `<div class="tile"><span>Did better than the halal fund SPUS</span><b>${h.halal_fund.beat_pct.toFixed(0)}% of the time</b><small class="muted">since ${esc(day(h.halal_fund.since))}, ${h.halal_fund.n.toLocaleString("en-US")} stretches</small></div>` : ""}</div>
+        ${h.halal_fund ? `<div class="tile halal-part"><span>Did better than the halal fund SPUS</span><b>${h.halal_fund.beat_pct.toFixed(0)}% of the time</b><small class="muted">since ${esc(day(h.halal_fund.since))}, ${h.halal_fund.n.toLocaleString("en-US")} stretches</small></div>` : ""}</div>
       <div class="ladder">${ups.map((r) => row("rise", `Up ${r.pct}% or more`, r.pct, r.chance)).join("")}
         ${row("rise", "Higher at all", 0, h.up[0].chance)}
-        <div class="now">You put in ${money(w.amount)} at ${usd(buy)}</div>
+        <div class="now">You put in ${money(w.amount)} at ${px(buy)}</div>
         ${row("fall", "Lower at all", 0, h.down[0].chance)}
         ${downs.map((r) => row("fall", `Down ${r.pct}% or more`, -r.pct, r.chance)).join("")}</div>
       <p class="reasons">Counted from ${n} stretches of ${esc(w.span)} since ${esc(day(ch.from))}. They overlap, so the count really rests on ${h.separate ? separate(h.separate, w.span) : "far fewer"}${h.n < 500 || (h.separate && h.separate < 5) ? ", too few to lean on" : ""}. Dividends are counted as if put back in. A stock that is big today had a good past by definition, so its own past flatters it. Not a forecast.</p>`;
@@ -1561,7 +1585,7 @@
         ${d.gifts_3m || d.gifts_12m ? `Gifts and transfers are counted apart, as they are not sales: <b>${d.gifts_3m || 0}</b> in 3 months, <b>${d.gifts_12m || 0}</b> in 12.` : ""}
         ${d.counts_complete === false ? `<span class="muted">Counted from the latest 200 filings, which do not reach back a full year.</span>` : ""}</p>
       ${d.trades.length ? `<div class="scroll"><table><thead><tr><th>Who</th><th>Role</th><th>What</th><th class="num">Shares</th><th class="num">Price</th><th>When</th></tr></thead><tbody>${
-        d.trades.slice(0, 6).map((t) => `<tr><td>${esc(t.who)}</td><td>${esc(t.role)}</td><td>${esc(t.type)}</td><td class="num">${t.shares != null ? Math.round(t.shares).toLocaleString("en-US") : "–"}</td><td class="num">${t.price ? usd(t.price) : "–"}</td><td>${esc(day(t.date))}</td></tr>`).join("")}</tbody></table></div>` : ""}
+        d.trades.slice(0, 6).map((t) => `<tr><td>${esc(t.who)}</td><td>${esc(t.role)}</td><td>${esc(t.type)}</td><td class="num">${t.shares != null ? Math.round(t.shares).toLocaleString("en-US") : "–"}</td><td class="num">${t.price ? px(t.price) : "–"}</td><td>${esc(day(t.date))}</td></tr>`).join("")}</tbody></table></div>` : ""}
       ${auto ? `<p class="reasons">Planned sales are set months ahead under a fixed schedule, so they say less about today than a sale chosen on the day.</p>` : ""}
       <p class="reasons">There is no free, fair score for how good a leadership team is, so none is made up here. ${study ? `Your study of ${esc(d.symbol)} from ${esc(study.date)} is under Stock studies on the Desk tab.` : `The full Trade Desk can write up who runs it, for how long, and their record, with sources.`}</p>`;
   }
@@ -1572,12 +1596,12 @@
     $("c_an").innerHTML = `<h3>What analysts say (their opinion)</h3>
       <div class="split"><i style="width:${100 * d.buy / tot}%;background:var(--rise)"></i><i style="width:${100 * d.hold / tot}%;background:var(--muted)"></i><i style="width:${100 * d.sell / tot}%;background:var(--fall)"></i></div>
       <p><b>${d.buy}</b> say buy · <b>${d.hold}</b> say hold · <b>${d.sell}</b> say sell.</p>
-      <p>Their price targets for about a year from now run from <b>${usd(d.low)}</b> to <b>${usd(d.high)}</b>, with an average of <b>${usd(d.target)}</b>, against your price of <b>${usd(buy)}</b>.</p>
+      <p>Their price targets for about a year from now run from <b>${px(d.low)}</b> to <b>${px(d.high)}</b>, with an average of <b>${px(d.target)}</b>, against your price of <b>${px(buy)}</b>.</p>
       <div style="position:relative;height:2.2rem;margin:.25rem 0 .5rem">
         <div style="position:absolute;left:${at(d.low)}%;right:${100 - at(d.high)}%;top:.9rem;height:.4rem;border-radius:.2rem;background:var(--line)"></div>
         <div title="Average target" style="position:absolute;left:calc(${at(d.target)}% - 1px);top:.5rem;width:3px;height:1.2rem;background:var(--rise)"></div>
         <div title="Your price" style="position:absolute;left:calc(${at(buy)}% - 6px);top:.6rem;width:12px;height:12px;border-radius:50%;background:var(--fg);border:2px solid var(--bg)"></div>
-        <span class="reasons" style="position:absolute;left:0;top:1.5rem">${usd(lo)}</span><span class="reasons" style="position:absolute;right:0;top:1.5rem">${usd(hi)}</span></div>
+        <span class="reasons" style="position:absolute;left:0;top:1.5rem">${px(lo)}</span><span class="reasons" style="position:absolute;right:0;top:1.5rem">${px(hi)}</span></div>
       <p class="reasons">The black dot is your price; the blue mark is their average target. Analysts are often wrong and often all agree; their view is shown as theirs, not as advice.</p>`;
   }
 
@@ -1590,33 +1614,33 @@
   function drawChecklist(f) {
     const L = [];
     const net = desk?.account?.net_liquidation;
-    if (net) {
-      const pct = 100 * w.amount / net;
+    if (net && w.usdPer) {
+      const amtUsd = w.amount * (w.usdPer || 1), pct = 100 * amtUsd / net;
       L.push(`${money(w.amount)} is ${pct.toFixed(1)}% of your account${limits?.max_position_pct ? `; your limit for one stock is ${limits.max_position_pct}%${pct > limits.max_position_pct ? ", so this is over it" : ""}` : ""}.`);
-      if (desk.account.cash != null && w.amount > desk.account.cash) L.push(`You have ${usd(desk.account.cash)} in cash, less than ${money(w.amount)}.`);
+      if (desk.account.cash != null && amtUsd > desk.account.cash) L.push(`You have ${usd(desk.account.cash)} in cash, less than ${money(w.amount)}.`);
     }
     if (f.h && f.h.enough) {
       const bad = w.amount * f.h.worst_tenth / 100;
       L.push(`After ${w.span} it ended lower ${f.h.down[0].chance.toFixed(0)}% of the time. In the bad case (1 time in 10) you would be down about ${money(Math.abs(Math.min(bad, 0)))}${limits?.risk_per_trade_usd ? `, against the ${money(limits.risk_per_trade_usd)} you are willing to lose on one trade` : ""}.`);
       if (f.h.market) L.push(`The plain choice: the same ${money(w.amount)} in the whole S&P 500 had a middle result of ${plus(w.amount * f.h.market.middle / 100)} over the same stretches, against ${plus(w.amount * f.h.middle / 100)} for ${w.symbol}. ${w.symbol} did better ${f.h.market.beat_pct.toFixed(0)}% of the time.`);
-      if (f.h.halal_fund) L.push(`The plain halal choice: SPUS, an S&P 500 fund that keeps only companies passing a Shariah screen, had a middle result of ${plus(w.amount * f.h.halal_fund.middle / 100)} over the stretches it covers (since ${day(f.h.halal_fund.since)}). ${w.symbol} did better ${f.h.halal_fund.beat_pct.toFixed(0)}% of the time.`);
+      if (f.h.halal_fund && halalOn()) L.push(`The plain halal choice: SPUS, an S&P 500 fund that keeps only companies passing a Shariah screen, had a middle result of ${plus(w.amount * f.h.halal_fund.middle / 100)} over the stretches it covers (since ${day(f.h.halal_fund.since)}). ${w.symbol} did better ${f.h.halal_fund.beat_pct.toFixed(0)}% of the time.`);
     }
     if (w.why === "A quick trade" && ["6 months", "1 year", "3 years"].includes(w.span)) L.push(`You said a quick trade, but chose to hold it for ${w.span}.`);
     if (w.why === "To grow over the years" && ["1 week", "1 month"].includes(w.span)) L.push(`You said to grow over the years, but chose ${w.span}; short stretches swing much more by chance.`);
     if (w.why === "For the dividends") {
       const y = f.sum && f.sum.dividend && f.buy ? 100 * f.sum.dividend / f.buy : null;
-      L.push(y ? `It paid ${usd(f.sum.dividend)} a share in dividends over the last year, about ${y.toFixed(1)}% at your price, or ${money(w.amount * y / 100)} a year on your ${money(w.amount)}. The replay and the chances count dividends as if put back in. Whether it can keep paying is in its results.` : `It paid no dividend in the last year${f.sum ? "" : " that could be found"}, so it does not fit the reason you gave.`);
+      L.push(y ? `It paid ${px(f.sum.dividend)} a share in dividends over the last year, about ${y.toFixed(1)}% at your price, or ${money(w.amount * y / 100)} a year on your ${money(w.amount)}. The replay and the chances count dividends as if put back in. Whether it can keep paying is in its results.` : `It paid no dividend in the last year${f.sum ? "" : " that could be found"}, so it does not fit the reason you gave.`);
     }
     if (w.why === "Someone told me about it") L.push(`A tip is a reason to look, not to buy. The study lists the case against as well as the case for.`);
     if (w.when === "dip") {
       const fall = 100 * (1 - w.price / f.ch.price);
-      L.push(fall > 0 ? `You only buy if it falls ${fall.toFixed(1)}% from today's ${usd(f.ch.price)}. Possibilities (Desk tab, More tools) shows how often falls like that happened.` : `Your price ${usd(w.price)} is at or above today's ${usd(f.ch.price)}, so the order would likely fill now.`);
+      L.push(fall > 0 ? `You only buy if it falls ${fall.toFixed(1)}% from today's ${px(f.ch.price)}. Possibilities (Desk tab, More tools) shows how often falls like that happened.` : `Your price ${px(w.price)} is at or above today's ${px(f.ch.price)}, so the order would likely fill now.`);
     }
     if (f.alike && f.alike.pct > 60) L.push(`It moves a lot like ${f.alike.symbol}, which you own (${f.alike.pct}% alike over six months), so it adds to the same bet.`);
     const times = (n) => n == null ? "an unknown number of times" : `${n} ${n === 1 ? "time" : "times"}`;
     if (f.ins && (f.ins.trades.length || f.ins.buys_12m || f.ins.sells_12m)) L.push(`The company's own leaders bought ${times(f.ins.buys_3m)} and sold ${times(f.ins.sells_3m)} in the last 3 months${f.ins.gifts_3m ? `, not counting ${times(f.ins.gifts_3m)} they gave shares away or moved them` : ""}.`);
     if (f.inv) L.push(`${(f.inv.increased.holders || 0).toLocaleString("en-US")} big investors raised their stake and ${(f.inv.decreased.holders || 0).toLocaleString("en-US")} cut it in their latest filings.`);
-    if (f.an) L.push(`Analysts: ${f.an.buy} buy, ${f.an.hold} hold, ${f.an.sell} sell; their average target is ${usd(f.an.target)}.`);
+    if (f.an) L.push(`Analysts: ${f.an.buy} buy, ${f.an.hold} hold, ${f.an.sell} sell; their average target is ${px(f.an.target)}.`);
     if (!limits || !limits.risk_per_trade_usd) L.push(`Your loss limits are not set yet (Desk tab, Your limits); with them, this list also checks the size against them.`);
     $("c_check").innerHTML = `<h3>Before you decide</h3><ul class="checklist">${L.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>
       <p class="reasons">Facts to weigh, set against your own answers. The choice is yours: this desk does not tell you to buy or not.</p>`;
@@ -1936,10 +1960,11 @@
       const cash = desk?.account?.cash;
       const r = await api(`/api/checkup?symbols=${encodeURIComponent(rows.map((h) => h.symbol).join(","))}&shares=${rows.map((h) => h.shares).join(",")}${cash != null ? `&cash=${cash}` : ""}`);
       const fmt = (d) => d ? esc(window.fmtDay ? window.fmtDay(d) : d) : "–";
-      box.innerHTML = `<ul class="checklist">${r.notes.map((n) => `<li>${esc(n)}</li>`).join("")}</ul>
-        <div class="scroll"><table><thead><tr><th>Stock</th><th class="num">Value</th><th class="num">Share of all</th><th>Halal</th><th class="num">Dividends a year</th><th>Results</th></tr></thead><tbody>${
+      const halalShown = !document.body.classList.contains("no-halal");
+      box.innerHTML = `<ul class="checklist">${r.notes.filter((n) => halalShown || !n.startsWith("Not passing the halal")).map((n) => `<li>${esc(n)}</li>`).join("")}</ul>
+        <div class="scroll"><table><thead><tr><th>Stock</th><th class="num">Value</th><th class="num">Share of all</th><th class="halal-part">Halal</th><th class="num">Dividends a year</th><th>Results</th></tr></thead><tbody>${
           r.rows.slice().sort((a, b) => (b.value || 0) - (a.value || 0)).map((x) => `<tr><td><b>${esc(x.symbol)}</b></td><td class="num">${usd(x.value)}</td><td class="num">${x.weight_pct != null ? x.weight_pct + "%" : "–"}</td>
-            <td>${esc(x.halal)}</td><td class="num">${x.income ? usd(x.income) : "–"}</td><td>${fmt(x.earnings_date)}</td></tr>`).join("")}</tbody></table></div>
+            <td class="halal-part">${esc(x.halal)}</td><td class="num">${x.income ? usd(x.income) : "–"}</td><td>${fmt(x.earnings_date)}</td></tr>`).join("")}</tbody></table></div>
         <p class="reasons">Checked ${fmt(r.checked)}. "Move together" compares daily moves over six months. Dividends are last year's, per share, times your shares.</p>`;
     } catch (e) {
       box.innerHTML = `<p class="muted">${esc(e.message)}</p>`;

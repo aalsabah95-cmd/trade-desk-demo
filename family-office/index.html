@@ -1,0 +1,713 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Family Office</title>
+<meta name="description" content="A demo of a family office: everything a family owns in one place, by owner, in dinars and dollars, with a calendar of money in and out and a monthly report.">
+<style>
+  :root {
+    --bg: #f6f7fb; --surface: #ffffff; --fg: #15171c; --muted: #646b7a; --line: #e3e6ee; --accent: #1f5fd1; --accent-2: #0f8a7a;
+    --good: #12805c; --bad: #c2412d; --warn: #a86400; --radius: 14px; --shadow: 0 1px 2px rgba(20,30,60,.06), 0 8px 24px rgba(20,30,60,.06);
+    color-scheme: light dark;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #0d1016; --surface: #161a22; --fg: #eef1f7; --muted: #98a1b3; --line: #262c38; --accent: #7aa7ff; --accent-2: #3cc4b0;
+      --good: #4ade80; --bad: #f87171; --warn: #fbbf24; --shadow: 0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.35); }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--fg); font: 15px/1.5 -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif; }
+  body { overflow-anchor: none; }
+  header { background: linear-gradient(135deg, #12306b, #0f6b63); color: #fff; padding: 1.4rem 1rem 1.2rem; }
+  header .in, main { max-width: 68rem; margin: 0 auto; }
+  header h1 { margin: 0; font-size: 1.5rem; letter-spacing: -.01em; }
+  header p { margin: .25rem 0 0; opacity: .85; }
+  .big { display: flex; flex-wrap: wrap; gap: 1.5rem; margin-top: 1rem; align-items: baseline; }
+  .big b { font-size: 2.1rem; letter-spacing: -.02em; } .big span { opacity: .85; }
+  main { padding: 0 1rem 3rem; }
+  nav.tabs { display: flex; gap: .3rem; margin: -1.1rem 0 1rem; position: sticky; top: .5rem; z-index: 5; background: var(--surface); border: 1px solid var(--line);
+    border-radius: 999px; padding: .3rem; width: max-content; max-width: 100%; overflow-x: auto; box-shadow: var(--shadow); }
+  nav.tabs button { border: 0; background: none; padding: .45rem .95rem; border-radius: 999px; font: inherit; color: var(--muted); cursor: pointer; white-space: nowrap; }
+  nav.tabs button[aria-selected="true"] { background: var(--fg); color: var(--bg); }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 1.1rem 1.2rem; box-shadow: var(--shadow); margin: 0 0 1rem; }
+  .card h2 { margin: 0 0 .6rem; font-size: 1.1rem; }
+  .muted { color: var(--muted); } .small { font-size: .85rem; }
+  .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr)); gap: .7rem; }
+  .tile { border: 1px solid var(--line); border-radius: 12px; padding: .7rem .85rem; }
+  .tile span { display: block; color: var(--muted); font-size: .82rem; } .tile b { font-size: 1.2rem; }
+  .bars .row { display: grid; grid-template-columns: 1fr auto; gap: .2rem .6rem; align-items: baseline; margin: .55rem 0; }
+  .bars .track { grid-column: 1 / -1; grid-row: 2; height: .55rem; background: color-mix(in srgb, var(--line) 70%, transparent); border-radius: 999px; overflow: hidden; }
+  .bars .fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent-2)); border-radius: 999px; }
+  .bars .val { text-align: right; font-variant-numeric: tabular-nums; font-size: .9rem; }
+  .split { display: grid; grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr)); gap: 1rem; }
+  table { border-collapse: collapse; width: 100%; } .scroll { overflow-x: auto; }
+  th, td { text-align: left; padding: .45rem .5rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font-size: .8rem; color: var(--muted); font-weight: 600; } td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  tr.group td { background: color-mix(in srgb, var(--accent) 6%, transparent); font-weight: 600; }
+  button, select, input { font: inherit; }
+  button { border: 1px solid var(--line); background: var(--surface); color: var(--fg); border-radius: 10px; padding: .45rem .8rem; cursor: pointer; }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  input, select { border: 1px solid var(--line); background: var(--surface); color: var(--fg); border-radius: 10px; padding: .45rem .6rem; width: 100%; }
+  form.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); gap: .65rem; }
+  form.grid label { display: block; font-size: .8rem; color: var(--muted); margin-bottom: .2rem; }
+  .actions { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .75rem; align-items: center; }
+  .badge { display: inline-block; font-size: .75rem; padding: .1rem .5rem; border-radius: 999px; border: 1px solid var(--line); }
+  .badge.yes { color: var(--good); border-color: color-mix(in srgb, var(--good) 40%, transparent); }
+  .badge.no { color: var(--bad); border-color: color-mix(in srgb, var(--bad) 40%, transparent); }
+  .badge.unknown { color: var(--warn); border-color: color-mix(in srgb, var(--warn) 40%, transparent); }
+  .alert { background: color-mix(in srgb, var(--warn) 12%, transparent); border-radius: 10px; padding: .6rem .9rem; }
+  .note { font-size: .85rem; color: var(--muted); }
+  .empty { padding: 1.5rem; text-align: center; color: var(--muted); }
+  .switch { display: flex; gap: .6rem; align-items: center; } .switch input { width: auto; }
+  svg text { fill: var(--muted); font-size: 11px; }
+  @media (max-width: 560px) { .big b { font-size: 1.7rem; } }
+  .report h2 { font-size: 1.35rem; margin: 0; } .report h3 { font-size: 1rem; margin: 1.1rem 0 .4rem; }
+  .report .rgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); gap: 1rem 1.5rem; }
+  .report table { font-size: .9rem; } .report td.num { white-space: nowrap; } .report td { padding: .35rem .4rem; }
+  @media print {
+    header, nav.tabs, .no-print, main > section, .tab:not(#tab-report), #importCard, #formCard { display: none !important; }
+    #tab-report { display: block !important; }
+    html, body { background: #fff; color: #000; font-size: 11pt; }
+    .card { box-shadow: none; border: 0; padding: 0; }
+    .report { break-inside: auto; } .report table { break-inside: avoid; }
+    :root { --fg: #000; --muted: #444; --line: #ccc; --surface: #fff; --bg: #fff; }
+  }
+</style>
+</head>
+<body>
+<header><div class="in">
+  <h1>Family Office</h1>
+  <p id="status">Loading…</p>
+  <div class="big"><div><b id="nwMain">–</b> <span id="nwOther"></span></div><div class="switch small"><label for="showCur">Show in</label>
+    <select id="showCur" style="width:auto"><option value="KWD">Kuwaiti dinars</option><option value="USD">US dollars</option></select></div></div>
+</div></header>
+<main>
+<div class="card no-print" style="margin:1rem 0;border-style:dashed"><b>Demo.</b> A made-up family, with prices frozen on 27 October 2026. Change anything or add your own: it stays in your own browser. <button type="button" onclick="resetDemo()">Start again with the sample family</button> <a href="../">Try the Trade Desk demo</a>, which checks a single stock before you buy. The full Family Office runs on its owner's Mac, with live prices for any symbol.</div>
+  <nav class="tabs" role="tablist">
+    <button data-tab="overview" aria-selected="true">Overview</button><button data-tab="holdings">Holdings</button>
+    <button data-tab="calendar">Calendar</button><button data-tab="report">Report</button><button data-tab="owners">Owners</button><button data-tab="settings">Settings</button>
+  </nav>
+
+  <div class="tab" id="tab-overview">
+    <div class="card"><h2>The whole picture</h2><div class="tiles" id="tiles"></div></div>
+    <div class="split">
+      <div class="card"><h2>By kind</h2><div class="bars" id="byKind"></div></div>
+      <div class="card"><h2>By owner</h2><div class="bars" id="byOwner"></div></div>
+      <div class="card"><h2>By currency</h2><div class="bars" id="byCur"></div></div>
+      <div class="card"><h2>By country</h2><div class="bars" id="byCountry"></div></div>
+    </div>
+    <div class="card" id="halalCard"><h2>Halal</h2><div class="bars" id="byHalal"></div><p class="note" id="halalNote"></p></div>
+    <div class="card"><h2>Month by month</h2><div id="history"></div><p class="note">The total is kept once a month, the latest look of each month, so you can see it grow. Nothing is deleted.</p></div>
+  </div>
+
+  <div class="tab" id="tab-holdings" hidden>
+    <div class="card"><h2>Everything the family owns</h2>
+      <div class="actions" style="margin:0 0 .75rem"><button class="primary" id="addBtn">Add something</button><button id="importBtn">Bring in a spreadsheet</button><button id="exportBtn">Download as a spreadsheet</button>
+        <select id="filterOwner" style="width:auto"></select><span class="note" id="priceNote"></span></div>
+      <div class="scroll" id="holdingsTable"></div></div>
+    <div class="card" id="formCard" hidden><h2 id="formTitle">Add something</h2>
+      <form class="grid" id="hForm" onsubmit="return false"></form>
+      <div class="actions"><button class="primary" id="saveH">Save</button><button id="cancelH">Cancel</button><button id="archiveH" hidden>Mark as sold or closed</button><span class="note" id="formMsg"></span></div></div>
+  </div>
+
+  <div class="tab" id="tab-calendar" hidden>
+    <div class="card"><h2>Money in and out, the next 12 months</h2><div class="tiles" id="calTiles"></div>
+      <div id="calChart" style="margin-top:1rem"></div>
+      <p class="note">From what is on each holding (rent, mortgage payments, sukuk profit, fund cash calls and payouts), dividends expected from what each share paid over the last year, and your own dates below. Results days are shown without an amount.</p></div>
+    <div class="card"><h2>Month by month</h2><div class="actions" style="margin:0 0 .6rem"><select id="calOwner" style="width:auto"></select></div><div class="scroll" id="calList"></div></div>
+    <div class="card"><h2>Add your own date</h2><p class="muted">A payment or a reminder that is not on a holding: zakat, a licence, school fees, a loan to family.</p>
+      <form class="grid" id="eForm" onsubmit="return false">
+        <div><label for="e_title">What</label><input id="e_title" placeholder="e.g. School fees"></div>
+        <div><label for="e_date">On</label><input id="e_date" type="date"></div>
+        <div><label for="e_amount">Amount, optional</label><input id="e_amount" type="number" step="any" min="0"></div>
+        <div><label for="e_currency">Currency</label><select id="e_currency"><option>KWD</option><option>USD</option><option>EUR</option><option>GBP</option><option>SAR</option><option>AED</option></select></div>
+        <div><label for="e_dir">Money</label><select id="e_dir"><option value="out">Goes out</option><option value="in">Comes in</option><option value="none">A reminder only</option></select></div>
+        <div><label for="e_repeat">Repeats</label><select id="e_repeat"><option value="none">Once</option><option value="monthly">Every month</option><option value="yearly">Every year</option></select></div>
+        <div><label for="e_owner">Owner</label><select id="e_owner"></select></div>
+      </form>
+      <div class="actions"><button class="primary" id="addEvent">Add</button><span class="note" id="eventMsg"></span></div></div>
+  </div>
+
+  <div class="tab" id="tab-report" hidden>
+    <div class="actions no-print" style="margin:0 0 1rem"><button class="primary" id="printBtn">Print, or save as PDF</button><span class="note">Your Mac's print window has "Save as PDF" at the bottom left.</span></div>
+    <div class="card report" id="report"></div>
+  </div>
+
+  <div class="card" id="importCard" hidden>
+    <h2>Bring in a spreadsheet</h2>
+    <p class="muted">From Excel or Numbers, save the sheet as CSV, then choose it here. One row per holding. The first row names the columns; only <b>kind</b> and <b>owner</b> are needed, with <b>symbol and qty</b> for shares, gold and crypto, or <b>value and currency</b> for everything else. New owners are added by name. Nothing is changed until you press "Add these".</p>
+    <div class="actions"><input type="file" id="csvFile" accept=".csv,text/csv" style="width:auto"><button id="templateBtn">Download a blank template</button></div>
+    <div id="importPreview" style="margin-top:.75rem"></div>
+    <div class="actions"><button class="primary" id="importGo" hidden>Add these</button><button id="importCancel">Close</button><span class="note" id="importMsg"></span></div>
+  </div>
+
+  <div class="tab" id="tab-owners" hidden>
+    <div class="card"><h2>Who owns what</h2><p class="muted">The people and companies in the family. Each holding belongs to one of them; the Overview adds them up.</p>
+      <div class="scroll" id="ownersTable"></div>
+      <form class="grid" id="oForm" onsubmit="return false" style="margin-top:.8rem">
+        <div><label for="o_name">Name</label><input id="o_name" placeholder="e.g. a family member or a family company"></div>
+        <div><label for="o_kind">Kind</label><select id="o_kind"><option value="person">Person</option><option value="company">Company</option><option value="trust">Trust or fund</option></select></div>
+      </form>
+      <div class="actions"><button class="primary" id="addOwner">Add owner</button><span class="note" id="ownerMsg"></span></div></div>
+  </div>
+
+  <div class="tab" id="tab-settings" hidden>
+    <div class="card"><h2>Settings</h2>
+      <div class="switch"><input type="checkbox" id="set_halal"><label for="set_halal"><b>Halal checks</b>: show which holdings pass a Shariah screen, and how much of the total does. Off hides them everywhere.</label></div>
+      <p class="note">The same switch is on the Trade Desk. For US shares the Trade Desk's screen is used; for everything else you mark it yourself on each holding (an Islamic bank account, sukuk and gold usually pass; interest-bearing deposits and bonds do not). A screen, not a ruling.</p>
+      <div class="actions"><span class="note" id="setMsg"></span></div></div>
+  </div>
+
+  <section><p class="note">A demo with a made-up family; what you change stays in your browser. Prices come from Yahoo Finance's public data and can be 15 minutes old; Boursa Kuwait prices are turned from fils into dinars. Values you type in (property, private holdings, cash) are as of the day you last changed them. Nothing here is advice.</p></section>
+</main>
+<script>window.DEMO = {"frozen": "2026-10-27", "data": {"owners": [{"id": "o-1", "name": "Parent (sample)", "kind": "person"}, {"id": "o-2", "name": "Daughter (sample)", "kind": "person"}, {"id": "o-3", "name": "Son (sample)", "kind": "person"}, {"id": "o-4", "name": "Family Holding Co. (sample)", "kind": "company"}], "holdings": [{"id": "h-1", "owner": "o-1", "kind": "stock", "symbol": "NBK.KW", "qty": 25000, "halal": "no"}, {"id": "h-2", "owner": "o-1", "kind": "stock", "symbol": "KFH.KW", "qty": 40000, "halal": "yes"}, {"id": "h-3", "owner": "o-4", "kind": "stock", "symbol": "ZAIN.KW", "qty": 30000, "halal": "unknown"}, {"id": "h-4", "owner": "o-2", "kind": "stock", "symbol": "AAPL", "qty": 60, "halal": "auto"}, {"id": "h-5", "owner": "o-3", "kind": "stock", "symbol": "MSFT", "qty": 25, "halal": "auto"}, {"id": "h-6", "owner": "o-1", "kind": "cash", "name": "Islamic current account", "value": 45000, "currency": "KWD", "country": "Kuwait", "halal": "yes"}, {"id": "h-7", "owner": "o-4", "kind": "cash", "name": "Dollar deposit", "value": 150000, "currency": "USD", "country": "United States", "halal": "no"}, {"id": "h-8", "owner": "o-4", "kind": "property", "name": "Apartment building", "value": 780000, "currency": "KWD", "rent_month": 4500, "rent_day": 5, "mortgage_left": 240000, "mortgage_payment": 2600, "mortgage_day": 15, "country": "Kuwait", "halal": "yes"}, {"id": "h-9", "owner": "o-1", "kind": "property", "name": "London flat", "value": 650000, "currency": "GBP", "rent_month": 2400, "rent_day": 1, "country": "United Kingdom", "halal": "yes"}, {"id": "h-10", "owner": "o-4", "kind": "sukuk", "name": "Gulf sukuk 2029", "value": 200000, "currency": "USD", "coupon_pct": 5.1, "per_year": 2, "maturity": "2029-06-30", "country": "Saudi Arabia", "halal": "yes"}, {"id": "h-11", "owner": "o-4", "kind": "private", "name": "Regional growth fund", "value": 120000, "currency": "USD", "committed": 250000, "called": 140000, "next_call_date": "2027-02-15", "next_call_amount": 30000, "country": "United Arab Emirates", "halal": "unknown"}, {"id": "h-12", "owner": "o-2", "kind": "gold", "name": "Gold bars", "qty": 1000, "unit": "g", "country": "Kuwait", "halal": "yes"}, {"id": "h-13", "owner": "o-3", "kind": "crypto", "symbol": "BTC-USD", "qty": 0.25, "halal": "unknown"}], "events": [{"id": "e-1", "title": "School fees (sample)", "date": "2027-01-10", "amount": 6000, "currency": "KWD", "dir": "out", "repeat": "yearly", "owner": "o-1"}, {"id": "e-2", "title": "Zakat reminder (sample)", "date": "2027-03-20", "amount": null, "currency": "KWD", "dir": "none", "repeat": "yearly", "owner": null}], "settings": {"halal": true, "show": "KWD"}}, "prices": {"quotes": {"AAPL": {"symbol": "AAPL", "name": "Apple Inc.", "price": 346.29998779296875, "currency": "USD", "change_pct": 0.69, "date": "2026-10-27"}, "BTC-USD": {"symbol": "BTC-USD", "name": "Bitcoin USD", "price": 80585.703125, "currency": "USD", "change_pct": 0.72, "date": "2026-10-27"}, "GC=F": {"symbol": "GC=F", "name": "Gold Dec 26", "price": 4069.300048828125, "currency": "USD", "change_pct": 0.77, "date": "2026-10-27"}, "KFH.KW": {"symbol": "KFH.KW", "name": "Kuwait Finance House K.S.C.P.", "price": 0.76, "currency": "KWD", "change_pct": 0.93, "date": "2026-10-27"}, "MSFT": {"symbol": "MSFT", "name": "Microsoft Corporation", "price": 531.5599975585938, "currency": "USD", "change_pct": -0.2, "date": "2026-10-27"}, "NBK.KW": {"symbol": "NBK.KW", "name": "National Bank of Kuwait S.A.K.P.", "price": 0.858, "currency": "KWD", "change_pct": 0.47, "date": "2026-10-27"}, "ZAIN.KW": {"symbol": "ZAIN.KW", "name": "Mobile Telecommunications Company K.S.C.P.", "price": 0.594, "currency": "KWD", "change_pct": 1.54, "date": "2026-10-27"}}, "errors": {}}, "fx": {"kwd_per": {"KWD": 1.0, "USD": 0.3079000215235439, "GBP": 0.4099212159011127}, "errors": {}}, "events": {"NBK.KW": {"dividends": [{"date": "2026-04-02", "amount": 0.035, "currency": "KWD"}], "results": null, "errors": []}, "KFH.KW": {"dividends": [{"date": "2026-04-16", "amount": 0.014, "currency": "KWD"}, {"date": "2026-08-11", "amount": 0.01, "currency": "KWD"}], "results": null, "errors": []}, "ZAIN.KW": {"dividends": [{"date": "2025-11-12", "amount": 0.025, "currency": "KWD"}, {"date": "2026-09-29", "amount": 0.017, "currency": "KWD"}], "results": null, "errors": []}, "AAPL": {"dividends": [{"date": "2025-11-10", "amount": 0.26, "currency": "USD"}, {"date": "2026-02-09", "amount": 0.26, "currency": "USD"}, {"date": "2026-05-11", "amount": 0.27, "currency": "USD"}, {"date": "2026-08-10", "amount": 0.27, "currency": "USD"}], "results": "2026-11-02", "errors": []}, "MSFT": {"dividends": [{"date": "2025-11-20", "amount": 0.91, "currency": "USD"}, {"date": "2026-02-19", "amount": 0.91, "currency": "USD"}, {"date": "2026-05-21", "amount": 0.91, "currency": "USD"}, {"date": "2026-08-20", "amount": 0.91, "currency": "USD"}], "results": "2026-10-28", "errors": []}}, "halal": {"AAPL": {"symbol": "AAPL", "overall": "pass", "passed": 4, "total": 5}, "MSFT": {"symbol": "MSFT", "overall": "pass", "passed": 4, "total": 5}}, "snapshots": []};</script>
+<script>
+(function () {
+  // The demo's stand-in for the server: answers from the frozen data, and keeps
+  // whatever a visitor adds or changes in their own browser only.
+  const D = window.DEMO, KEY = "family-office-demo-";
+  const json = (v) => new Response(JSON.stringify(v), { status: 200, headers: { "Content-Type": "application/json" } });
+  window.mobleeApp = {
+    async load(name) {
+      try { const v = localStorage.getItem(KEY + name); if (v) return JSON.parse(v); } catch (e) { /* private window: fine */ }
+      return D.data[name] !== undefined ? JSON.parse(JSON.stringify(D.data[name])) : null;
+    },
+    async save(name, value) {
+      try { localStorage.setItem(KEY + name, JSON.stringify(value)); } catch (e) { /* private window: kept for this visit only */ D.data[name] = value; }
+      return { ok: true };
+    },
+  };
+  const realFetch = window.fetch.bind(window);
+  window.fetch = async function (url, opts) {
+    const u = new URL(url, location.href);
+    if (!u.pathname.includes("/api/")) return realFetch(url, opts);
+    const q = Object.fromEntries(u.searchParams), list = (k) => (q[k] || "").split(",").filter(Boolean);
+    await new Promise((r) => setTimeout(r, 150));
+    if (u.pathname.endsWith("/api/prices")) {
+      const quotes = {}, errors = {};
+      list("symbols").forEach((s) => { const x = D.prices.quotes[s.toUpperCase()]; if (x) quotes[s.toUpperCase()] = x; else errors[s.toUpperCase()] = "Not in this demo, which has prices only for the sample family's holdings. The full Family Office reads any symbol."; });
+      return json({ quotes, errors });
+    }
+    if (u.pathname.endsWith("/api/fx")) {
+      const kwd_per = { KWD: 1 }, errors = {};
+      list("c").concat(["USD"]).forEach((c) => { if (D.fx.kwd_per[c]) kwd_per[c] = D.fx.kwd_per[c]; else errors[c] = "This demo has no rate for " + c + "."; });
+      return json({ kwd_per, errors });
+    }
+    if (u.pathname.endsWith("/api/events")) return json(Object.fromEntries(list("symbols").map((s) => [s.toUpperCase(), D.events[s.toUpperCase()] || { dividends: [], results: null }])));
+    if (u.pathname.endsWith("/api/halal")) return json(D.halal[(q.symbol || "").toUpperCase()] || { overall: "unknown" });
+    return json({ error: "That part needs the full Family Office on a Mac." });
+  };
+  window.resetDemo = function () {
+    try { Object.keys(localStorage).filter((k) => k.startsWith(KEY)).forEach((k) => localStorage.removeItem(k)); } catch (e) { /* fine */ }
+    location.reload();
+  };
+})();
+</script>
+<script>
+(function () {
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const KINDS = {
+    stock: "Listed shares", cash: "Bank cash", sukuk: "Sukuk and bonds", property: "Property", private: "Private companies and funds",
+    gold: "Gold", crypto: "Crypto", other: "Other",
+  };
+  // Which fields each kind asks for. Priced kinds take a symbol and a number held; the rest a value you type.
+  const FIELDS = {
+    stock: ["owner", "symbol", "qty", "cost", "country", "halal", "notes"],
+    cash: ["owner", "name", "value", "currency", "country", "halal", "notes"],
+    sukuk: ["owner", "name", "value", "currency", "coupon_pct", "per_year", "maturity", "country", "halal", "notes"],
+    property: ["owner", "name", "value", "currency", "rent_month", "rent_day", "mortgage_left", "mortgage_payment", "mortgage_day", "country", "halal", "notes"],
+    private: ["owner", "name", "value", "currency", "committed", "called", "next_call_date", "next_call_amount", "next_dist_date", "next_dist_amount", "country", "halal", "notes"],
+    gold: ["owner", "name", "qty", "unit", "country", "halal", "notes"],
+    crypto: ["owner", "symbol", "qty", "cost", "halal", "notes"],
+    other: ["owner", "name", "value", "currency", "country", "halal", "notes"],
+  };
+  const LABELS = {
+    owner: "Owner", symbol: "Symbol (Boursa Kuwait ends .KW, e.g. NBK.KW; crypto e.g. BTC-USD)", qty: "How many held", cost: "Price paid each, optional",
+    name: "Name", value: "Value today", currency: "Currency", coupon_pct: "Profit or coupon a year (%)", maturity: "Matures on",
+    rent_month: "Rent a month", mortgage_left: "Mortgage or loan left", committed: "Committed in total", called: "Paid in so far",
+    country: "Country", halal: "Halal", notes: "Notes", unit: "Unit", per_year: "Payments a year", rent_day: "Rent comes in on day (1 to 28)",
+    mortgage_payment: "Mortgage payment a month", mortgage_day: "Paid on day (1 to 28)", next_call_date: "Next cash call on", next_call_amount: "Next cash call amount",
+    next_dist_date: "Next payout expected on", next_dist_amount: "Next payout amount",
+  };
+  const CURRENCIES = ["KWD", "USD", "EUR", "GBP", "SAR", "AED", "QAR", "BHD", "OMR"];
+  const HALAL_DEFAULT = { stock: "auto", cash: "unknown", sukuk: "yes", property: "yes", private: "unknown", gold: "yes", crypto: "unknown", other: "unknown" };
+  const GRAMS_PER_OUNCE = 31.1035;
+
+  let owners = [], holdings = [], settings = { halal: true, show: "KWD" }, snapshots = [], events = [], shareEvents = {};
+  let quotes = {}, fx = { KWD: 1 }, priceErrors = {}, halalAuto = {}, editing = null;
+
+  // ---- Tabs ----
+  const tabs = [...document.querySelectorAll("nav.tabs button")];
+  function show(name) {
+    tabs.forEach((b) => b.setAttribute("aria-selected", String(b.dataset.tab === name)));
+    document.querySelectorAll(".tab").forEach((t) => { t.hidden = t.id !== "tab-" + name; });
+    const top = $("tab-" + name).getBoundingClientRect().top + scrollY - 70;
+    if (scrollY > top) scrollTo({ top: Math.max(0, top), behavior: "instant" });
+  }
+  tabs.forEach((b) => b.addEventListener("click", () => show(b.dataset.tab)));
+
+  // ---- Values ----
+  const ownerName = (id) => (owners.find((o) => o.id === id) || {}).name || "Unassigned";
+  const isPriced = (h) => h.kind === "stock" || h.kind === "crypto" || h.kind === "gold";
+  const symbolOf = (h) => h.kind === "gold" ? "GC=F" : (h.symbol || "").toUpperCase();
+  function valueOf(h) {
+    // What it is worth today, in its own currency, and that currency; and in dinars.
+    let v = null, cur = h.currency || "KWD";
+    if (isPriced(h)) {
+      const q = quotes[symbolOf(h)];
+      if (q) { cur = q.currency; v = Number(h.qty || 0) * q.price / (h.kind === "gold" && h.unit === "g" ? GRAMS_PER_OUNCE : 1); }
+    } else if (h.value !== "" && h.value != null) {
+      v = Number(h.value);
+    }
+    const debt = h.kind === "property" ? Number(h.mortgage_left || 0) : 0;
+    const rate = fx[cur];
+    return { v, cur, gross_kwd: v != null && rate ? v * rate : null, net_kwd: v != null && rate ? (v - debt) * rate : null, debt_kwd: rate ? debt * rate : 0 };
+  }
+  const countryOf = (h) => h.country || (h.kind === "stock" ? ((h.symbol || "").toUpperCase().endsWith(".KW") ? "Kuwait" : "United States") : h.kind === "crypto" ? "None (crypto)" : "Not given");
+  function halalOf(h) {
+    const mark = h.halal || HALAL_DEFAULT[h.kind] || "unknown";
+    if (mark !== "auto") return mark;
+    if ((h.symbol || "").toUpperCase().endsWith(".KW")) return "unknown";
+    const a = halalAuto[(h.symbol || "").toUpperCase()];
+    return !a ? "unknown" : a.overall === "pass" ? "yes" : a.overall === "fail" ? "no" : "unknown";
+  }
+  const showRate = () => settings.show === "USD" ? fx.USD : 1;
+  const fmt = (kwd, cur) => {
+    if (kwd == null) return "–";
+    cur = cur || settings.show;
+    const v = cur === "USD" ? kwd / fx.USD : kwd;
+    return (cur === "USD" ? "$" : "KWD ") + v.toLocaleString("en-US", { maximumFractionDigits: Math.abs(v) < 1000 ? 2 : 0 });
+  };
+  const native = (v, cur) => v == null ? "–" : `${cur} ${Number(v).toLocaleString("en-US", { maximumFractionDigits: Math.abs(v) < 100 ? 3 : 0 })}`;
+
+  // ---- Loading ----
+  async function load() {
+    [owners, holdings, settings, snapshots, events] = await Promise.all([
+      mobleeApp.load("owners").then((x) => x || []), mobleeApp.load("holdings").then((x) => x || []),
+      mobleeApp.load("settings").then((x) => Object.assign({ halal: true, show: "KWD" }, x || {})), mobleeApp.load("snapshots").then((x) => x || []),
+      mobleeApp.load("events").then((x) => x || []),
+    ]);
+    $("showCur").value = settings.show; $("set_halal").checked = !!settings.halal;
+    await refreshPrices();
+  }
+  async function refreshPrices() {
+    const live = holdings.filter((h) => !h.closed);
+    const syms = [...new Set(live.filter(isPriced).map(symbolOf).filter(Boolean))];
+    const curs = [...new Set(live.filter((h) => !isPriced(h)).map((h) => h.currency || "KWD").concat(["USD"]))];
+    $("status").textContent = "Reading today's prices…";
+    const [p, f] = await Promise.all([
+      syms.length ? fetch(`/api/prices?symbols=${encodeURIComponent(syms.join(","))}`).then((r) => r.json()).catch(() => ({ quotes: {}, errors: { all: "Could not reach the price reader." } })) : { quotes: {}, errors: {} },
+      fetch(`/api/fx?c=${encodeURIComponent(curs.join(","))}`).then((r) => r.json()).catch(() => ({ kwd_per: { KWD: 1 }, errors: { all: "Could not read exchange rates." } })),
+    ]);
+    quotes = p.quotes || {}; priceErrors = Object.assign({}, p.errors || {}, f.errors || {}); fx = Object.assign({ KWD: 1 }, f.kwd_per || {});
+    // Priced holdings in other currencies need their rate too.
+    const more = [...new Set(Object.values(quotes).map((q) => q.currency))].filter((c) => !fx[c]);
+    if (more.length) Object.assign(fx, (await fetch(`/api/fx?c=${more.join(",")}`).then((r) => r.json()).catch(() => ({ kwd_per: {} }))).kwd_per);
+    render();
+    if (settings.halal) loadHalal(live);
+    const shares = [...new Set(live.filter((h) => h.kind === "stock" && h.symbol).map((h) => h.symbol.toUpperCase()))].filter((s) => !shareEvents[s]);
+    if (shares.length) {
+      Object.assign(shareEvents, await fetch(`/api/events?symbols=${encodeURIComponent(shares.join(","))}`).then((r) => r.json()).catch(() => ({})));
+      render();   // the calendar and the report both use these
+    }
+  }
+  async function loadHalal(live) {
+    const us = [...new Set(live.filter((h) => h.kind === "stock" && (h.halal || "auto") === "auto" && !(h.symbol || "").toUpperCase().endsWith(".KW")).map((h) => h.symbol.toUpperCase()))]
+      .filter((s) => !halalAuto[s]);
+    await Promise.all(us.map((s) => fetch(`/api/halal?symbol=${encodeURIComponent(s)}`).then((r) => r.json()).then((d) => { halalAuto[s] = d; }).catch(() => {})));
+    if (us.length) render();
+  }
+
+  // ---- Drawing ----
+  function sumBy(rows, key) {
+    const m = new Map();
+    rows.forEach((r) => { if (r.net_kwd == null) return; const k = key(r); m.set(k, (m.get(k) || 0) + r.net_kwd); });
+    return [...m.entries()].sort((a, b) => b[1] - a[1]);
+  }
+  function bars(id, list, total) {
+    $(id).innerHTML = list.length ? list.map(([k, v]) => `<div class="row"><span>${esc(k)}</span><div class="track"><div class="fill" style="width:${total > 0 ? Math.max(0, 100 * v / total) : 0}%"></div></div>
+      <span class="val">${fmt(v)} <span class="muted small">${total > 0 ? Math.round(100 * v / total) : 0}%</span></span></div>`).join("") : `<p class="empty">Nothing yet.</p>`;
+  }
+  function render() {
+    const live = holdings.filter((h) => !h.closed);
+    const rows = live.map((h) => Object.assign({ h }, valueOf(h)));
+    const total = rows.reduce((t, r) => t + (r.net_kwd || 0), 0);
+    const gross = rows.reduce((t, r) => t + (r.gross_kwd || 0), 0);
+    const debt = rows.reduce((t, r) => t + (r.debt_kwd || 0), 0);
+    const missing = rows.filter((r) => r.net_kwd == null);
+    $("nwMain").textContent = live.length ? fmt(total) : "Nothing added yet";
+    $("nwOther").textContent = live.length ? `about ${fmt(total, settings.show === "USD" ? "KWD" : "USD")}` : "";
+    $("status").textContent = !live.length ? "Start under Holdings: add what the family owns. Nothing is wrong; it is empty until then."
+      : `Net worth today, ${live.length} holdings, ${owners.length || 1} ${owners.length === 1 ? "owner" : "owners"}${missing.length ? `. ${missing.length} could not be valued just now (see Holdings)` : ""}.`;
+    const income = live.reduce((t, h) => {
+      const r = fx[h.currency || "KWD"] || 0;
+      if (h.kind === "property") return t + 12 * Number(h.rent_month || 0) * r;
+      if (h.kind === "sukuk") return t + Number(h.value || 0) * Number(h.coupon_pct || 0) / 100 * r;
+      return t;
+    }, 0);
+    const unfunded = live.filter((h) => h.kind === "private").reduce((t, h) => t + Math.max(0, Number(h.committed || 0) - Number(h.called || 0)) * (fx[h.currency || "KWD"] || 0), 0);
+    $("tiles").innerHTML = [
+      ["Net worth", fmt(total)], ["Everything owned", fmt(gross)], ["Owed on property", fmt(debt)],
+      ["Rent and sukuk profit a year", income ? fmt(income) : "–"], ["Still to pay into funds", unfunded ? fmt(unfunded) : "–"],
+      ["One dinar", fx.USD ? `$${(1 / fx.USD).toFixed(4)}` : "–"],
+    ].map(([k, v]) => `<div class="tile"><span>${k}</span><b>${v}</b></div>`).join("");
+    bars("byKind", sumBy(rows, (r) => KINDS[r.h.kind] || r.h.kind), total);
+    bars("byOwner", sumBy(rows, (r) => ownerName(r.h.owner)), total);
+    bars("byCur", sumBy(rows, (r) => r.cur), total);
+    bars("byCountry", sumBy(rows, (r) => countryOf(r.h)), total);
+    $("halalCard").hidden = !settings.halal;
+    if (settings.halal) {
+      const words = { yes: "Passes", no: "Does not pass", unknown: "Not checked" };
+      bars("byHalal", sumBy(rows, (r) => words[halalOf(r.h)]), total);
+      $("halalNote").textContent = "US shares use the Trade Desk's screen; Boursa Kuwait shares and everything else are as you marked them on each holding. Not checked means nobody has said yet. A screen, not a ruling.";
+    }
+    drawHoldings(rows);
+    drawOwners(rows);
+    drawCalendar();
+    drawReport(rows, total);
+    keepSnapshot(rows, total);
+  }
+
+  function drawHoldings(rows) {
+    const f = $("filterOwner").value;
+    const sel = [`<option value="">Every owner</option>`].concat(owners.map((o) => `<option value="${esc(o.id)}"${o.id === f ? " selected" : ""}>${esc(o.name)}</option>`));
+    $("filterOwner").innerHTML = sel.join("");
+    const list = rows.filter((r) => !f || r.h.owner === f);
+    const errs = Object.entries(priceErrors);
+    $("priceNote").textContent = errs.length ? `Could not read: ${errs.map(([k, v]) => `${k} (${v})`).join("; ")}` : Object.keys(quotes).length ? "Prices read just now." : "";
+    if (!list.length) { $("holdingsTable").innerHTML = `<p class="empty">Nothing here yet. Press "Add something".</p>`; return; }
+    const groups = Object.keys(KINDS).map((k) => [k, list.filter((r) => r.h.kind === k)]).filter(([, l]) => l.length);
+    $("holdingsTable").innerHTML = `<table><thead><tr><th>Holding</th><th>Owner</th><th class="num">Held</th><th class="num">Value</th><th class="num">${esc(settings.show)}</th>${settings.halal ? "<th>Halal</th>" : ""}<th></th></tr></thead><tbody>${
+      groups.map(([k, l]) => `<tr class="group"><td colspan="${settings.halal ? 7 : 6}">${esc(KINDS[k])} <span class="muted small">${fmt(l.reduce((t, r) => t + (r.net_kwd || 0), 0))}</span></td></tr>` + l.map((r) => {
+        const h = r.h, q = quotes[symbolOf(h)], hl = halalOf(h);
+        const title = isPriced(h) && h.kind !== "gold" ? `<b>${esc(h.symbol)}</b> <span class="muted small">${esc(q ? q.name : "")}</span>` : `<b>${esc(h.name || KINDS[h.kind])}</b>`;
+        const extra = h.kind === "property" && Number(h.mortgage_left) ? `<div class="muted small">Value ${native(h.value, h.currency)}, owed ${native(h.mortgage_left, h.currency)}</div>`
+          : h.kind === "private" && Number(h.committed) ? `<div class="muted small">Committed ${native(h.committed, h.currency)}, paid in ${native(h.called || 0, h.currency)}</div>`
+          : h.kind === "sukuk" && h.maturity ? `<div class="muted small">${h.coupon_pct ? `${h.coupon_pct}% a year, ` : ""}matures ${esc(h.maturity)}</div>`
+          : q ? `<div class="muted small">${native(q.price, q.currency)} each, ${q.change_pct >= 0 ? "+" : ""}${q.change_pct}% today</div>` : "";
+        return `<tr><td>${title}${extra}</td><td>${esc(ownerName(h.owner))}</td><td class="num">${isPriced(h) ? `${Number(h.qty || 0).toLocaleString("en-US")}${h.kind === "gold" ? (h.unit === "g" ? " g" : " oz") : ""}` : ""}</td>
+          <td class="num">${r.v != null ? native(r.v, r.cur) : `<span class="badge unknown">no price</span>`}</td><td class="num">${fmt(r.net_kwd)}</td>
+          ${settings.halal ? `<td><span class="badge ${hl}">${hl === "yes" ? "Passes" : hl === "no" ? "Does not" : "Not checked"}</span></td>` : ""}
+          <td><button data-edit="${esc(h.id)}">Change</button></td></tr>`;
+      }).join("")).join("")}</tbody></table>`;
+    $("holdingsTable").querySelectorAll("[data-edit]").forEach((b) => b.addEventListener("click", () => openForm(holdings.find((h) => h.id === b.dataset.edit))));
+  }
+
+  function drawOwners(rows) {
+    $("ownersTable").innerHTML = owners.length ? `<table><thead><tr><th>Owner</th><th>Kind</th><th class="num">Holdings</th><th class="num">Net worth</th></tr></thead><tbody>${
+      owners.map((o) => { const mine = rows.filter((r) => r.h.owner === o.id); return `<tr><td><b>${esc(o.name)}</b></td><td>${esc(o.kind)}</td><td class="num">${mine.length}</td><td class="num">${fmt(mine.reduce((t, r) => t + (r.net_kwd || 0), 0))}</td></tr>`; }).join("")
+    }</tbody></table>` : `<p class="empty">No owners yet. Add the first one below; it can be you.</p>`;
+  }
+
+  // ---- The calendar ----
+  // Every payment in or out over the next 12 months, worked out from the
+  // holdings, last year's dividends and the owner's own dates. Expected, not promised.
+  const iso = (d) => d.toISOString().slice(0, 10);
+  const onDay = (y, m, day) => iso(new Date(Date.UTC(y, m, Math.min(Math.max(Number(day) || 1, 1), 28))));
+  function calendar() {
+    const today = new Date(), start = iso(today), end = iso(new Date(today.getTime() + 365 * 864e5)), out = [];
+    const add = (date, what, h, amount, cur, dir, kind) => { if (date > start && date <= end) out.push({ date, what, owner: h ? h.owner : null, amount, cur, dir, kind }); };
+    const months = (fn) => { for (let i = 0; i <= 12; i++) { const d = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth() + i, 1)); fn(d.getUTCFullYear(), d.getUTCMonth()); } };
+    holdings.filter((h) => !h.closed).forEach((h) => {
+      const cur = h.currency || "KWD", name = h.name || h.symbol || KINDS[h.kind];
+      if (h.kind === "property") {
+        if (Number(h.rent_month)) months((y, m) => add(onDay(y, m, h.rent_day), `Rent: ${name}`, h, Number(h.rent_month), cur, "in", "rent"));
+        if (Number(h.mortgage_payment)) months((y, m) => add(onDay(y, m, h.mortgage_day), `Mortgage: ${name}`, h, Number(h.mortgage_payment), cur, "out", "mortgage"));
+      }
+      if (h.kind === "sukuk" && h.maturity) {
+        const n = Number(h.per_year) || 2, step = 12 / n, mat = new Date(h.maturity + "T00:00:00Z");
+        if (Number(h.coupon_pct)) for (let k = 0; k < 400; k++) {
+          const d = new Date(Date.UTC(mat.getUTCFullYear(), mat.getUTCMonth() - k * step, mat.getUTCDate()));
+          if (iso(d) <= start) break;
+          add(iso(d), `Profit: ${name}`, h, Number(h.value) * Number(h.coupon_pct) / 100 / n, cur, "in", "sukuk");
+        }
+        add(h.maturity, `Matures, paid back: ${name}`, h, Number(h.value), cur, "in", "sukuk");
+      }
+      if (h.kind === "private") {
+        if (h.next_call_date) add(h.next_call_date, `Cash call: ${name}`, h, Number(h.next_call_amount) || null, cur, "out", "fund");
+        if (h.next_dist_date) add(h.next_dist_date, `Payout: ${name}`, h, Number(h.next_dist_amount) || null, cur, "in", "fund");
+      }
+      if (h.kind === "stock" && h.symbol) {
+        const ev = shareEvents[h.symbol.toUpperCase()];
+        if (!ev) return;
+        (ev.dividends || []).forEach((d) => {   // last year's payment, a year on
+          let dt = new Date(d.date + "T00:00:00Z"); dt.setUTCFullYear(dt.getUTCFullYear() + 1);
+          if (iso(dt) <= start) dt.setUTCFullYear(dt.getUTCFullYear() + 1);
+          add(iso(dt), `Dividend (expected): ${h.symbol}`, h, d.amount * Number(h.qty || 0), d.currency, "in", "dividend");
+        });
+        if (ev.results) add(ev.results, `Results day: ${h.symbol}`, h, null, null, "none", "results");
+      }
+    });
+    events.forEach((e) => {
+      const base = new Date(e.date + "T00:00:00Z");
+      if (e.repeat === "monthly") months((y, m) => add(onDay(y, m, base.getUTCDate()), e.title, e, Number(e.amount) || null, e.currency, e.dir, "own"));
+      else if (e.repeat === "yearly") { for (let y = today.getUTCFullYear() - 1; y <= today.getUTCFullYear() + 1; y++) add(iso(new Date(Date.UTC(y, base.getUTCMonth(), base.getUTCDate()))), e.title, e, Number(e.amount) || null, e.currency, e.dir, "own"); }
+      else add(e.date, e.title, e, Number(e.amount) || null, e.currency, e.dir, "own");
+    });
+    return out.map((x) => Object.assign(x, { kwd: x.amount != null && fx[x.cur] ? x.amount * fx[x.cur] : null })).sort((a, b) => a.date.localeCompare(b.date));
+  }
+  function drawCalendar() {
+    const f = $("calOwner").value;
+    $("calOwner").innerHTML = [`<option value="">Every owner</option>`].concat(owners.map((o) => `<option value="${esc(o.id)}"${o.id === f ? " selected" : ""}>${esc(o.name)}</option>`)).join("");
+    $("e_owner").innerHTML = [`<option value="">The whole family</option>`].concat(owners.map((o) => `<option value="${esc(o.id)}">${esc(o.name)}</option>`)).join("");
+    const all = calendar().filter((x) => !f || x.owner === f);
+    const sum = (dir) => all.filter((x) => x.dir === dir).reduce((t, x) => t + (x.kwd || 0), 0);
+    const inn = sum("in"), outt = sum("out");
+    $("calTiles").innerHTML = [["Comes in", fmt(inn)], ["Goes out", fmt(outt)], ["Left over", fmt(inn - outt)], ["Payments and dates", String(all.length)]]
+      .map(([k, v]) => `<div class="tile"><span>${k}</span><b>${v}</b></div>`).join("");
+    // Twelve months of bars: money in above the line, out below.
+    const byMonth = new Map();
+    for (let i = 0; i < 12; i++) { const d = new Date(); d.setUTCDate(1); d.setUTCMonth(d.getUTCMonth() + i); byMonth.set(iso(d).slice(0, 7), { in: 0, out: 0 }); }
+    all.forEach((x) => { const m = byMonth.get(x.date.slice(0, 7)); if (m && x.kwd) m[x.dir === "in" ? "in" : x.dir === "out" ? "out" : "x"] += x.dir === "none" ? 0 : x.kwd; });
+    const W = 640, H = 180, mid = 90, peak = Math.max(1, ...[...byMonth.values()].flatMap((m) => [m.in, m.out])), bw = (W - 20) / 12;
+    const label = (k) => new Date(k + "-01T00:00:00Z").toLocaleDateString("en-GB", { month: "short", timeZone: "UTC" });
+    $("calChart").innerHTML = all.length ? `<svg viewBox="0 0 ${W} ${H + 18}" role="img" aria-label="Money in and out by month" style="width:100%;height:auto">
+      <line x1="10" x2="${W - 10}" y1="${mid}" y2="${mid}" stroke="var(--line)"/>
+      ${[...byMonth.entries()].map(([k, m], i) => `<rect x="${10 + i * bw + 4}" y="${mid - (mid - 8) * m.in / peak}" width="${bw - 8}" height="${(mid - 8) * m.in / peak}" rx="3" fill="var(--good)"><title>${label(k)}: in ${fmt(m.in)}</title></rect>
+        <rect x="${10 + i * bw + 4}" y="${mid}" width="${bw - 8}" height="${(mid - 8) * m.out / peak}" rx="3" fill="var(--bad)"><title>${label(k)}: out ${fmt(m.out)}</title></rect>
+        <text x="${10 + i * bw + bw / 2}" y="${H + 14}" text-anchor="middle">${label(k)}</text>`).join("")}</svg>` : `<p class="empty">Nothing due yet. Add rent, sukuk, fund calls or your own dates.</p>`;
+    let last = "";
+    $("calList").innerHTML = all.length ? `<table><thead><tr><th>Date</th><th>What</th><th>Owner</th><th class="num">Amount</th><th class="num">${esc(settings.show)}</th></tr></thead><tbody>${all.map((x) => {
+      const m = x.date.slice(0, 7), head = m !== last ? `<tr class="group"><td colspan="5">${new Date(m + "-01T00:00:00Z").toLocaleDateString("en-GB", { month: "long", year: "numeric", timeZone: "UTC" })}</td></tr>` : "";
+      last = m;
+      const sign = x.dir === "in" ? "+" : x.dir === "out" ? "−" : "";
+      return head + `<tr><td>${new Date(x.date + "T00:00:00Z").toLocaleDateString("en-GB", { day: "numeric", month: "short", timeZone: "UTC" })}</td><td>${esc(x.what)}</td><td>${esc(x.owner ? ownerName(x.owner) : "Family")}</td>
+        <td class="num">${x.amount != null ? `${sign}${native(x.amount, x.cur)}` : "–"}</td><td class="num" style="color:${x.dir === "in" ? "var(--good)" : x.dir === "out" ? "var(--bad)" : "inherit"}">${x.kwd != null ? sign + fmt(x.kwd) : ""}</td></tr>`;
+    }).join("")}</tbody></table>` : `<p class="empty">Nothing in the next 12 months yet.</p>`;
+  }
+  $("calOwner").addEventListener("change", drawCalendar);
+  $("addEvent").addEventListener("click", async () => {
+    const title = $("e_title").value.trim(), date = $("e_date").value;
+    if (!title || !date) { $("eventMsg").textContent = "Put in what it is and the date."; return; }
+    events.push({ id: `e-${Date.now()}`, title, date, amount: $("e_amount").value === "" ? null : Number($("e_amount").value), currency: $("e_currency").value,
+                  dir: $("e_dir").value, repeat: $("e_repeat").value, owner: $("e_owner").value || null, added: iso(new Date()) });
+    await mobleeApp.save("events", events);
+    $("e_title").value = ""; $("e_amount").value = ""; $("eventMsg").textContent = `Added "${title}".`;
+    drawCalendar();
+  });
+
+  // ---- The monthly family report ----
+  // One page for the family or its CIO: where things stand, what changed,
+  // what is coming. Printed from the browser, or saved as a PDF from there.
+  function drawReport(rows, total) {
+    const now = new Date(), month = now.toLocaleDateString("en-GB", { month: "long", year: "numeric" });
+    const prevKey = new Date(now.getFullYear(), now.getMonth() - 1, 15).toISOString().slice(0, 7);
+    const yearKey = new Date(now.getFullYear() - 1, now.getMonth(), 15).toISOString().slice(0, 7);
+    const prev = snapshots.find((s) => s.month === prevKey), year = snapshots.find((s) => s.month === yearKey);
+    const change = (s) => s ? `${total - s.kwd >= 0 ? "+" : "−"}${fmt(Math.abs(total - s.kwd))} (${s.kwd ? ((100 * (total - s.kwd)) / s.kwd).toFixed(1) : "0"}%)` : "not kept yet";
+    const top = rows.filter((r) => r.net_kwd != null).sort((a, b) => b.net_kwd - a.net_kwd).slice(0, 8);
+    const soon = calendar().filter((x) => x.date <= new Date(now.getTime() + 31 * 864e5).toISOString().slice(0, 10));
+    const tbl = (list) => `<table><tbody>${list.map(([k, v]) => `<tr><td>${esc(k)}</td><td class="num">${fmt(v)}</td><td class="num muted">${total > 0 ? Math.round(100 * v / total) : 0}%</td></tr>`).join("")}</tbody></table>`;
+    const halalRows = settings.halal ? sumBy(rows, (r) => ({ yes: "Passes", no: "Does not pass", unknown: "Not checked" })[halalOf(r.h)]) : [];
+    const missing = rows.filter((r) => r.net_kwd == null).length;
+    $("report").innerHTML = rows.length ? `<h2>Family report, ${esc(month)}</h2>
+      <p class="muted">Prepared ${now.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })} from the Family Office. Values in ${esc(settings.show === "USD" ? "US dollars" : "Kuwaiti dinars")}; one dinar is $${fx.USD ? (1 / fx.USD).toFixed(4) : "?"}.${missing ? ` ${missing} holding(s) could not be valued and are left out of the totals.` : ""}</p>
+      <div class="rgrid">
+        <div><h3>Where things stand</h3><table><tbody>
+          <tr><td>Net worth</td><td class="num"><b>${fmt(total)}</b></td></tr>
+          <tr><td>Since last month</td><td class="num">${change(prev)}</td></tr>
+          <tr><td>Since a year ago</td><td class="num">${change(year)}</td></tr>
+          <tr><td>Everything owned</td><td class="num">${fmt(rows.reduce((t, r) => t + (r.gross_kwd || 0), 0))}</td></tr>
+          <tr><td>Owed on property</td><td class="num">${fmt(rows.reduce((t, r) => t + (r.debt_kwd || 0), 0))}</td></tr></tbody></table></div>
+        <div><h3>By owner</h3>${tbl(sumBy(rows, (r) => ownerName(r.h.owner)))}</div>
+        <div><h3>By kind</h3>${tbl(sumBy(rows, (r) => KINDS[r.h.kind] || r.h.kind))}</div>
+        <div><h3>By currency</h3>${tbl(sumBy(rows, (r) => r.cur))}</div>
+        ${halalRows.length ? `<div><h3>Halal</h3>${tbl(halalRows)}</div>` : ""}
+      </div>
+      <h3>Largest holdings</h3><table><thead><tr><th>Holding</th><th>Owner</th><th class="num">Value</th><th class="num">Share</th></tr></thead><tbody>${
+        top.map((r) => `<tr><td>${esc(r.h.symbol || r.h.name || KINDS[r.h.kind])}</td><td>${esc(ownerName(r.h.owner))}</td><td class="num">${fmt(r.net_kwd)}</td><td class="num">${total > 0 ? Math.round(100 * r.net_kwd / total) : 0}%</td></tr>`).join("")}</tbody></table>
+      <h3>The next month</h3>${soon.length ? `<table><tbody>${soon.map((x) => `<tr><td>${new Date(x.date + "T00:00:00Z").toLocaleDateString("en-GB", { day: "numeric", month: "short", timeZone: "UTC" })}</td><td>${esc(x.what)}</td><td class="num">${x.kwd != null ? (x.dir === "in" ? "+" : x.dir === "out" ? "−" : "") + fmt(x.kwd) : ""}</td></tr>`).join("")}</tbody></table>` : `<p class="muted">Nothing due.</p>`}
+      <p class="note" style="margin-top:1rem">Prices from Yahoo Finance's public data; values typed in are as of the day they were last changed. A record of what the family holds, not advice.</p>`
+      : `<p class="empty">The report fills in once holdings are added.</p>`;
+  }
+  $("printBtn").addEventListener("click", () => window.print());
+
+  // ---- Spreadsheets in and out ----
+  const COLUMNS = ["owner", "kind", "name", "symbol", "qty", "unit", "value", "currency", "country", "cost", "rent_month", "rent_day", "mortgage_left",
+                   "mortgage_payment", "mortgage_day", "coupon_pct", "per_year", "maturity", "committed", "called", "next_call_date", "next_call_amount",
+                   "next_dist_date", "next_dist_amount", "halal", "notes"];
+  const KIND_WORDS = { stock: "stock", share: "stock", shares: "stock", equity: "stock", cash: "cash", deposit: "cash", bank: "cash", sukuk: "sukuk", bond: "sukuk",
+                       bonds: "sukuk", property: "property", "real estate": "property", realestate: "property", private: "private", fund: "private",
+                       "private equity": "private", gold: "gold", crypto: "crypto", bitcoin: "crypto", other: "other" };
+  function parseCSV(text) {
+    const rows = [], s = text.replace(/^﻿/, "");
+    let row = [], cell = "", q = false;
+    for (let i = 0; i < s.length; i++) {
+      const c = s[i];
+      if (q) { if (c === '"' && s[i + 1] === '"') { cell += '"'; i++; } else if (c === '"') q = false; else cell += c; }
+      else if (c === '"') q = true;
+      else if (c === "," || c === ";" || c === "\t") { row.push(cell); cell = ""; }
+      else if (c === "\n" || c === "\r") { if (c === "\r" && s[i + 1] === "\n") i++; row.push(cell); rows.push(row); row = []; cell = ""; }
+      else cell += c;
+    }
+    if (cell || row.length) { row.push(cell); rows.push(row); }
+    return rows.filter((r) => r.some((x) => x.trim()));
+  }
+  const csvCell = (v) => { const t = String(v ?? ""); return /[",\n]/.test(t) ? `"${t.replace(/"/g, '""')}"` : t; };
+  function download(name, text) {
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([text], { type: "text/csv" }));
+    a.download = name; a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  }
+  let pending = [];
+  $("importBtn").addEventListener("click", () => { $("importCard").hidden = false; $("importCard").scrollIntoView({ behavior: "smooth" }); });
+  $("importCancel").addEventListener("click", () => { $("importCard").hidden = true; pending = []; $("importPreview").innerHTML = ""; $("importGo").hidden = true; });
+  $("templateBtn").addEventListener("click", () => download("family-office-template.csv", COLUMNS.join(",") + "\n"
+    + "Parent,stock,,NBK.KW,1000,,,,Kuwait\nParent,cash,Current account,,,,25000,KWD,Kuwait\nFamily Co.,property,Building,,,,500000,KWD,Kuwait,,3000,1,150000\n"));
+  $("exportBtn").addEventListener("click", () => {
+    const live = holdings.filter((h) => !h.closed);
+    download(`family-office-${new Date().toISOString().slice(0, 10)}.csv`, [COLUMNS.join(",")].concat(live.map((h) =>
+      COLUMNS.map((c) => csvCell(c === "owner" ? ownerName(h.owner) : h[c])).join(","))).join("\n") + "\n");
+  });
+  $("csvFile").addEventListener("change", async (ev) => {
+    const file = ev.target.files[0];
+    if (!file) return;
+    const rows = parseCSV(await file.text());
+    if (rows.length < 2) { $("importMsg").textContent = "The file has no rows under its first line."; return; }
+    const head = rows[0].map((h) => h.trim().toLowerCase().replace(/\s+/g, "_"));
+    const problems = [];
+    pending = rows.slice(1).map((r, i) => {
+      const o = {}; head.forEach((h, j) => { if (COLUMNS.includes(h) && (r[j] ?? "").trim() !== "") o[h] = r[j].trim(); });
+      o.kind = KIND_WORDS[(o.kind || "").toLowerCase()] || "";
+      ["qty", "value", "cost", "rent_month", "rent_day", "mortgage_left", "mortgage_payment", "mortgage_day", "coupon_pct", "per_year", "committed", "called", "next_call_amount", "next_dist_amount"]
+        .forEach((k) => { if (o[k] != null) o[k] = Number(String(o[k]).replace(/[, ]/g, "")); });
+      if (o.symbol) o.symbol = o.symbol.toUpperCase();
+      if (o.currency) o.currency = o.currency.toUpperCase();
+      const line = i + 2;
+      if (!o.kind) problems.push(`Row ${line}: the kind is missing or not one the app knows.`);
+      else if (!o.owner) problems.push(`Row ${line}: no owner.`);
+      else if (["stock", "crypto"].includes(o.kind) && !(o.symbol && o.qty > 0)) problems.push(`Row ${line}: a share or crypto needs a symbol and a number held.`);
+      else if (o.kind === "gold" && !(o.qty > 0)) problems.push(`Row ${line}: gold needs how much is held.`);
+      else if (!["stock", "crypto", "gold"].includes(o.kind) && !(o.value >= 0 && o.value !== undefined)) problems.push(`Row ${line}: needs a value.`);
+      else return o;
+      return null;
+    }).filter(Boolean);
+    $("importPreview").innerHTML = (pending.length ? `<p><b>${pending.length}</b> ready to add:</p><div class="scroll"><table><thead><tr><th>Owner</th><th>Kind</th><th>Holding</th><th class="num">Held or value</th></tr></thead><tbody>${
+      pending.map((o) => `<tr><td>${esc(o.owner)}</td><td>${esc(KINDS[o.kind])}</td><td>${esc(o.symbol || o.name || "")}</td><td class="num">${esc(o.qty ?? `${o.value} ${o.currency || "KWD"}`)}</td></tr>`).join("")}</tbody></table></div>` : "")
+      + (problems.length ? `<p class="alert">Left out, so nothing is guessed:<br>${problems.map(esc).join("<br>")}</p>` : "");
+    $("importGo").hidden = !pending.length;
+    $("importMsg").textContent = "";
+  });
+  $("importGo").addEventListener("click", async () => {
+    let added = 0;
+    pending.forEach((o, i) => {
+      let owner = owners.find((x) => x.name.toLowerCase() === o.owner.toLowerCase());
+      if (!owner) { owner = { id: `o-${Date.now()}-${i}`, name: o.owner, kind: /co\.|company|holding|llc|ltd|w\.l\.l|k\.s\.c/i.test(o.owner) ? "company" : "person" }; owners.push(owner); }
+      const h = Object.assign({}, o, { id: `h-${Date.now()}-${i}`, owner: owner.id, added: new Date().toISOString().slice(0, 10), source: "spreadsheet" });
+      if (!h.currency && !["stock", "crypto", "gold"].includes(h.kind)) h.currency = "KWD";
+      holdings.push(h); added++;
+    });
+    await mobleeApp.save("owners", owners);
+    await mobleeApp.save("holdings", holdings);
+    $("importMsg").textContent = `Added ${added}.`; $("importGo").hidden = true; pending = [];
+    await refreshPrices();
+  });
+
+  // ---- The monthly record ----
+  async function keepSnapshot(rows, total) {
+    if (!rows.length || rows.some((r) => r.net_kwd == null)) { drawHistory(); return; }   // only a complete total is kept
+    const month = new Date().toISOString().slice(0, 7);
+    const by = (key) => Object.fromEntries(sumBy(rows, key).map(([k, v]) => [k, Math.round(v)]));
+    const snap = { month, taken: new Date().toISOString().slice(0, 16), kwd: Math.round(total), usd: fx.USD ? Math.round(total / fx.USD) : null,
+                   by_kind: by((r) => r.h.kind), by_owner: by((r) => ownerName(r.h.owner)) };
+    const old = snapshots.find((s) => s.month === month);
+    if (!old || old.kwd !== snap.kwd) {
+      snapshots = snapshots.filter((s) => s.month !== month).concat([snap]).sort((a, b) => a.month.localeCompare(b.month));
+      await mobleeApp.save("snapshots", snapshots).catch(() => {});
+    }
+    drawHistory();
+  }
+  function drawHistory() {
+    if (snapshots.length < 2) { $("history").innerHTML = `<p class="muted">${snapshots.length ? `${esc(snapshots[0].month)}: ${fmt(snapshots[0].kwd)}. The line appears from the second month.` : "Kept from the first complete look."}</p>`; return; }
+    const W = 640, H = 200, L = 70, R = 10, T = 10, B = 24, vals = snapshots.map((s) => s.kwd);
+    const lo = Math.min(...vals) * 0.98, hi = Math.max(...vals) * 1.02, x = (i) => L + i * (W - L - R) / (snapshots.length - 1), y = (v) => T + (1 - (v - lo) / (hi - lo || 1)) * (H - T - B);
+    $("history").innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Net worth month by month" style="width:100%;height:auto">
+      <polyline fill="none" stroke="var(--accent)" stroke-width="2.5" points="${snapshots.map((s, i) => `${x(i)},${y(s.kwd)}`).join(" ")}"/>
+      ${snapshots.map((s, i) => `<circle cx="${x(i)}" cy="${y(s.kwd)}" r="3.5" fill="var(--accent)"><title>${esc(s.month)}: ${fmt(s.kwd)}</title></circle><text x="${x(i)}" y="${H - 6}" text-anchor="middle">${esc(s.month)}</text>`).join("")}
+      <text x="${L - 6}" y="${y(hi) + 4}" text-anchor="end">${fmt(hi)}</text><text x="${L - 6}" y="${y(lo) + 4}" text-anchor="end">${fmt(lo)}</text></svg>`;
+  }
+
+  // ---- Adding and changing ----
+  function field(key, h) {
+    const v = h[key] ?? "";
+    if (key === "owner") return `<div><label for="f_owner">${LABELS.owner}</label><select id="f_owner">${owners.map((o) => `<option value="${esc(o.id)}"${o.id === v ? " selected" : ""}>${esc(o.name)}</option>`).join("")}</select></div>`;
+    if (key === "currency") return `<div><label for="f_currency">${LABELS.currency}</label><select id="f_currency">${CURRENCIES.map((c) => `<option${c === (v || "KWD") ? " selected" : ""}>${c}</option>`).join("")}</select></div>`;
+    if (key === "unit") return `<div><label for="f_unit">${LABELS.unit}</label><select id="f_unit"><option value="oz"${v !== "g" ? " selected" : ""}>Troy ounces</option><option value="g"${v === "g" ? " selected" : ""}>Grams</option></select></div>`;
+    if (key === "halal") {
+      if (!settings.halal) return "";
+      const d = v || HALAL_DEFAULT[h.kind];
+      return `<div><label for="f_halal">${LABELS.halal}</label><select id="f_halal">${(h.kind === "stock" ? [["auto", "Use the Trade Desk's screen (US shares)"]] : []).concat([["yes", "Passes"], ["no", "Does not pass"], ["unknown", "Not checked"]])
+        .map(([k, t]) => `<option value="${k}"${k === d ? " selected" : ""}>${t}</option>`).join("")}</select></div>`;
+    }
+    if (key === "per_year") return `<div><label for="f_per_year">${LABELS.per_year}</label><select id="f_per_year">${[[1, "Once"], [2, "Twice (every 6 months)"], [4, "Four times"], [12, "Monthly"]]
+      .map(([n, t]) => `<option value="${n}"${Number(v || 2) === n ? " selected" : ""}>${t}</option>`).join("")}</select></div>`;
+    const type = ["qty", "cost", "value", "coupon_pct", "rent_month", "mortgage_left", "committed", "called", "rent_day", "mortgage_payment", "mortgage_day", "next_call_amount", "next_dist_amount"].includes(key) ? "number" : ["maturity", "next_call_date", "next_dist_date"].includes(key) ? "date" : "text";
+    return `<div><label for="f_${key}">${LABELS[key]}</label><input id="f_${key}" type="${type}" ${type === "number" ? 'step="any" min="0"' : ""} value="${esc(v)}"></div>`;
+  }
+  function openForm(h) {
+    if (!owners.length) { show("owners"); $("ownerMsg").textContent = "Add an owner first; every holding belongs to someone."; return; }
+    editing = h ? Object.assign({}, h) : { id: null, kind: "stock" };
+    $("formCard").hidden = false;
+    $("formTitle").textContent = h ? "Change this holding" : "Add something";
+    $("archiveH").hidden = !h;
+    drawForm();
+    $("formCard").scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+  function drawForm() {
+    const h = editing;
+    $("hForm").innerHTML = `<div><label for="f_kind">What is it?</label><select id="f_kind">${Object.entries(KINDS).map(([k, t]) => `<option value="${k}"${k === h.kind ? " selected" : ""}>${t}</option>`).join("")}</select></div>`
+      + FIELDS[h.kind].map((k) => field(k, h)).join("");
+    $("f_kind").addEventListener("change", () => { readForm(); editing.kind = $("f_kind").value; drawForm(); });
+    $("formMsg").textContent = "";
+  }
+  function readForm() {
+    FIELDS[editing.kind].forEach((k) => { const el = $("f_" + k); if (el) editing[k] = el.type === "number" ? (el.value === "" ? "" : Number(el.value)) : el.value.trim(); });
+  }
+  $("addBtn").addEventListener("click", () => openForm(null));
+  $("cancelH").addEventListener("click", () => { $("formCard").hidden = true; editing = null; });
+  $("saveH").addEventListener("click", async () => {
+    readForm();
+    const h = editing;
+    if (isPriced(h) && h.kind !== "gold" && !h.symbol) { $("formMsg").textContent = "Put in the symbol."; return; }
+    if (isPriced(h) && !(Number(h.qty) > 0)) { $("formMsg").textContent = "Put in how many are held."; return; }
+    if (!isPriced(h) && h.value === "") { $("formMsg").textContent = "Put in what it is worth today."; return; }
+    if (h.symbol) h.symbol = h.symbol.toUpperCase();
+    h.updated = new Date().toISOString().slice(0, 10);
+    if (!h.id) { h.id = `h-${Date.now()}`; h.added = h.updated; holdings.push(h); } else { holdings = holdings.map((x) => x.id === h.id ? h : x); }
+    await mobleeApp.save("holdings", holdings);
+    $("formCard").hidden = true; editing = null;
+    await refreshPrices();
+  });
+  $("archiveH").addEventListener("click", async () => {
+    // Kept, marked closed, so the record of what the family held is never lost.
+    if (!editing?.id) return;
+    holdings = holdings.map((x) => x.id === editing.id ? Object.assign({}, x, { closed: new Date().toISOString().slice(0, 10) }) : x);
+    await mobleeApp.save("holdings", holdings);
+    $("formCard").hidden = true; editing = null;
+    render();
+  });
+  $("addOwner").addEventListener("click", async () => {
+    const name = $("o_name").value.trim();
+    if (!name) { $("ownerMsg").textContent = "Put in a name."; return; }
+    owners.push({ id: `o-${Date.now()}`, name, kind: $("o_kind").value });
+    await mobleeApp.save("owners", owners);
+    $("o_name").value = ""; $("ownerMsg").textContent = `Added ${name}.`;
+    render();
+  });
+  $("filterOwner").addEventListener("change", render);
+  $("showCur").addEventListener("change", async () => { settings.show = $("showCur").value; await mobleeApp.save("settings", settings); render(); });
+  $("set_halal").addEventListener("change", async () => {
+    settings.halal = $("set_halal").checked;
+    await mobleeApp.save("settings", settings);
+    $("setMsg").textContent = settings.halal ? "Halal checks are on." : "Halal checks are off; nothing about halal is shown.";
+    render();
+    if (settings.halal) loadHalal(holdings.filter((h) => !h.closed));
+  });
+
+  load().catch((e) => { $("status").textContent = "Could not read the family's data: " + e.message; });
+})();
+</script>
+</body>
+</html>
