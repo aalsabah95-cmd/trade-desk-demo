@@ -139,6 +139,30 @@
   .report h2 { font-size: 1.35rem; margin: 0; } .report h3 { font-size: 1rem; margin: 1.1rem 0 .4rem; }
   .report .rgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); gap: 1rem 1.5rem; }
   .report table { font-size: .9rem; } .report td.num { white-space: nowrap; } .report td { padding: .35rem .4rem; }
+  /* The Overview laid out as the video's main page: number cards beside a large chart, then two count cards and the ring. */
+  .dash { display: grid; gap: 1rem; margin-bottom: 1rem; grid-template-columns: 1fr; }
+  .dash > .card { margin: 0; } .dash-tiles { margin: 0; }
+  @media (min-width: 900px) {
+    .dash { grid-template-columns: repeat(4, minmax(0, 1fr)); grid-template-areas: "t t c c" "h o r r"; }
+    .dash-tiles { grid-area: t; grid-template-columns: repeat(2, minmax(0, 1fr)) !important; align-content: start; }
+    .dash-chart { grid-area: c; } #dashHold { grid-area: h; } #dashOwners { grid-area: o; } .dash-ring { grid-area: r; }
+  }
+  .dash-chart #history { margin-top: .4rem; } .dash-chart .note { margin-bottom: 0; }
+  .dash-count { position: relative; display: flex; flex-direction: column; justify-content: space-between; gap: .6rem; min-height: 10rem; }
+  .dash-ic { display: grid; place-items: center; width: 2.3rem; height: 2.3rem; border-radius: 50%; border: 1px solid var(--line); color: var(--muted); }
+  .dash-ic svg { width: 1.1rem; height: 1.1rem; }
+  .dash-big { margin-top: auto; } .dash-big b { font-size: 2.3rem; font-weight: 700; letter-spacing: -.02em; font-variant-numeric: tabular-nums; } .dash-big span { font-size: 1rem; color: var(--muted); }
+  .dash-count p { margin: 0; } .hl { color: #f59e0b; font-weight: 600; }
+  .faces { position: absolute; top: 1rem; inset-inline-end: 1rem; display: flex; }
+  .faces .avatar { width: 1.9rem; height: 1.9rem; font-size: .75rem; margin-inline-start: -.45rem; box-shadow: 0 0 0 2px var(--surface); }
+  .dash-ring .owns { margin-top: .4rem; grid-template-columns: minmax(8rem, 10.5rem) 1fr; gap: 1rem 1.2rem; }
+  .dash-ring .pick { padding: .3rem .45rem; font-size: .88rem; } .dash-ring .pick > span:nth-child(2) { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .dash-ring .pick > :last-child { white-space: nowrap; }
+  html.glass .dash > .card { animation: rise .55s cubic-bezier(.2,.7,.2,1) backwards; }
+  html.glass .dash > .dash-chart { animation-delay: .08s; } html.glass .dash > #dashHold { animation-delay: .16s; } html.glass .dash > #dashOwners { animation-delay: .22s; } html.glass .dash > .dash-ring { animation-delay: .28s; }
+  html.glass .dash-ic { border-color: var(--glass-line); background: rgba(255,255,255,.05); }
+  html.glass .faces .avatar { box-shadow: 0 0 0 2px #1d1e24; } html.glass[data-theme="light"] .faces .avatar { box-shadow: 0 0 0 2px #fff; }
+  @media (prefers-reduced-motion: reduce) { html.glass .dash > .card { animation: none; } }
   /* Performance, Family and Connected, and the pieces they share. */
   .menu-sep { display: block; height: 1px; margin: .35rem .4rem; background: var(--line); }
   .head-row { display: flex; justify-content: space-between; align-items: center; gap: .6rem; flex-wrap: wrap; } .head-row h2 { margin: 0; }
@@ -520,10 +544,16 @@
     <div class="card welcome" id="welcome" hidden><h2>Set up your family in three steps</h2>
       <p class="muted">Who is in the family, what you own, and then the whole picture. About ten minutes; rough numbers are fine.</p>
       <div class="actions"><button class="primary" id="guideBtn">Start</button></div></div>
-    <div class="card"><h2>The whole picture</h2><div class="tiles" id="tiles"></div></div>
-    <div class="card"><h2>What the family owns</h2>
-      <div class="owns"><div id="kindRing"></div><div class="legend" id="byKind"></div></div>
-      <p class="hint">Press any part to see what is in it.</p></div>
+    <div class="dash">
+      <div class="tiles dash-tiles" id="tiles"></div>
+      <div class="card dash-chart"><div class="head-row"><h2>Net worth <span class="muted small">month by month</span></h2><div class="seg-btns" role="group" aria-label="Show as"><button type="button" data-hist="bars" aria-pressed="true">Bars</button><button type="button" data-hist="line" aria-pressed="false">Line</button></div></div>
+        <div id="history"></div><p class="note" id="historyNote">The total is kept once a month, the latest look of each month, so you can see it grow. Nothing is deleted. <span>In this demo, the earlier months are made up.</span></p></div>
+      <div class="card dash-count" id="dashHold"></div>
+      <div class="card dash-count" id="dashOwners"></div>
+      <div class="card dash-ring"><div class="head-row"><h2>What the family owns <span class="muted small">by kind</span></h2></div>
+        <div class="owns"><div id="kindRing"></div><div class="legend" id="byKind"></div></div>
+        <p class="hint">Press any part to see what is in it.</p></div>
+    </div>
     <div class="card" id="drill" hidden><div class="drill-head"><div><h2 id="drillTitle"></h2><p class="muted small" id="drillSub" style="margin:0"></p></div><button id="drillClose">Close</button></div>
       <div class="scroll" id="drillBody" style="margin-top:.6rem"></div>
       <div class="actions"><button id="drillOpen">Open in Holdings</button></div></div>
@@ -533,7 +563,6 @@
       <div class="card"><h2>By country</h2><div class="bars" id="byCountry"></div></div>
     </div>
     <div class="card" id="halalCard"><h2>Halal</h2><div class="bars" id="byHalal"></div><p class="note" id="halalNote"></p></div>
-    <div class="card"><div class="head-row"><h2>Month by month</h2><div class="seg-btns" role="group" aria-label="Show as"><button type="button" data-hist="line" aria-pressed="true">Line</button><button type="button" data-hist="bars" aria-pressed="false">Bars</button></div></div><div id="history"></div><p class="note" id="historyNote">The total is kept once a month, the latest look of each month, so you can see it grow. Nothing is deleted. <span>In this demo, the earlier months are made up.</span></p></div>
   </div>
 
   <div class="tab" id="tab-perf" hidden>
@@ -810,6 +839,12 @@
   // The demo's stand-in for the server: answers from the frozen data, and keeps
   // whatever a visitor adds or changes in their own browser only.
   const D = window.DEMO, KEY = "family-office-demo-";
+  // A visitor who started their own family but added nothing comes back to the sample on their next visit,
+  // so the demo never opens empty by surprise. A family with anything in it is kept.
+  try {
+    const own = localStorage.getItem(KEY + "holdings");
+    if (own === "[]" && !sessionStorage.getItem("fo-own")) Object.keys(localStorage).filter((k) => k.startsWith(KEY)).forEach((k) => localStorage.removeItem(k));
+  } catch (e) { /* private window: fine */ }
   const json = (v) => new Response(JSON.stringify(v), { status: 200, headers: { "Content-Type": "application/json" } });
   window.mobleeApp = {
     async load(name) {
@@ -874,7 +909,7 @@
   window.startOwn = function () {
     if (!confirm("Start empty, to put in your own family? The sample is set aside, and what you add stays only in this browser, on this device.")) return;
     try { ["owners", "holdings", "events", "snapshots", "area-notes", "goals", "rent-log"].forEach((k) => localStorage.setItem(KEY + k, "[]")); localStorage.setItem(KEY + "finder", JSON.stringify({ answers: {}, shortlist: [] })); } catch (e) { D.data.owners = []; D.data.holdings = []; D.data.events = []; D.data.snapshots = []; }
-    try { sessionStorage.setItem("fo-guide", "1"); } catch (e) { /* the welcome card on the Overview still offers the guide */ }
+    try { sessionStorage.setItem("fo-guide", "1"); sessionStorage.setItem("fo-own", "1"); } catch (e) { /* the welcome card on the Overview still offers the guide */ }
     location.reload();
   };
   window.resetDemo = function () {
@@ -1165,7 +1200,7 @@
     drawInsights(rows, total);
     drawFinder();
     drawGoals(); drawZakat(); drawPerson(); drawWhatIf(); drawPack(); drawRent();
-    drawPerf(rows, total); drawFamily(rows, total); drawConnected(rows, total);
+    drawDash(rows, total); drawPerf(rows, total); drawFamily(rows, total); drawConnected(rows, total);
     keepSnapshot(rows, total);
   }
 
@@ -1810,7 +1845,7 @@
   }
 
   // ---- Month by month as bars: the same totals, one bar a month ----
-  let histMode = "line";
+  let histMode = "bars";
   document.querySelectorAll("[data-hist]").forEach((b) => b.addEventListener("click", () => {
     histMode = b.dataset.hist;
     document.querySelectorAll("[data-hist]").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
@@ -1848,6 +1883,19 @@
   // A month is labelled every few bars, and always the last, but not one so close to the last that the two overlap.
   function skipTick(i, n, every) { return i === n - 1 ? false : i % every !== 0 || n - 1 - i < every; }
   const quarterOf = (m) => `Q${Math.floor((Number(m.slice(5, 7)) - 1) / 3) + 1} ${m.slice(0, 4)}`;
+
+  // ---- The Overview's two count cards, as in the video: how many holdings, and who owns them ----
+  function drawDash(rows, total) {
+    const soon = iso(new Date(Date.now() + 30 * 864e5)), due = calendar().filter((x) => x.date <= soon && x.dir !== "none").length;
+    const people = owners.map((o) => ({ o, v: rows.filter((r) => r.h.owner === o.id).reduce((t, r) => t + (r.net_kwd || 0), 0) })).sort((a, b) => b.v - a.v);
+    const icon = (d) => `<span class="dash-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d}</svg></span>`;
+    $("dashHold").innerHTML = `${icon('<path d="M20 6L9 17l-5-5"/>')}<div class="dash-big"><b>${rows.length}</b> <span>${rows.length === 1 ? "holding" : "holdings"}</span></div>
+      <p class="muted small"><b class="hl">${due}</b> ${due === 1 ? "payment due in the next 30 days." : "payments due in the next 30 days."}</p>`;
+    $("dashOwners").innerHTML = `${icon('<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/>')}
+      <div class="faces">${people.slice(0, 5).map((p, i) => `<span class="avatar" style="--c:${SERIES[i % SERIES.length]}">${esc((p.o.name || "?").trim().charAt(0).toUpperCase())}</span>`).join("")}</div>
+      <div class="dash-big"><b>${owners.length}</b> <span>${owners.length === 1 ? "owner" : "owners"}</span></div>
+      <p class="muted small">${people.length && total > 0 ? `<b class="hl">${esc(people[0].o.name)}</b> ${`holds ${Math.round(100 * people[0].v / total)}% of the family.`}` : "Nobody added yet."}</p>`;
+  }
 
   // ---- Performance: how the family is doing, from the totals kept each month ----
   function drawPerf(rows, total) {
@@ -2549,7 +2597,7 @@
     };
     requestAnimationFrame(step);
   };
-  const countAll = () => { const tab = document.querySelector(".tab:not([hidden])"); if (tab) tab.querySelectorAll(".tile b, .pv, .gauge b").forEach(count); };
+  const countAll = () => { const tab = document.querySelector(".tab:not([hidden])"); if (tab) tab.querySelectorAll(".tile b, .pv, .gauge b, .dash-big b").forEach(count); };
   document.querySelectorAll("[data-tab]").forEach((b) => b.addEventListener("click", () => setTimeout(countAll, 30)));
   const firstTiles = new MutationObserver(() => { if (document.querySelector("#tiles .tile")) { firstTiles.disconnect(); setTimeout(countAll, 30); } });
   firstTiles.observe(document.getElementById("tiles"), { childList: true });
@@ -2859,6 +2907,9 @@
     "None needed yet": "لا حاجة بعد", "Not read yet": "لم تُقرأ بعد", "Open": "افتح", "Moves with live prices": "يتحرك مع الأسعار الحية",
     "Typed in by the family": "أدخلته العائلة يدوياً", "Could not be valued just now": "تعذّر تقييمه الآن",
     "Hello": "مرحباً", "Search": "بحث",
+    "month by month": "شهراً بعد شهر", "by kind": "حسب النوع", "holding": "أصل", "holdings": "أصول", "owner": "مالك", "owners": "مالكين",
+    "payment due in the next 30 days.": "دفعة مستحقة في الأيام الـ30 القادمة.", "payments due in the next 30 days.": "دفعات مستحقة في الأيام الـ30 القادمة.",
+    "Nobody added yet.": "لم يُضف أحد بعد.",
   };
   const PH = {
     "Find a holding, owner, country or currency": "ابحث عن أصل أو مالك أو دولة أو عملة",
@@ -2979,6 +3030,7 @@
     [/^(\d+) US shares screened$/, (m) => `فُحص ${m[1]} من الأسهم الأمريكية`],
     [/^On, (\d+) days? ahead$/, (m) => `يعمل، قبل ${m[1] === "1" ? "يوم" : `${m[1]} أيام`}`],
     [/^(\d+) kept$/, (m) => `حُفظ ${m[1]}`],
+    [/^holds (\d+)% of the family\.$/, (m) => `يملك ${m[1]}% من العائلة.`],
     [/^Today, (Mon|Tue|Wed|Thu|Fri|Sat|Sun) (\d+) (\w+)$/, (m) => `اليوم، ${({ Mon: "الاثنين", Tue: "الثلاثاء", Wed: "الأربعاء", Thu: "الخميس", Fri: "الجمعة", Sat: "السبت", Sun: "الأحد" })[m[1]]} ${m[2]} ${mon(m[3])}`],
   ];
 
