@@ -85,7 +85,7 @@
 <div class="card no-print" style="margin:1rem 0;border-style:dashed"><b>Demo.</b> A made-up family, with prices frozen on 28 October 2026. Change anything or add your own: it stays in your own browser, on your own device, and is never sent anywhere. <button type="button" class="primary" onclick="startOwn()">Start with my own family</button> <button type="button" onclick="resetDemo()">Back to the sample family</button> <a href="../">Try the Trade Desk demo</a>, which checks a single stock before you buy. The full Family Office runs on its owner's Mac, with live prices for any symbol.</div>
   <nav class="tabs" role="tablist">
     <button data-tab="overview" aria-selected="true">Overview</button><button data-tab="holdings">Holdings</button>
-    <button data-tab="calendar">Calendar</button><button data-tab="report">Report</button><button data-tab="options">Options</button><button data-tab="owners">Owners</button><button data-tab="settings">Settings</button>
+    <button data-tab="calendar">Calendar</button><button data-tab="insights">Insights</button><button data-tab="report">Report</button><button data-tab="options">Options</button><button data-tab="finder">Property finder</button><button data-tab="owners">Owners</button><button data-tab="settings">Settings</button>
   </nav>
 
   <div class="tab" id="tab-overview">
@@ -131,6 +131,50 @@
   <div class="tab" id="tab-report" hidden>
     <div class="actions no-print" style="margin:0 0 1rem"><button class="primary" id="printBtn">Print, or save as PDF</button><span class="note">Your Mac's print window has "Save as PDF" at the bottom left.</span></div>
     <div class="card report" id="report"></div>
+  </div>
+
+  <div class="tab" id="tab-insights" hidden>
+    <div class="card"><h2>Worth a look</h2><p class="muted">Plain facts from what the family holds, the points a family office would raise. Not instructions: what to do about them is yours.</p><ul id="insWorth" class="small"></ul></div>
+    <div class="card"><h2>The whole picture</h2><div class="tiles" id="insTiles"></div><p class="note" id="insNote"></p></div>
+    <div class="card"><h2>Spare cash</h2><div id="insSpare"></div></div>
+    <div class="card"><h2>Each property</h2><div class="scroll" id="insProps"></div></div>
+    <div class="card"><h2>Each share</h2><p class="muted">From the Trade Desk, one line each. "Thinking of selling?" lays out the facts on one holding; "Full check" opens it in the Trade Desk.</p><div class="scroll" id="insStocks"></div><div id="insSell" style="margin-top:.75rem"></div></div>
+  </div>
+
+  <div class="tab" id="tab-finder" hidden>
+    <div class="card"><h2>What are you looking for?</h2>
+      <form class="grid" id="fForm" onsubmit="return false">
+        <div><label for="f_country">Country</label><select id="f_country"><option>Kuwait</option><option>United Arab Emirates</option><option>United Kingdom</option><option>Saudi Arabia</option><option>Other</option></select></div>
+        <div><label for="f_areas">Areas (commas between)</label><input id="f_areas" placeholder="e.g. Salmiya, Jabriya"></div>
+        <div><label for="f_type">Type</label><select id="f_type"><option value="flat">Flat</option><option value="villa">Villa or house</option><option value="building">Whole building</option><option value="land">Land</option><option value="office">Office or shop</option></select></div>
+        <div><label for="f_min">Budget from</label><input id="f_min" type="number" min="0" step="any"></div>
+        <div><label for="f_max">Budget up to</label><input id="f_max" type="number" min="0" step="any"></div>
+        <div><label for="f_cur">Currency</label><select id="f_cur"><option>KWD</option><option>AED</option><option>GBP</option><option>SAR</option><option>USD</option></select></div>
+        <div><label for="f_size">At least (square metres)</label><input id="f_size" type="number" min="0" step="any"></div>
+        <div><label for="f_purpose">For</label><select id="f_purpose"><option value="rent">Renting out</option><option value="live">Living in</option><option value="both">Either</option></select></div>
+      </form>
+      <div class="actions"><button class="primary" id="fSave">Save and show me where to look</button><span class="note" id="fMsg"></span></div>
+      <div id="fLinks" style="margin-top:.75rem"></div></div>
+
+    <div class="card"><h2>Your shortlist</h2>
+      <p class="muted">Properties you are looking at, each with its numbers, sorted by how well it fits your answers. Add one below, or tell Claude "find me properties" or "check this listing" with its link.</p>
+      <div class="actions" style="margin:0 0 .6rem"><label for="fSort" class="small" style="margin:0">Sort by</label><select id="fSort" style="width:auto">
+        <option value="fit">How well it fits your answers</option><option value="net">What it would earn after costs</option><option value="m2">Price per square metre</option><option value="price">Price</option></select></div>
+      <div class="scroll" id="fList"></div>
+      <form class="grid" id="sForm" onsubmit="return false" style="margin-top:.9rem">
+        <div><label for="s_title">What it is</label><input id="s_title" placeholder="e.g. 3-bedroom flat, sea view"></div>
+        <div><label for="s_link">Link to the listing, optional</label><input id="s_link" type="url" placeholder="https://"></div>
+        <div><label for="s_area">Area</label><input id="s_area"></div>
+        <div><label for="s_type">Type</label><select id="s_type"><option value="flat">Flat</option><option value="villa">Villa or house</option><option value="building">Whole building</option><option value="land">Land</option><option value="office">Office or shop</option></select></div>
+        <div><label for="s_price">Price</label><input id="s_price" type="number" min="0" step="any"></div>
+        <div><label for="s_cur">Currency</label><select id="s_cur"><option>KWD</option><option>AED</option><option>GBP</option><option>SAR</option><option>USD</option></select></div>
+        <div><label for="s_size">Size (square metres)</label><input id="s_size" type="number" min="0" step="any"></div>
+        <div><label for="s_rent">Rent a month (asked, or what it could fetch)</label><input id="s_rent" type="number" min="0" step="any"></div>
+        <div><label for="s_costs">Costs a year, if known</label><input id="s_costs" type="number" min="0" step="any"></div>
+      </form>
+      <div class="actions"><button class="primary" id="sAdd">Add to the shortlist</button><span class="note" id="sMsg"></span></div></div>
+
+    <div class="card"><h2>Area notes</h2><p class="muted">Typical prices and rents in an area, gathered by Claude from sources with their dates when you say "study property in Salmiya". Used above to say whether a listing is below, within or above its area's usual price.</p><div id="fAreas"></div></div>
   </div>
 
   <div class="tab" id="tab-options" hidden>
@@ -190,7 +234,7 @@
 
   <section><p class="note">A demo with a made-up family; what you change stays in your browser. Prices come from Yahoo Finance's public data and can be 15 minutes old; Boursa Kuwait prices are turned from fils into dinars. Values you type in (property, private holdings, cash) are as of the day you last changed them. Nothing here is advice.</p></section>
 </main>
-<script>window.DEMO = {"frozen": "2026-10-28", "data": {"owners": [{"id": "o-1", "name": "Parent (sample)", "kind": "person"}, {"id": "o-2", "name": "Daughter (sample)", "kind": "person"}, {"id": "o-3", "name": "Son (sample)", "kind": "person"}, {"id": "o-4", "name": "Family Holding Co. (sample)", "kind": "company"}], "holdings": [{"id": "h-1", "owner": "o-1", "kind": "stock", "symbol": "NBK.KW", "qty": 25000, "halal": "no"}, {"id": "h-2", "owner": "o-1", "kind": "stock", "symbol": "KFH.KW", "qty": 40000, "halal": "yes"}, {"id": "h-3", "owner": "o-4", "kind": "stock", "symbol": "ZAIN.KW", "qty": 30000, "halal": "unknown"}, {"id": "h-4", "owner": "o-2", "kind": "stock", "symbol": "AAPL", "qty": 60, "halal": "auto"}, {"id": "h-5", "owner": "o-3", "kind": "stock", "symbol": "MSFT", "qty": 25, "halal": "auto"}, {"id": "h-6", "owner": "o-1", "kind": "cash", "name": "Islamic current account", "value": 45000, "currency": "KWD", "country": "Kuwait", "halal": "yes"}, {"id": "h-7", "owner": "o-4", "kind": "cash", "name": "Dollar deposit", "value": 150000, "currency": "USD", "country": "United States", "halal": "no"}, {"id": "h-8", "owner": "o-4", "kind": "property", "name": "Apartment building", "value": 780000, "currency": "KWD", "rent_month": 4500, "rent_day": 5, "mortgage_left": 240000, "mortgage_payment": 2600, "mortgage_day": 15, "country": "Kuwait", "halal": "yes"}, {"id": "h-9", "owner": "o-1", "kind": "property", "name": "London flat", "value": 650000, "currency": "GBP", "rent_month": 2400, "rent_day": 1, "country": "United Kingdom", "halal": "yes"}, {"id": "h-10", "owner": "o-4", "kind": "sukuk", "name": "Gulf sukuk 2029", "value": 200000, "currency": "USD", "coupon_pct": 5.1, "per_year": 2, "maturity": "2029-06-30", "country": "Saudi Arabia", "halal": "yes"}, {"id": "h-11", "owner": "o-4", "kind": "private", "name": "Regional growth fund", "value": 120000, "currency": "USD", "committed": 250000, "called": 140000, "next_call_date": "2027-02-15", "next_call_amount": 30000, "country": "United Arab Emirates", "halal": "unknown"}, {"id": "h-12", "owner": "o-2", "kind": "gold", "name": "Gold bars", "qty": 1000, "unit": "g", "country": "Kuwait", "halal": "yes"}, {"id": "h-13", "owner": "o-3", "kind": "crypto", "symbol": "BTC-USD", "qty": 0.25, "halal": "unknown"}], "events": [{"id": "e-1", "title": "School fees (sample)", "date": "2027-01-10", "amount": 6000, "currency": "KWD", "dir": "out", "repeat": "yearly", "owner": "o-1"}, {"id": "e-2", "title": "Zakat reminder (sample)", "date": "2027-03-20", "amount": null, "currency": "KWD", "dir": "none", "repeat": "yearly", "owner": null}], "settings": {"halal": true, "show": "KWD"}}, "prices": {"quotes": {"AAPL": {"symbol": "AAPL", "name": "Apple Inc.", "price": 347.1000061035156, "currency": "USD", "change_pct": 0.93, "date": "2026-10-27"}, "BTC-USD": {"symbol": "BTC-USD", "name": "Bitcoin USD", "price": 80595.0078125, "currency": "USD", "change_pct": -0.26, "date": "2026-10-28"}, "GC=F": {"symbol": "GC=F", "name": "Gold Dec 26", "price": 4069.199951171875, "currency": "USD", "change_pct": -0.13, "date": "2026-10-28"}, "KFH.KW": {"symbol": "KFH.KW", "name": "Kuwait Finance House K.S.C.P.", "price": 0.752, "currency": "KWD", "change_pct": -1.05, "date": "2026-10-28"}, "MSFT": {"symbol": "MSFT", "name": "Microsoft Corporation", "price": 531.3300170898438, "currency": "USD", "change_pct": -0.24, "date": "2026-10-27"}, "NBK.KW": {"symbol": "NBK.KW", "name": "National Bank of Kuwait S.A.K.P.", "price": 0.851, "currency": "KWD", "change_pct": -0.82, "date": "2026-10-28"}, "ZAIN.KW": {"symbol": "ZAIN.KW", "name": "Mobile Telecommunications Company K.S.C.P.", "price": 0.583, "currency": "KWD", "change_pct": -1.85, "date": "2026-10-28"}}, "errors": {}}, "fx": {"kwd_per": {"KWD": 1.0, "USD": 0.3080999814080941, "GBP": 0.4094025460553683}, "errors": {}}, "events": {"NBK.KW": {"dividends": [{"date": "2026-04-02", "amount": 0.035, "currency": "KWD"}], "results": null, "errors": []}, "KFH.KW": {"dividends": [{"date": "2026-04-16", "amount": 0.014, "currency": "KWD"}, {"date": "2026-08-11", "amount": 0.01, "currency": "KWD"}], "results": null, "errors": []}, "ZAIN.KW": {"dividends": [{"date": "2025-11-12", "amount": 0.025, "currency": "KWD"}, {"date": "2026-09-29", "amount": 0.017, "currency": "KWD"}], "results": null, "errors": []}, "AAPL": {"dividends": [{"date": "2025-11-10", "amount": 0.26, "currency": "USD"}, {"date": "2026-02-09", "amount": 0.26, "currency": "USD"}, {"date": "2026-05-11", "amount": 0.27, "currency": "USD"}, {"date": "2026-08-10", "amount": 0.27, "currency": "USD"}], "results": "2026-11-02", "errors": []}, "MSFT": {"dividends": [{"date": "2025-11-20", "amount": 0.91, "currency": "USD"}, {"date": "2026-02-19", "amount": 0.91, "currency": "USD"}, {"date": "2026-05-21", "amount": 0.91, "currency": "USD"}, {"date": "2026-08-20", "amount": 0.91, "currency": "USD"}], "results": null, "errors": []}}, "halal": {"AAPL": {"symbol": "AAPL", "overall": "pass", "passed": 4, "total": 5}, "MSFT": {"symbol": "MSFT", "overall": "pass", "passed": 4, "total": 5}}, "ranges": {"SPY|1": {"symbol": "SPY", "years": 1, "n": 2261, "separate": 9, "since": "2016-10-27", "middle": 16.7, "bad": -5.0, "good": 33.0, "lower_pct": 14.0, "worst_drop": -33.7}, "SPY|3": {"symbol": "SPY", "years": 3, "n": 1757, "separate": 3, "since": "2016-10-27", "middle": 47.5, "bad": 29.7, "good": 80.0, "lower_pct": 0.0, "worst_drop": -33.7}, "SPY|5": {"symbol": "SPY", "years": 5, "n": 1253, "separate": 1, "since": "2016-10-27", "middle": 94.2, "bad": 64.8, "good": 114.1, "lower_pct": 0.0, "worst_drop": -33.7}, "SPUS|1": {"symbol": "SPUS", "years": 1, "n": 1471, "separate": 6, "since": "2019-12-18", "middle": 23.2, "bad": -7.8, "good": 37.7, "lower_pct": 16.0, "worst_drop": -30.8}, "SPUS|3": {"symbol": "SPUS", "years": 3, "n": 967, "separate": 2, "since": "2019-12-18", "middle": 50.5, "bad": 34.3, "good": 95.9, "lower_pct": 0.0, "worst_drop": -30.8}, "SPUS|5": {"symbol": "SPUS", "years": 5, "n": 463, "separate": 1, "since": "2019-12-18", "middle": 115.9, "bad": 100.9, "good": 127.2, "lower_pct": 0.0, "worst_drop": -30.8}, "GC=F|1": {"symbol": "GC=F", "years": 1, "n": 2262, "separate": 9, "since": "2016-10-27", "middle": 13.2, "bad": -4.2, "good": 41.4, "lower_pct": 23.3, "worst_drop": -24.9}, "GC=F|3": {"symbol": "GC=F", "years": 3, "n": 1758, "separate": 3, "since": "2016-10-27", "middle": 42.6, "bad": 11.3, "good": 128.3, "lower_pct": 1.9, "worst_drop": -24.9}, "GC=F|5": {"symbol": "GC=F", "years": 5, "n": 1254, "separate": 1, "since": "2016-10-27", "middle": 67.9, "bad": 41.7, "good": 141.6, "lower_pct": 0.0, "worst_drop": -24.9}}, "snapshots": []};</script>
+<script>window.DEMO = {"frozen": "2026-10-28", "data": {"owners": [{"id": "o-1", "name": "Parent (sample)", "kind": "person"}, {"id": "o-2", "name": "Daughter (sample)", "kind": "person"}, {"id": "o-3", "name": "Son (sample)", "kind": "person"}, {"id": "o-4", "name": "Family Holding Co. (sample)", "kind": "company"}], "holdings": [{"id": "h-1", "owner": "o-1", "kind": "stock", "symbol": "NBK.KW", "qty": 25000, "cost": 0.7, "halal": "no"}, {"id": "h-2", "owner": "o-1", "kind": "stock", "symbol": "KFH.KW", "qty": 40000, "halal": "yes"}, {"id": "h-3", "owner": "o-4", "kind": "stock", "symbol": "ZAIN.KW", "qty": 30000, "halal": "unknown"}, {"id": "h-4", "owner": "o-2", "kind": "stock", "symbol": "AAPL", "qty": 60, "halal": "auto"}, {"id": "h-5", "owner": "o-3", "kind": "stock", "symbol": "MSFT", "qty": 25, "halal": "auto"}, {"id": "h-6", "owner": "o-1", "kind": "cash", "name": "Islamic current account", "value": 45000, "currency": "KWD", "country": "Kuwait", "halal": "yes"}, {"id": "h-7", "owner": "o-4", "kind": "cash", "name": "Dollar deposit", "value": 150000, "currency": "USD", "country": "United States", "halal": "no"}, {"id": "h-8", "owner": "o-4", "kind": "property", "name": "Apartment building", "value": 780000, "currency": "KWD", "rent_month": 4500, "rent_day": 5, "costs_year": 6000, "empty_months": 1, "area": "Salmiya", "size_m2": 1400, "mortgage_left": 240000, "mortgage_payment": 2600, "mortgage_day": 15, "country": "Kuwait", "halal": "yes"}, {"id": "h-9", "owner": "o-1", "kind": "property", "name": "London flat", "value": 650000, "currency": "GBP", "rent_month": 2400, "rent_day": 1, "country": "United Kingdom", "halal": "yes"}, {"id": "h-10", "owner": "o-4", "kind": "sukuk", "name": "Gulf sukuk 2029", "value": 200000, "currency": "USD", "coupon_pct": 5.1, "per_year": 2, "maturity": "2029-06-30", "country": "Saudi Arabia", "halal": "yes"}, {"id": "h-11", "owner": "o-4", "kind": "private", "name": "Regional growth fund", "value": 120000, "currency": "USD", "committed": 250000, "called": 140000, "next_call_date": "2027-02-15", "next_call_amount": 30000, "country": "United Arab Emirates", "halal": "unknown"}, {"id": "h-12", "owner": "o-2", "kind": "gold", "name": "Gold bars", "qty": 1000, "unit": "g", "country": "Kuwait", "halal": "yes"}, {"id": "h-13", "owner": "o-3", "kind": "crypto", "symbol": "BTC-USD", "qty": 0.25, "halal": "unknown"}], "events": [{"id": "e-1", "title": "School fees (sample)", "date": "2027-01-10", "amount": 6000, "currency": "KWD", "dir": "out", "repeat": "yearly", "owner": "o-1"}, {"id": "e-2", "title": "Zakat reminder (sample)", "date": "2027-03-20", "amount": null, "currency": "KWD", "dir": "none", "repeat": "yearly", "owner": null}], "settings": {"halal": true, "show": "KWD", "deposit_rate": 4, "sukuk_rate": 5.1}, "finder": {"answers": {"country": "Kuwait", "areas": ["Salmiya", "Jabriya"], "type": "flat", "min": 100000, "max": 200000, "currency": "KWD", "size": 150, "purpose": "rent"}, "shortlist": [{"id": "p-1", "title": "3-bedroom flat (sample listing)", "area": "Salmiya", "type": "flat", "price": 165000, "currency": "KWD", "size_m2": 180, "rent_month": 650, "costs_year": 900, "source": "owner"}, {"id": "p-2", "title": "2-bedroom flat (sample listing)", "area": "Jabriya", "type": "flat", "price": 120000, "currency": "KWD", "size_m2": 120, "rent_month": 480, "source": "owner"}, {"id": "p-3", "title": "Villa (sample listing)", "area": "Mishref", "type": "villa", "price": 450000, "currency": "KWD", "size_m2": 400, "source": "owner"}]}, "area-notes": [{"area": "Salmiya", "country": "Kuwait", "date": "2026-10-28", "currency": "KWD", "price_m2_low": 800, "price_m2_high": 1000, "rent_note": "made-up figures for the demo, not real market data", "summary": "A sample note to show how an area note looks. In the full Family Office, Claude writes real ones from sources, with their dates.", "sources": []}]}, "prices": {"quotes": {"AAPL": {"symbol": "AAPL", "name": "Apple Inc.", "price": 345.9599914550781, "currency": "USD", "change_pct": -0.33, "date": "2026-10-28"}, "BTC-USD": {"symbol": "BTC-USD", "name": "Bitcoin USD", "price": 80568.75, "currency": "USD", "change_pct": -0.29, "date": "2026-10-28"}, "GC=F": {"symbol": "GC=F", "name": "Gold Dec 26", "price": 4066.0, "currency": "USD", "change_pct": -0.21, "date": "2026-10-28"}, "KFH.KW": {"symbol": "KFH.KW", "name": "Kuwait Finance House K.S.C.P.", "price": 0.752, "currency": "KWD", "change_pct": -1.05, "date": "2026-10-28"}, "MSFT": {"symbol": "MSFT", "name": "Microsoft Corporation", "price": 534.39111328125, "currency": "USD", "change_pct": 0.58, "date": "2026-10-28"}, "NBK.KW": {"symbol": "NBK.KW", "name": "National Bank of Kuwait S.A.K.P.", "price": 0.851, "currency": "KWD", "change_pct": -0.82, "date": "2026-10-28"}, "ZAIN.KW": {"symbol": "ZAIN.KW", "name": "Mobile Telecommunications Company K.S.C.P.", "price": 0.583, "currency": "KWD", "change_pct": -1.85, "date": "2026-10-28"}}, "errors": {}}, "fx": {"kwd_per": {"KWD": 1.0, "USD": 0.3080999814080941, "GBP": 0.40965296014948743}, "errors": {}}, "events": {"NBK.KW": {"dividends": [{"date": "2026-04-02", "amount": 0.035, "currency": "KWD"}], "results": null, "errors": []}, "KFH.KW": {"dividends": [{"date": "2026-04-16", "amount": 0.014, "currency": "KWD"}, {"date": "2026-08-11", "amount": 0.01, "currency": "KWD"}], "results": null, "errors": []}, "ZAIN.KW": {"dividends": [{"date": "2025-11-12", "amount": 0.025, "currency": "KWD"}, {"date": "2026-09-29", "amount": 0.017, "currency": "KWD"}], "results": null, "errors": []}, "AAPL": {"dividends": [{"date": "2025-11-10", "amount": 0.26, "currency": "USD"}, {"date": "2026-02-09", "amount": 0.26, "currency": "USD"}, {"date": "2026-05-11", "amount": 0.27, "currency": "USD"}, {"date": "2026-08-10", "amount": 0.27, "currency": "USD"}], "results": "2026-11-02", "errors": []}, "MSFT": {"dividends": [{"date": "2025-11-20", "amount": 0.91, "currency": "USD"}, {"date": "2026-02-19", "amount": 0.91, "currency": "USD"}, {"date": "2026-05-21", "amount": 0.91, "currency": "USD"}, {"date": "2026-08-20", "amount": 0.91, "currency": "USD"}], "results": null, "errors": []}}, "halal": {"AAPL": {"symbol": "AAPL", "overall": "pass", "passed": 4, "total": 5}, "MSFT": {"symbol": "MSFT", "overall": "pass", "passed": 4, "total": 5}}, "ranges": {"SPY|1": {"symbol": "SPY", "years": 1, "n": 2261, "separate": 9, "since": "2016-10-27", "middle": 16.7, "bad": -5.0, "good": 33.0, "lower_pct": 14.0, "worst_drop": -33.7}, "SPY|3": {"symbol": "SPY", "years": 3, "n": 1757, "separate": 3, "since": "2016-10-27", "middle": 47.5, "bad": 29.7, "good": 80.0, "lower_pct": 0.0, "worst_drop": -33.7}, "SPY|5": {"symbol": "SPY", "years": 5, "n": 1253, "separate": 1, "since": "2016-10-27", "middle": 94.2, "bad": 64.8, "good": 114.1, "lower_pct": 0.0, "worst_drop": -33.7}, "SPUS|1": {"symbol": "SPUS", "years": 1, "n": 1471, "separate": 6, "since": "2019-12-18", "middle": 23.2, "bad": -7.8, "good": 37.7, "lower_pct": 16.0, "worst_drop": -30.8}, "SPUS|3": {"symbol": "SPUS", "years": 3, "n": 967, "separate": 2, "since": "2019-12-18", "middle": 50.5, "bad": 34.3, "good": 95.9, "lower_pct": 0.0, "worst_drop": -30.8}, "SPUS|5": {"symbol": "SPUS", "years": 5, "n": 463, "separate": 1, "since": "2019-12-18", "middle": 115.9, "bad": 100.9, "good": 127.2, "lower_pct": 0.0, "worst_drop": -30.8}, "GC=F|1": {"symbol": "GC=F", "years": 1, "n": 2262, "separate": 9, "since": "2016-10-27", "middle": 13.2, "bad": -4.2, "good": 41.4, "lower_pct": 23.3, "worst_drop": -24.9}, "GC=F|3": {"symbol": "GC=F", "years": 3, "n": 1758, "separate": 3, "since": "2016-10-27", "middle": 42.6, "bad": 11.3, "good": 128.3, "lower_pct": 1.9, "worst_drop": -24.9}, "GC=F|5": {"symbol": "GC=F", "years": 5, "n": 1254, "separate": 1, "since": "2016-10-27", "middle": 67.9, "bad": 41.7, "good": 141.6, "lower_pct": 0.0, "worst_drop": -24.9}}, "stockfacts": {"facts": {"NBK.KW": {"symbol": "NBK.KW", "higher_1y": 65.4, "separate": 9, "beat_market": 41.3, "middle_1y": 12.3, "bad_1y": -13.6, "dividend": 0.035, "results": null}, "KFH.KW": {"symbol": "KFH.KW", "higher_1y": 84.1, "separate": 9, "beat_market": 42.4, "middle_1y": 12.6, "bad_1y": -5.6, "dividend": 0.024, "results": null}, "ZAIN.KW": {"symbol": "ZAIN.KW", "higher_1y": 56.9, "separate": 9, "beat_market": 25.0, "middle_1y": 2.1, "bad_1y": -12.9, "dividend": 0.042, "results": null}, "AAPL": {"symbol": "AAPL", "higher_1y": 89.5, "separate": 9, "beat_market": 67.3, "middle_1y": 26.0, "bad_1y": -0.6, "dividend": 1.08, "results": "2026-11-02", "buys_3m": 0, "sells_3m": 16, "gifts_3m": 8}, "MSFT": {"symbol": "MSFT", "higher_1y": 83.6, "separate": 9, "beat_market": 71.1, "middle_1y": 31.5, "bad_1y": -6.9, "dividend": 3.64, "results": null, "buys_3m": 0, "sells_3m": 5, "gifts_3m": 26}}, "pairs": [{"a": "NBK.KW", "b": "KFH.KW", "pct": 49}, {"a": "NBK.KW", "b": "ZAIN.KW", "pct": 38}, {"a": "KFH.KW", "b": "ZAIN.KW", "pct": 22}, {"a": "NBK.KW", "b": "MSFT", "pct": 21}, {"a": "KFH.KW", "b": "MSFT", "pct": 11}, {"a": "AAPL", "b": "MSFT", "pct": 9}, {"a": "NBK.KW", "b": "AAPL", "pct": 3}, {"a": "KFH.KW", "b": "AAPL", "pct": 1}, {"a": "ZAIN.KW", "b": "AAPL", "pct": -9}, {"a": "ZAIN.KW", "b": "MSFT", "pct": -19}]}, "snapshots": []};</script>
 <script>
 (function () {
   // The demo's stand-in for the server: answers from the frozen data, and keeps
@@ -225,13 +269,14 @@
     }
     if (u.pathname.endsWith("/api/events")) return json(Object.fromEntries(list("symbols").map((s) => [s.toUpperCase(), D.events[s.toUpperCase()] || { dividends: [], results: null }])));
     if (u.pathname.endsWith("/api/halal")) return json(D.halal[(q.symbol || "").toUpperCase()] || { overall: "unknown" });
+    if (u.pathname.endsWith("/api/stockfacts")) return json(D.stockfacts || { facts: {}, pairs: [] });
     if (u.pathname.endsWith("/api/ranges")) return json(D.ranges[`${(q.symbol || "").toUpperCase()}|${q.years}`] || { error: "Not in this demo." });
     return json({ error: "That part needs the full Family Office on a Mac." });
   };
   // Start empty, to put in your own family; kept only in this browser.
   window.startOwn = function () {
     if (!confirm("Start empty, to put in your own family? The sample is set aside, and what you add stays only in this browser, on this device.")) return;
-    try { ["owners", "holdings", "events", "snapshots"].forEach((k) => localStorage.setItem(KEY + k, "[]")); } catch (e) { D.data.owners = []; D.data.holdings = []; D.data.events = []; }
+    try { ["owners", "holdings", "events", "snapshots", "area-notes"].forEach((k) => localStorage.setItem(KEY + k, "[]")); localStorage.setItem(KEY + "finder", JSON.stringify({ answers: {}, shortlist: [] })); } catch (e) { D.data.owners = []; D.data.holdings = []; D.data.events = []; }
     location.reload();
   };
   window.resetDemo = function () {
@@ -253,7 +298,7 @@
     stock: ["owner", "symbol", "qty", "cost", "country", "halal", "notes"],
     cash: ["owner", "name", "value", "currency", "country", "halal", "notes"],
     sukuk: ["owner", "name", "value", "currency", "coupon_pct", "per_year", "maturity", "country", "halal", "notes"],
-    property: ["owner", "name", "value", "currency", "rent_month", "rent_day", "mortgage_left", "mortgage_payment", "mortgage_day", "country", "halal", "notes"],
+    property: ["owner", "name", "value", "currency", "rent_month", "rent_day", "costs_year", "empty_months", "mortgage_left", "mortgage_payment", "mortgage_day", "area", "size_m2", "country", "halal", "notes"],
     private: ["owner", "name", "value", "currency", "committed", "called", "next_call_date", "next_call_amount", "next_dist_date", "next_dist_amount", "country", "halal", "notes"],
     gold: ["owner", "name", "qty", "unit", "country", "halal", "notes"],
     crypto: ["owner", "symbol", "qty", "cost", "halal", "notes"],
@@ -265,13 +310,14 @@
     rent_month: "Rent a month", mortgage_left: "Mortgage or loan left", committed: "Committed in total", called: "Paid in so far",
     country: "Country", halal: "Halal", notes: "Notes", unit: "Unit", per_year: "Payments a year", rent_day: "Rent comes in on day (1 to 28)",
     mortgage_payment: "Mortgage payment a month", mortgage_day: "Paid on day (1 to 28)", next_call_date: "Next cash call on", next_call_amount: "Next cash call amount",
-    next_dist_date: "Next payout expected on", next_dist_amount: "Next payout amount",
+    next_dist_date: "Next payout expected on", next_dist_amount: "Next payout amount", costs_year: "Costs a year (upkeep, service)",
+    empty_months: "Months empty a year", area: "Area (e.g. Salmiya, or a postcode)", size_m2: "Size (square metres)",
   };
   const CURRENCIES = ["KWD", "USD", "EUR", "GBP", "SAR", "AED", "QAR", "BHD", "OMR"];
   const HALAL_DEFAULT = { stock: "auto", cash: "unknown", sukuk: "yes", property: "yes", private: "unknown", gold: "yes", crypto: "unknown", other: "unknown" };
   const GRAMS_PER_OUNCE = 31.1035;
 
-  let owners = [], holdings = [], settings = { halal: true, show: "KWD" }, snapshots = [], events = [], shareEvents = {};
+  let owners = [], holdings = [], settings = { halal: true, show: "KWD" }, snapshots = [], events = [], shareEvents = {}, finder = { answers: {}, shortlist: [] }, areaNotes = [], stockFacts = null, stockKey = "";
   let quotes = {}, fx = { KWD: 1 }, priceErrors = {}, halalAuto = {}, editing = null;
 
   // ---- Tabs ----
@@ -320,10 +366,11 @@
 
   // ---- Loading ----
   async function load() {
-    [owners, holdings, settings, snapshots, events] = await Promise.all([
+    [owners, holdings, settings, snapshots, events, finder, areaNotes] = await Promise.all([
       mobleeApp.load("owners").then((x) => x || []), mobleeApp.load("holdings").then((x) => x || []),
       mobleeApp.load("settings").then((x) => Object.assign({ halal: true, show: "KWD" }, x || {})), mobleeApp.load("snapshots").then((x) => x || []),
       mobleeApp.load("events").then((x) => x || []),
+      mobleeApp.load("finder").then((x) => Object.assign({ answers: {}, shortlist: [] }, x || {})), mobleeApp.load("area-notes").then((x) => x || []),
     ]);
     $("showCur").value = settings.show; $("set_halal").checked = !!settings.halal;
     await refreshPrices();
@@ -403,6 +450,8 @@
     drawOwners(rows);
     drawCalendar();
     drawReport(rows, total);
+    drawInsights(rows, total);
+    drawFinder();
     keepSnapshot(rows, total);
   }
 
@@ -642,6 +691,211 @@
     await refreshPrices();
   });
 
+  // ---- Insights ----
+  // The points a family office would raise, from the family's own holdings and
+  // dates: facts and their size, never what to buy or sell.
+  const QUICK = { stock: "Within a week", crypto: "Within a week", gold: "Within a week", cash: "Within a week", sukuk: "Days to weeks, at the market's price", other: "Depends" };
+  const pct0 = (a, b) => b > 0 ? Math.round(100 * a / b) : 0;
+  const dmy = (d) => d ? new Date(d + "T00:00:00Z").toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" }) : "";
+  function drawInsights(rows, total) {
+    const live = rows.filter((r) => r.net_kwd != null);
+    if (!live.length) { $("insWorth").innerHTML = `<li class="muted">Insights appear once holdings are added.</li>`; ["insTiles", "insSpare", "insProps", "insStocks", "insSell"].forEach((id) => { $(id).innerHTML = ""; }); $("insNote").textContent = ""; return; }
+    const biggest = live.slice().sort((a, b) => b.net_kwd - a.net_kwd)[0];
+    const top = (key) => sumBy(live, key)[0] || ["–", 0];
+    const [kTop, kVal] = top((r) => KINDS[r.h.kind]), [cTop, cVal] = top((r) => countryOf(r.h)), [curTop, curVal] = top((r) => r.cur);
+    const quick = live.filter((r) => QUICK[r.h.kind] === "Within a week").reduce((t, r) => t + r.net_kwd, 0);
+    const propVal = live.filter((r) => r.h.kind === "property").reduce((t, r) => t + (r.gross_kwd || 0), 0);
+    const owed = live.reduce((t, r) => t + (r.debt_kwd || 0), 0);
+    const cash = live.filter((r) => r.h.kind === "cash").reduce((t, r) => t + r.net_kwd, 0);
+    const cal = calendar(), inDays = (d) => iso(new Date(Date.now() + d * 864e5));
+    const out90 = cal.filter((x) => x.dir === "out" && x.date <= inDays(91)).reduce((t, x) => t + (x.kwd || 0), 0);
+    const in90 = cal.filter((x) => x.dir === "in" && x.date <= inDays(91)).reduce((t, x) => t + (x.kwd || 0), 0);
+    const monthlyOut = out90 / 3, cover = monthlyOut > 0 ? cash / monthlyOut : null;
+    $("insTiles").innerHTML = [
+      ["Largest single holding", `${esc(biggest.h.symbol || biggest.h.name || KINDS[biggest.h.kind])}: ${pct0(biggest.net_kwd, total)}%`],
+      ["Largest kind", `${esc(kTop)}: ${pct0(kVal, total)}%`], ["Largest country", `${esc(cTop)}: ${pct0(cVal, total)}%`], ["Largest currency", `${esc(curTop)}: ${pct0(curVal, total)}%`],
+      ["Could be cash within a week", `${fmt(quick)} (${pct0(quick, total)}%)`], ["Owed against property", propVal ? `${pct0(owed, propVal)}% of its value` : "No property"],
+      ["Cash covers", cover == null ? "No payments due in 3 months" : `${cover.toFixed(1)} months of payments`],
+    ].map(([k, v]) => `<div class="tile"><span>${k}</span><b>${v}</b></div>`).join("");
+    $("insNote").textContent = "Within a week: shares, funds, gold, crypto and bank cash. Property, private holdings and sukuk held to the end are slower. Payments are those on the Calendar for the next three months.";
+
+    // Spare cash: the cash beyond what the next three months' payments need.
+    const spare = cash - Math.max(0, out90 - in90);
+    $("insSpare").innerHTML = cash <= 0 ? `<p class="muted">No bank cash added yet.</p>` : `<p>Bank cash ${fmt(cash)}; the next three months bring in ${fmt(in90)} and take out ${fmt(out90)}.
+      ${spare > 0 ? `That leaves about <b>${fmt(spare)}</b> beyond what those payments need.` : `The payments due need more than the cash; nothing is spare.`}</p>
+      ${spare > 0 ? `<div class="actions"><button type="button" id="spareGo">Lay ${fmt(spare)} out in Options</button><span class="note">Side by side, never ranked.</span></div>` : ""}`;
+    $("spareGo")?.addEventListener("click", () => { $("c_amount").value = Math.round(settings.show === "USD" ? spare / fx.USD : spare); $("c_cur").value = settings.show; show("options"); $("cashGo").click(); });
+
+    // Each property against the rates the owner typed in Options.
+    const props = live.filter((r) => r.h.kind === "property");
+    const dep = settings.deposit_rate, suk = settings.sukuk_rate;
+    $("insProps").innerHTML = props.length ? `<table><thead><tr><th>Property</th><th class="num">Earns a year</th><th class="num">After costs and empty months</th><th class="num">Owed</th><th>Rent against the loan</th><th>Its area</th></tr></thead><tbody>${props.map((r) => {
+      const h = r.h, v = Number(h.value) || 0, rent = Number(h.rent_month) || 0, gross = v ? 100 * rent * 12 / v : null;
+      const net = v && rent ? 100 * (rent * (12 - (Number(h.empty_months) || 0)) - (Number(h.costs_year) || 0)) / v : null;
+      const vs = net != null && (dep != null || suk != null) ? ` <span class="muted small">(${[dep != null ? `deposit ${dep}%` : "", suk != null ? `sukuk ${suk}%` : ""].filter(Boolean).join(", ")})</span>` : "";
+      const pay = Number(h.mortgage_payment) || 0;
+      const note = areaNotes.find((a) => h.area && a.area.toLowerCase() === h.area.toLowerCase());
+      const m2 = h.size_m2 ? v / Number(h.size_m2) : null;
+      const areaLine = !h.area ? `<span class="muted small">Add its area to compare</span>` : note && m2 && note.price_m2_low != null
+        ? `${native(m2, h.currency)}/m² against ${native(note.price_m2_low, note.currency)} to ${native(note.price_m2_high, note.currency)} usual (${m2 < note.price_m2_low ? "below" : m2 > note.price_m2_high ? "above" : "within"})`
+        : note ? `<span class="small">${esc(note.summary || "Note on file")}</span>` : `<span class="muted small">Say "study property in ${esc(h.area)}"</span>`;
+      return `<tr><td><b>${esc(h.name || "Property")}</b><div class="muted small">${esc(ownerName(h.owner))}</div></td><td class="num">${gross != null ? gross.toFixed(1) + "%" : "–"}</td>
+        <td class="num">${net != null ? net.toFixed(1) + "%" : `<span class="muted small">add costs</span>`}${vs}</td><td class="num">${v ? pct0(Number(h.mortgage_left) || 0, v) + "%" : "–"}</td>
+        <td class="small">${pay ? (rent >= pay ? `Rent covers it, ${native(rent - pay, h.currency)} over a month` : `Short by ${native(pay - rent, h.currency)} a month`) : "No loan payment added"}</td><td class="small">${areaLine}</td></tr>`;
+    }).join("")}</tbody></table>${dep == null && suk == null ? `<p class="note">Type a deposit or sukuk rate in Options to see each property beside them.</p>` : ""}` : `<p class="muted">No property added.</p>`;
+
+    // Each share, with the Trade Desk's facts.
+    const shares = live.filter((r) => r.h.kind === "stock" && r.h.symbol);
+    const key = shares.map((r) => r.h.symbol + ":" + r.h.qty).join(",");
+    if (shares.length && key !== stockKey) {
+      stockKey = key;
+      fetch(`/api/stockfacts?symbols=${encodeURIComponent(shares.map((r) => r.h.symbol).join(","))}&shares=${shares.map((r) => r.h.qty).join(",")}`)
+        .then((r) => r.json()).then((d) => { stockFacts = d; render(); }).catch(() => { stockFacts = { error: "The share facts could not be read just now." }; render(); });
+    }
+    const deskLink = (s) => window.DEMO ? `../#plan=s=${encodeURIComponent(s)}&a=5000&why=Something+else&when=now&p=&span=1+year` : `http://127.0.0.1:7401/#plan=s=${encodeURIComponent(s)}&a=5000&why=Something+else&when=now&p=&span=1+year`;
+    const F = (stockFacts && stockFacts.facts) || {};
+    $("insStocks").innerHTML = !shares.length ? `<p class="muted">No shares added.</p>` : stockFacts && stockFacts.error && !Object.keys(F).length ? `<p class="muted">${esc(stockFacts.error)}</p>` : `<table><thead><tr><th>Share</th><th class="num">Share of all</th><th class="num">Gain so far</th><th>Past years</th><th>Dividend</th><th>Leaders, 3 months</th><th>Results</th><th></th></tr></thead><tbody>${
+      shares.map((r) => {
+        const h = r.h, f = F[h.symbol.toUpperCase()] || {}, q = quotes[h.symbol.toUpperCase()];
+        const gain = h.cost && q ? 100 * (q.price / Number(h.cost) - 1) : null;
+        return `<tr><td><b>${esc(h.symbol)}</b><div class="muted small">${esc(ownerName(h.owner))}</div></td><td class="num">${pct0(r.net_kwd, total)}%</td>
+          <td class="num">${gain == null ? `<span class="muted small">add price paid</span>` : `${gain >= 0 ? "+" : ""}${gain.toFixed(1)}%`}</td>
+          <td class="small">${f.higher_1y != null ? `Higher after a year ${Math.round(f.higher_1y)}% of the time${f.beat_market != null ? `; beat the S&P 500 ${Math.round(f.beat_market)}%` : ""}` : stockFacts ? "–" : "Reading…"}</td>
+          <td class="small">${f.dividend && q ? `${(100 * f.dividend / q.price).toFixed(1)}% a year` : stockFacts ? "None found" : ""}</td>
+          <td class="small">${f.buys_3m != null ? `${f.buys_3m} buys, ${f.sells_3m} sales${f.gifts_3m ? ` (+${f.gifts_3m} gifts)` : ""}` : "–"}</td>
+          <td class="small">${f.results ? esc(dmy(f.results)) : "–"}</td>
+          <td><button type="button" data-sell="${esc(h.id)}">Thinking of selling?</button> <a href="${deskLink(h.symbol)}" target="_blank" rel="noopener">Full check</a></td></tr>`;
+      }).join("")}</tbody></table>`;
+    $("insStocks").querySelectorAll("[data-sell]").forEach((b) => b.addEventListener("click", () => sellSheet(b.dataset.sell, live, total)));
+
+    // Worth a look.
+    const W = [];
+    if (pct0(biggest.net_kwd, total) >= 30) W.push(`${pct0(biggest.net_kwd, total)}% of everything is one holding: ${biggest.h.symbol || biggest.h.name || KINDS[biggest.h.kind]}.`);
+    if (pct0(cVal, total) >= 80) W.push(`${pct0(cVal, total)}% of everything is in one country, ${cTop}.`);
+    if (pct0(quick, total) < 15) W.push(`Only ${pct0(quick, total)}% could be turned into cash within a week; the rest is slower to sell.`);
+    if (cover != null && cover < 3) W.push(`Bank cash covers ${cover.toFixed(1)} months of the payments due; the next three months take out ${fmt(out90)}.`);
+    if (propVal && owed / propVal >= 0.6) W.push(`${pct0(owed, propVal)}% of the property's value is borrowed.`);
+    props.forEach((r) => { const pay = Number(r.h.mortgage_payment) || 0, rent = Number(r.h.rent_month) || 0; if (pay && rent < pay) W.push(`The rent on ${r.h.name || "a property"} is ${native(pay - rent, r.h.currency)} a month short of its loan payment.`); });
+    cal.filter((x) => x.kind === "fund" && x.dir === "out" && x.kwd && x.date <= inDays(183)).forEach((x) => { if (x.kwd > cash) W.push(`A fund cash call on ${dmy(x.date)} (${fmt(x.kwd)}) is bigger than the family's bank cash.`); });
+    shares.forEach((r) => { const f = F[r.h.symbol.toUpperCase()] || {}; if (f.results && f.results >= iso(new Date()) && f.results <= inDays(7)) W.push(`${r.h.symbol} reports results on ${dmy(f.results)}.`); });
+    ((stockFacts && stockFacts.pairs) || []).filter((p) => p.pct >= 70).forEach((p) => W.push(`${p.a} and ${p.b} have moved ${p.pct}% alike over six months, so they act partly as one bet.`));
+    if (settings.halal) { const notPass = live.filter((r) => halalOf(r.h) === "no").reduce((t, r) => t + r.net_kwd, 0); if (notPass) W.push(`${fmt(notPass)} (${pct0(notPass, total)}%) does not pass the halal screen.`); }
+    if (spare > 0 && pct0(spare, total) >= 10) W.push(`About ${fmt(spare)} of bank cash is beyond the next three months' payments.`);
+    $("insWorth").innerHTML = W.length ? W.map((x) => `<li>${esc(x)}</li>`).join("") : `<li class="muted">Nothing stands out on these measures.</li>`;
+  }
+
+  // Thinking of selling: every fact on one holding, and no verdict.
+  function sellSheet(id, live, total) {
+    const r = live.find((x) => x.h.id === id); if (!r) return;
+    const h = r.h, F = (stockFacts && stockFacts.facts) || {}, f = F[h.symbol.toUpperCase()] || {}, q = quotes[h.symbol.toUpperCase()];
+    const pairs = ((stockFacts && stockFacts.pairs) || []).filter((p) => (p.a === h.symbol.toUpperCase() || p.b === h.symbol.toUpperCase()) && p.pct >= 50);
+    const L = [];
+    L.push(`${h.qty} shares, worth ${native(r.v, r.cur)}${r.cur !== settings.show ? ` (${fmt(r.net_kwd)})` : ""}, ${pct0(r.net_kwd, total)}% of everything the family owns.`);
+    if (h.cost && q) { const g = (q.price - Number(h.cost)) * Number(h.qty); L.push(`Bought at ${native(Number(h.cost), q.currency)}; it is ${native(q.price, q.currency)} now, a ${g >= 0 ? "gain" : "loss"} of ${native(Math.abs(g), q.currency)} (${(100 * (q.price / Number(h.cost) - 1)).toFixed(1)}%).`); }
+    else L.push("Add the price paid on the holding to see the gain or loss so far.");
+    if (f.higher_1y != null) L.push(`Over its last ten years, a year later it was higher ${Math.round(f.higher_1y)}% of the time (about ${f.separate} separate years); the middle year ${f.middle_1y >= 0 ? "+" : ""}${f.middle_1y}%, a bad one ${f.bad_1y}%.${f.beat_market != null ? ` It beat the S&P 500 in ${Math.round(f.beat_market)}% of those years.` : ""}`);
+    if (f.dividend && q) L.push(`It paid ${native(f.dividend, q.currency)} a share in dividends over the last year, ${(100 * f.dividend / q.price).toFixed(1)}%: about ${native(f.dividend * Number(h.qty), q.currency)} a year on this holding.`);
+    if (pairs.length) L.push(`It has moved alike with ${pairs.map((p) => `${p.a === h.symbol.toUpperCase() ? p.b : p.a} (${p.pct}%)`).join(", ")}, also held.`);
+    if (f.buys_3m != null) L.push(`Its own leaders bought ${f.buys_3m} times and sold ${f.sells_3m} times in the last three months${f.gifts_3m ? `, with ${f.gifts_3m} gifts or transfers apart` : ""}.`);
+    if (f.results) L.push(`Its next results are on ${dmy(f.results)}; prices often move sharply then.`);
+    if (settings.halal) L.push(`Halal screen: ${({ yes: "passes", no: "does not pass", unknown: "not checked" })[halalOf(h)]}.`);
+    L.push("Selling also means deciding where the money would go next; Options lays the choices side by side.");
+    $("insSell").innerHTML = `<div class="card" style="margin:0"><h2>Thinking of selling ${esc(h.symbol)}?</h2><ul class="small">${L.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>
+      <p class="note">The facts you would want before deciding. The decision is yours; this page does not say sell or keep.</p></div>`;
+    $("insSell").scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
+
+  // ---- Property finder ----
+  // The owner's answers, links to the listing sites with them in mind, a
+  // shortlist with each property's numbers, sorted by how well it fits.
+  const SITES = {
+    "Kuwait": [["4Sale (Kuwait)", "https://www.q84sale.com/en/property"]],
+    "United Arab Emirates": [["Property Finder", "https://www.propertyfinder.ae/"], ["Bayut", "https://www.bayut.com/"]],
+    "United Kingdom": [["Rightmove", "https://www.rightmove.co.uk/"], ["Zoopla", "https://www.zoopla.co.uk/"]],
+    "Saudi Arabia": [["Bayut (Saudi Arabia)", "https://www.bayut.sa/"]],
+    "Other": [],
+  };
+  const TYPE_WORDS = { flat: "flat for sale", villa: "villa for sale", building: "building for sale", land: "land for sale", office: "office for sale" };
+  function fillFinderForm() {
+    const a = finder.answers || {};
+    $("f_country").value = a.country || "Kuwait"; $("f_areas").value = (a.areas || []).join(", "); $("f_type").value = a.type || "flat";
+    $("f_min").value = a.min ?? ""; $("f_max").value = a.max ?? ""; $("f_cur").value = a.currency || "KWD"; $("f_size").value = a.size ?? ""; $("f_purpose").value = a.purpose || "rent";
+  }
+  function drawLinks() {
+    const a = finder.answers || {};
+    if (!a.country) { $("fLinks").innerHTML = ""; return; }
+    const areas = (a.areas || []).length ? a.areas : [""];
+    const q = (area) => [TYPE_WORDS[a.type] || "property for sale", area, a.country !== "Other" ? a.country : "", a.max ? `under ${Number(a.max).toLocaleString("en-US")} ${a.currency}` : ""].filter(Boolean).join(" ");
+    const sites = SITES[a.country] || [];
+    $("fLinks").innerHTML = `<p class="small"><b>Where to look.</b> These open the sites themselves; nothing is read from them automatically, as they do not allow it.</p><ul class="small">${
+      sites.map(([name, url]) => `<li><a href="${url}" target="_blank" rel="noopener">${esc(name)}</a></li>`).join("")}${
+      areas.map((ar) => `<li><a href="https://www.google.com/search?q=${encodeURIComponent(q(ar))}" target="_blank" rel="noopener">Web search: ${esc(q(ar))}</a></li>`).join("")}</ul>
+      <p class="note">Or tell Claude "find me properties": it searches with these answers and adds what it can read to the shortlist, with links.</p>`;
+  }
+  $("fSave").addEventListener("click", async () => {
+    finder.answers = { country: $("f_country").value, areas: $("f_areas").value.split(",").map((s) => s.trim()).filter(Boolean), type: $("f_type").value,
+      min: $("f_min").value === "" ? null : Number($("f_min").value), max: $("f_max").value === "" ? null : Number($("f_max").value), currency: $("f_cur").value,
+      size: $("f_size").value === "" ? null : Number($("f_size").value), purpose: $("f_purpose").value, updated: iso(new Date()) };
+    await mobleeApp.save("finder", finder);
+    $("fMsg").textContent = "Saved."; drawFinder();
+  });
+  function listingNumbers(p) {
+    const price = Number(p.price) || 0, rent = Number(p.rent_month) || 0, size = Number(p.size_m2) || 0;
+    const net = price && rent ? 100 * (rent * 11 - (Number(p.costs_year) || 0)) / price : null;   // one empty month a year, unless costs say more
+    const note = areaNotes.find((a) => p.area && a.area.toLowerCase() === p.area.toLowerCase());
+    const m2 = price && size ? price / size : null;
+    const a = finder.answers || {}, checks = [];
+    if (a.max || a.min) checks.push((!a.max || price <= a.max) && (!a.min || price >= a.min) && (p.currency || a.currency) === a.currency);
+    if ((a.areas || []).length) checks.push(!!p.area && a.areas.some((x) => x.toLowerCase() === p.area.toLowerCase()));
+    if (a.type) checks.push(p.type === a.type);
+    if (a.size) checks.push(size >= a.size);
+    if (a.purpose === "rent" || a.purpose === "both") checks.push(net != null && net > 0);
+    return { price, rent, size, net, m2, note, fit: checks.filter(Boolean).length, of: checks.length,
+             vsArea: note && m2 && note.price_m2_low != null ? (m2 < note.price_m2_low ? "below" : m2 > note.price_m2_high ? "above" : "within") : null };
+  }
+  function drawFinder() {
+    if (document.activeElement && document.activeElement.closest && document.activeElement.closest("#fForm")) return;   // never redraw under the owner's typing
+    fillFinderForm(); drawLinks();
+    const sort = $("fSort").value;
+    const list = (finder.shortlist || []).filter((p) => !p.closed).map((p) => Object.assign({ p }, listingNumbers(p)));
+    const by = { fit: (x) => -(x.of ? x.fit / x.of : 0) - (x.net || 0) / 1000, net: (x) => -(x.net ?? -99), m2: (x) => x.m2 ?? 1e12, price: (x) => x.price || 1e12 }[sort];
+    list.sort((a, b) => by(a) - by(b));
+    $("fList").innerHTML = list.length ? `<table><thead><tr><th>Property</th><th class="num">Price</th><th class="num">Per m²</th><th class="num">Would earn after costs</th><th>Its area</th><th>Fits your answers</th><th></th></tr></thead><tbody>${
+      list.map((x) => { const p = x.p, cur = p.currency || "KWD";
+        return `<tr><td><b>${p.link ? `<a href="${esc(p.link)}" target="_blank" rel="noopener">${esc(p.title || "Listing")}</a>` : esc(p.title || "Listing")}</b><div class="muted small">${esc([p.area, p.type, p.size_m2 ? p.size_m2 + " m²" : ""].filter(Boolean).join(" · "))}${p.source === "claude" ? " · found by Claude" : ""}</div></td>
+          <td class="num">${native(x.price, cur)}</td><td class="num">${x.m2 ? native(x.m2, cur) : "–"}</td>
+          <td class="num">${x.net != null ? x.net.toFixed(1) + "% a year" : `<span class="muted small">add the rent</span>`}</td>
+          <td class="small">${x.vsArea ? `${x.vsArea} its usual price` : x.note ? "note on file" : p.area ? `<span class="muted">no note yet</span>` : ""}</td>
+          <td class="small">${x.of ? `${x.fit} of ${x.of}` : "Answer the questions above"}</td>
+          <td><button type="button" data-check="${esc(p.id)}">Property check</button> <button type="button" data-drop="${esc(p.id)}">Set aside</button></td></tr>`; }).join("")}</tbody></table>
+      <p class="note">"Would earn" assumes one empty month a year and the costs typed in; the Property check takes a loan into account. Fits your answers counts budget, area, type, size and, for renting out, whether the rent was given.</p>`
+      : `<p class="empty">Nothing on the shortlist yet.</p>`;
+    $("fList").querySelectorAll("[data-check]").forEach((b) => b.addEventListener("click", () => {
+      const p = finder.shortlist.find((x) => x.id === b.dataset.check);
+      $("p_price").value = p.price || ""; $("p_cur").value = p.currency || "KWD"; $("p_rent").value = p.rent_month || ""; $("p_costs").value = p.costs_year || ""; $("p_empty").value = 1;
+      show("options"); $("propGo").click(); $("propOut").scrollIntoView({ behavior: "smooth" });
+    }));
+    $("fList").querySelectorAll("[data-drop]").forEach((b) => b.addEventListener("click", async () => {
+      // Set aside, never removed, so the record of what was looked at stays.
+      finder.shortlist = finder.shortlist.map((x) => x.id === b.dataset.drop ? Object.assign({}, x, { closed: iso(new Date()) }) : x);
+      await mobleeApp.save("finder", finder); drawFinder();
+    }));
+    $("fAreas").innerHTML = areaNotes.length ? areaNotes.map((a) => `<div style="margin:.5rem 0"><b>${esc(a.area)}</b>${a.country ? `, ${esc(a.country)}` : ""} <span class="muted small">${esc(dmy(a.date))}</span>
+      ${a.price_m2_low != null ? `<div class="small">Usual price ${native(a.price_m2_low, a.currency)} to ${native(a.price_m2_high, a.currency)} per m²${a.rent_note ? `; ${esc(a.rent_note)}` : ""}</div>` : ""}
+      ${a.summary ? `<div class="small">${esc(a.summary)}</div>` : ""}${(a.sources || []).length ? `<div class="muted small">Sources: ${a.sources.map((s) => `<a href="${esc(s)}" target="_blank" rel="noopener">${esc((s.split("/")[2] || s).replace("www.", ""))}</a>`).join(", ")}</div>` : ""}</div>`).join("")
+      : `<p class="muted small">None yet.</p>`;
+  }
+  $("fSort").addEventListener("change", drawFinder);
+  $("sAdd").addEventListener("click", async () => {
+    const v = (id) => $(id).value.trim(), n = (id) => $(id).value === "" ? null : Number($(id).value);
+    if (!v("s_title") || !(n("s_price") > 0)) { $("sMsg").textContent = "Put in at least what it is and its price."; return; }
+    finder.shortlist.push({ id: `p-${Date.now()}`, title: v("s_title"), link: v("s_link") || null, area: v("s_area") || null, type: $("s_type").value, price: n("s_price"),
+      currency: $("s_cur").value, size_m2: n("s_size"), rent_month: n("s_rent"), costs_year: n("s_costs"), added: iso(new Date()), source: "owner" });
+    await mobleeApp.save("finder", finder);
+    ["s_title", "s_link", "s_area", "s_price", "s_size", "s_rent", "s_costs"].forEach((id) => { $(id).value = ""; });
+    $("sMsg").textContent = "Added."; drawFinder();
+  });
+
   // ---- Options for cash, and the property check ----
   // Facts side by side, never a recommendation: past ranges for funds and gold,
   // and the owner's own numbers for deposits, sukuk and property.
@@ -649,6 +903,10 @@
 
   $("cashGo").addEventListener("click", async () => {
     const amt = Number($("c_amount").value), cur = $("c_cur").value, yrs = Number($("c_years").value);
+    // The rates typed in are kept, so Insights can set each property against them.
+    settings.deposit_rate = $("c_deposit").value === "" ? null : Number($("c_deposit").value);
+    settings.sukuk_rate = $("c_sukuk").value === "" ? null : Number($("c_sukuk").value);
+    mobleeApp.save("settings", settings).catch(() => {});
     if (!(amt > 0)) { $("cashMsg").textContent = "Put in an amount."; return; }
     $("cashMsg").textContent = "Reading the past…"; $("cashOut").innerHTML = "";
     const funds = [["SPY", "The S&P 500 (a fund such as SPY)", "Any trading day, within two days", "Swings with the market"],
@@ -739,7 +997,7 @@
     }
     if (key === "per_year") return `<div><label for="f_per_year">${LABELS.per_year}</label><select id="f_per_year">${[[1, "Once"], [2, "Twice (every 6 months)"], [4, "Four times"], [12, "Monthly"]]
       .map(([n, t]) => `<option value="${n}"${Number(v || 2) === n ? " selected" : ""}>${t}</option>`).join("")}</select></div>`;
-    const type = ["qty", "cost", "value", "coupon_pct", "rent_month", "mortgage_left", "committed", "called", "rent_day", "mortgage_payment", "mortgage_day", "next_call_amount", "next_dist_amount"].includes(key) ? "number" : ["maturity", "next_call_date", "next_dist_date"].includes(key) ? "date" : "text";
+    const type = ["qty", "cost", "value", "coupon_pct", "rent_month", "mortgage_left", "committed", "called", "rent_day", "mortgage_payment", "mortgage_day", "next_call_amount", "next_dist_amount", "costs_year", "empty_months", "size_m2"].includes(key) ? "number" : ["maturity", "next_call_date", "next_dist_date"].includes(key) ? "date" : "text";
     return `<div><label for="f_${key}">${LABELS[key]}</label><input id="f_${key}" type="${type}" ${type === "number" ? 'step="any" min="0"' : ""} value="${esc(v)}"></div>`;
   }
   function openForm(h) {
