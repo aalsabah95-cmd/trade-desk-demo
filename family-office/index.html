@@ -82,10 +82,10 @@
     <select id="showCur" style="width:auto"><option value="KWD">Kuwaiti dinars</option><option value="USD">US dollars</option></select></div></div>
 </div></header>
 <main>
-<div class="card no-print" style="margin:1rem 0;border-style:dashed"><b>Demo.</b> A made-up family, with prices frozen on 27 October 2026. Change anything or add your own: it stays in your own browser. <button type="button" onclick="resetDemo()">Start again with the sample family</button> <a href="../">Try the Trade Desk demo</a>, which checks a single stock before you buy. The full Family Office runs on its owner's Mac, with live prices for any symbol.</div>
+<div class="card no-print" style="margin:1rem 0;border-style:dashed"><b>Demo.</b> A made-up family, with prices frozen on 28 October 2026. Change anything or add your own: it stays in your own browser, on your own device, and is never sent anywhere. <button type="button" class="primary" onclick="startOwn()">Start with my own family</button> <button type="button" onclick="resetDemo()">Back to the sample family</button> <a href="../">Try the Trade Desk demo</a>, which checks a single stock before you buy. The full Family Office runs on its owner's Mac, with live prices for any symbol.</div>
   <nav class="tabs" role="tablist">
     <button data-tab="overview" aria-selected="true">Overview</button><button data-tab="holdings">Holdings</button>
-    <button data-tab="calendar">Calendar</button><button data-tab="report">Report</button><button data-tab="owners">Owners</button><button data-tab="settings">Settings</button>
+    <button data-tab="calendar">Calendar</button><button data-tab="report">Report</button><button data-tab="options">Options</button><button data-tab="owners">Owners</button><button data-tab="settings">Settings</button>
   </nav>
 
   <div class="tab" id="tab-overview">
@@ -133,6 +133,36 @@
     <div class="card report" id="report"></div>
   </div>
 
+  <div class="tab" id="tab-options" hidden>
+    <div class="card"><h2>Options for cash</h2>
+      <p class="muted">Where a sum of money could sit, side by side: what it might be worth after a while, how much it swung on the way, and how quickly it can be had back. Facts from the past and from what you type in, never ranked. The choice is yours.</p>
+      <form class="grid" id="cashForm" onsubmit="return false">
+        <div><label for="c_amount">Amount</label><input id="c_amount" type="number" min="0" step="any" placeholder="e.g. 100000"></div>
+        <div><label for="c_cur">Currency</label><select id="c_cur"><option>KWD</option><option>USD</option></select></div>
+        <div><label for="c_years">For</label><select id="c_years"><option value="1">1 year</option><option value="3">3 years</option><option value="5">5 years</option></select></div>
+        <div><label for="c_deposit">Your bank's profit rate a year on a deposit (%)</label><input id="c_deposit" type="number" min="0" step="any" placeholder="ask your bank"></div>
+        <div><label for="c_sukuk">A sukuk's profit rate a year (%)</label><input id="c_sukuk" type="number" min="0" step="any" placeholder="from the offer"></div>
+      </form>
+      <div class="actions"><button class="primary" id="cashGo">Show the options</button><span class="note" id="cashMsg"></span></div>
+      <div class="scroll" id="cashOut" style="margin-top:.75rem"></div></div>
+
+    <div class="card"><h2>Property check</h2>
+      <p class="muted">For a property you are looking at: what it really earns after costs and empty months, what the loan costs each month, and how long the rent takes to pay the price back. Numbers from what you type in.</p>
+      <form class="grid" id="propForm" onsubmit="return false">
+        <div><label for="p_price">Price</label><input id="p_price" type="number" min="0" step="any" placeholder="e.g. 500000"></div>
+        <div><label for="p_cur">Currency</label><select id="p_cur"><option>KWD</option><option>USD</option><option>GBP</option><option>EUR</option><option>AED</option><option>SAR</option></select></div>
+        <div><label for="p_rent">Rent a month</label><input id="p_rent" type="number" min="0" step="any" placeholder="e.g. 3000"></div>
+        <div><label for="p_costs">Costs a year (upkeep, service, management)</label><input id="p_costs" type="number" min="0" step="any" placeholder="e.g. 4000"></div>
+        <div><label for="p_empty">Months empty a year</label><input id="p_empty" type="number" min="0" max="12" step="any" placeholder="e.g. 1"></div>
+        <div><label for="p_buycost">Buying costs (fees, agent), once</label><input id="p_buycost" type="number" min="0" step="any" placeholder="e.g. 10000"></div>
+        <div><label for="p_down">Paid up front (%)</label><input id="p_down" type="number" min="0" max="100" step="any" placeholder="100 means no loan"></div>
+        <div><label for="p_rate">Loan profit rate a year (%)</label><input id="p_rate" type="number" min="0" step="any"></div>
+        <div><label for="p_term">Loan years</label><input id="p_term" type="number" min="1" max="40" step="1" placeholder="e.g. 15"></div>
+      </form>
+      <div class="actions"><button class="primary" id="propGo">Check it</button><span class="note" id="propMsg"></span></div>
+      <div id="propOut" style="margin-top:.75rem"></div></div>
+  </div>
+
   <div class="card" id="importCard" hidden>
     <h2>Bring in a spreadsheet</h2>
     <p class="muted">From Excel or Numbers, save the sheet as CSV, then choose it here. One row per holding. The first row names the columns; only <b>kind</b> and <b>owner</b> are needed, with <b>symbol and qty</b> for shares, gold and crypto, or <b>value and currency</b> for everything else. New owners are added by name. Nothing is changed until you press "Add these".</p>
@@ -160,7 +190,7 @@
 
   <section><p class="note">A demo with a made-up family; what you change stays in your browser. Prices come from Yahoo Finance's public data and can be 15 minutes old; Boursa Kuwait prices are turned from fils into dinars. Values you type in (property, private holdings, cash) are as of the day you last changed them. Nothing here is advice.</p></section>
 </main>
-<script>window.DEMO = {"frozen": "2026-10-27", "data": {"owners": [{"id": "o-1", "name": "Parent (sample)", "kind": "person"}, {"id": "o-2", "name": "Daughter (sample)", "kind": "person"}, {"id": "o-3", "name": "Son (sample)", "kind": "person"}, {"id": "o-4", "name": "Family Holding Co. (sample)", "kind": "company"}], "holdings": [{"id": "h-1", "owner": "o-1", "kind": "stock", "symbol": "NBK.KW", "qty": 25000, "halal": "no"}, {"id": "h-2", "owner": "o-1", "kind": "stock", "symbol": "KFH.KW", "qty": 40000, "halal": "yes"}, {"id": "h-3", "owner": "o-4", "kind": "stock", "symbol": "ZAIN.KW", "qty": 30000, "halal": "unknown"}, {"id": "h-4", "owner": "o-2", "kind": "stock", "symbol": "AAPL", "qty": 60, "halal": "auto"}, {"id": "h-5", "owner": "o-3", "kind": "stock", "symbol": "MSFT", "qty": 25, "halal": "auto"}, {"id": "h-6", "owner": "o-1", "kind": "cash", "name": "Islamic current account", "value": 45000, "currency": "KWD", "country": "Kuwait", "halal": "yes"}, {"id": "h-7", "owner": "o-4", "kind": "cash", "name": "Dollar deposit", "value": 150000, "currency": "USD", "country": "United States", "halal": "no"}, {"id": "h-8", "owner": "o-4", "kind": "property", "name": "Apartment building", "value": 780000, "currency": "KWD", "rent_month": 4500, "rent_day": 5, "mortgage_left": 240000, "mortgage_payment": 2600, "mortgage_day": 15, "country": "Kuwait", "halal": "yes"}, {"id": "h-9", "owner": "o-1", "kind": "property", "name": "London flat", "value": 650000, "currency": "GBP", "rent_month": 2400, "rent_day": 1, "country": "United Kingdom", "halal": "yes"}, {"id": "h-10", "owner": "o-4", "kind": "sukuk", "name": "Gulf sukuk 2029", "value": 200000, "currency": "USD", "coupon_pct": 5.1, "per_year": 2, "maturity": "2029-06-30", "country": "Saudi Arabia", "halal": "yes"}, {"id": "h-11", "owner": "o-4", "kind": "private", "name": "Regional growth fund", "value": 120000, "currency": "USD", "committed": 250000, "called": 140000, "next_call_date": "2027-02-15", "next_call_amount": 30000, "country": "United Arab Emirates", "halal": "unknown"}, {"id": "h-12", "owner": "o-2", "kind": "gold", "name": "Gold bars", "qty": 1000, "unit": "g", "country": "Kuwait", "halal": "yes"}, {"id": "h-13", "owner": "o-3", "kind": "crypto", "symbol": "BTC-USD", "qty": 0.25, "halal": "unknown"}], "events": [{"id": "e-1", "title": "School fees (sample)", "date": "2027-01-10", "amount": 6000, "currency": "KWD", "dir": "out", "repeat": "yearly", "owner": "o-1"}, {"id": "e-2", "title": "Zakat reminder (sample)", "date": "2027-03-20", "amount": null, "currency": "KWD", "dir": "none", "repeat": "yearly", "owner": null}], "settings": {"halal": true, "show": "KWD"}}, "prices": {"quotes": {"AAPL": {"symbol": "AAPL", "name": "Apple Inc.", "price": 346.29998779296875, "currency": "USD", "change_pct": 0.69, "date": "2026-10-27"}, "BTC-USD": {"symbol": "BTC-USD", "name": "Bitcoin USD", "price": 80585.703125, "currency": "USD", "change_pct": 0.72, "date": "2026-10-27"}, "GC=F": {"symbol": "GC=F", "name": "Gold Dec 26", "price": 4069.300048828125, "currency": "USD", "change_pct": 0.77, "date": "2026-10-27"}, "KFH.KW": {"symbol": "KFH.KW", "name": "Kuwait Finance House K.S.C.P.", "price": 0.76, "currency": "KWD", "change_pct": 0.93, "date": "2026-10-27"}, "MSFT": {"symbol": "MSFT", "name": "Microsoft Corporation", "price": 531.5599975585938, "currency": "USD", "change_pct": -0.2, "date": "2026-10-27"}, "NBK.KW": {"symbol": "NBK.KW", "name": "National Bank of Kuwait S.A.K.P.", "price": 0.858, "currency": "KWD", "change_pct": 0.47, "date": "2026-10-27"}, "ZAIN.KW": {"symbol": "ZAIN.KW", "name": "Mobile Telecommunications Company K.S.C.P.", "price": 0.594, "currency": "KWD", "change_pct": 1.54, "date": "2026-10-27"}}, "errors": {}}, "fx": {"kwd_per": {"KWD": 1.0, "USD": 0.3079000215235439, "GBP": 0.4099212159011127}, "errors": {}}, "events": {"NBK.KW": {"dividends": [{"date": "2026-04-02", "amount": 0.035, "currency": "KWD"}], "results": null, "errors": []}, "KFH.KW": {"dividends": [{"date": "2026-04-16", "amount": 0.014, "currency": "KWD"}, {"date": "2026-08-11", "amount": 0.01, "currency": "KWD"}], "results": null, "errors": []}, "ZAIN.KW": {"dividends": [{"date": "2025-11-12", "amount": 0.025, "currency": "KWD"}, {"date": "2026-09-29", "amount": 0.017, "currency": "KWD"}], "results": null, "errors": []}, "AAPL": {"dividends": [{"date": "2025-11-10", "amount": 0.26, "currency": "USD"}, {"date": "2026-02-09", "amount": 0.26, "currency": "USD"}, {"date": "2026-05-11", "amount": 0.27, "currency": "USD"}, {"date": "2026-08-10", "amount": 0.27, "currency": "USD"}], "results": "2026-11-02", "errors": []}, "MSFT": {"dividends": [{"date": "2025-11-20", "amount": 0.91, "currency": "USD"}, {"date": "2026-02-19", "amount": 0.91, "currency": "USD"}, {"date": "2026-05-21", "amount": 0.91, "currency": "USD"}, {"date": "2026-08-20", "amount": 0.91, "currency": "USD"}], "results": "2026-10-28", "errors": []}}, "halal": {"AAPL": {"symbol": "AAPL", "overall": "pass", "passed": 4, "total": 5}, "MSFT": {"symbol": "MSFT", "overall": "pass", "passed": 4, "total": 5}}, "snapshots": []};</script>
+<script>window.DEMO = {"frozen": "2026-10-28", "data": {"owners": [{"id": "o-1", "name": "Parent (sample)", "kind": "person"}, {"id": "o-2", "name": "Daughter (sample)", "kind": "person"}, {"id": "o-3", "name": "Son (sample)", "kind": "person"}, {"id": "o-4", "name": "Family Holding Co. (sample)", "kind": "company"}], "holdings": [{"id": "h-1", "owner": "o-1", "kind": "stock", "symbol": "NBK.KW", "qty": 25000, "halal": "no"}, {"id": "h-2", "owner": "o-1", "kind": "stock", "symbol": "KFH.KW", "qty": 40000, "halal": "yes"}, {"id": "h-3", "owner": "o-4", "kind": "stock", "symbol": "ZAIN.KW", "qty": 30000, "halal": "unknown"}, {"id": "h-4", "owner": "o-2", "kind": "stock", "symbol": "AAPL", "qty": 60, "halal": "auto"}, {"id": "h-5", "owner": "o-3", "kind": "stock", "symbol": "MSFT", "qty": 25, "halal": "auto"}, {"id": "h-6", "owner": "o-1", "kind": "cash", "name": "Islamic current account", "value": 45000, "currency": "KWD", "country": "Kuwait", "halal": "yes"}, {"id": "h-7", "owner": "o-4", "kind": "cash", "name": "Dollar deposit", "value": 150000, "currency": "USD", "country": "United States", "halal": "no"}, {"id": "h-8", "owner": "o-4", "kind": "property", "name": "Apartment building", "value": 780000, "currency": "KWD", "rent_month": 4500, "rent_day": 5, "mortgage_left": 240000, "mortgage_payment": 2600, "mortgage_day": 15, "country": "Kuwait", "halal": "yes"}, {"id": "h-9", "owner": "o-1", "kind": "property", "name": "London flat", "value": 650000, "currency": "GBP", "rent_month": 2400, "rent_day": 1, "country": "United Kingdom", "halal": "yes"}, {"id": "h-10", "owner": "o-4", "kind": "sukuk", "name": "Gulf sukuk 2029", "value": 200000, "currency": "USD", "coupon_pct": 5.1, "per_year": 2, "maturity": "2029-06-30", "country": "Saudi Arabia", "halal": "yes"}, {"id": "h-11", "owner": "o-4", "kind": "private", "name": "Regional growth fund", "value": 120000, "currency": "USD", "committed": 250000, "called": 140000, "next_call_date": "2027-02-15", "next_call_amount": 30000, "country": "United Arab Emirates", "halal": "unknown"}, {"id": "h-12", "owner": "o-2", "kind": "gold", "name": "Gold bars", "qty": 1000, "unit": "g", "country": "Kuwait", "halal": "yes"}, {"id": "h-13", "owner": "o-3", "kind": "crypto", "symbol": "BTC-USD", "qty": 0.25, "halal": "unknown"}], "events": [{"id": "e-1", "title": "School fees (sample)", "date": "2027-01-10", "amount": 6000, "currency": "KWD", "dir": "out", "repeat": "yearly", "owner": "o-1"}, {"id": "e-2", "title": "Zakat reminder (sample)", "date": "2027-03-20", "amount": null, "currency": "KWD", "dir": "none", "repeat": "yearly", "owner": null}], "settings": {"halal": true, "show": "KWD"}}, "prices": {"quotes": {"AAPL": {"symbol": "AAPL", "name": "Apple Inc.", "price": 347.1000061035156, "currency": "USD", "change_pct": 0.93, "date": "2026-10-27"}, "BTC-USD": {"symbol": "BTC-USD", "name": "Bitcoin USD", "price": 80595.0078125, "currency": "USD", "change_pct": -0.26, "date": "2026-10-28"}, "GC=F": {"symbol": "GC=F", "name": "Gold Dec 26", "price": 4069.199951171875, "currency": "USD", "change_pct": -0.13, "date": "2026-10-28"}, "KFH.KW": {"symbol": "KFH.KW", "name": "Kuwait Finance House K.S.C.P.", "price": 0.752, "currency": "KWD", "change_pct": -1.05, "date": "2026-10-28"}, "MSFT": {"symbol": "MSFT", "name": "Microsoft Corporation", "price": 531.3300170898438, "currency": "USD", "change_pct": -0.24, "date": "2026-10-27"}, "NBK.KW": {"symbol": "NBK.KW", "name": "National Bank of Kuwait S.A.K.P.", "price": 0.851, "currency": "KWD", "change_pct": -0.82, "date": "2026-10-28"}, "ZAIN.KW": {"symbol": "ZAIN.KW", "name": "Mobile Telecommunications Company K.S.C.P.", "price": 0.583, "currency": "KWD", "change_pct": -1.85, "date": "2026-10-28"}}, "errors": {}}, "fx": {"kwd_per": {"KWD": 1.0, "USD": 0.3080999814080941, "GBP": 0.4094025460553683}, "errors": {}}, "events": {"NBK.KW": {"dividends": [{"date": "2026-04-02", "amount": 0.035, "currency": "KWD"}], "results": null, "errors": []}, "KFH.KW": {"dividends": [{"date": "2026-04-16", "amount": 0.014, "currency": "KWD"}, {"date": "2026-08-11", "amount": 0.01, "currency": "KWD"}], "results": null, "errors": []}, "ZAIN.KW": {"dividends": [{"date": "2025-11-12", "amount": 0.025, "currency": "KWD"}, {"date": "2026-09-29", "amount": 0.017, "currency": "KWD"}], "results": null, "errors": []}, "AAPL": {"dividends": [{"date": "2025-11-10", "amount": 0.26, "currency": "USD"}, {"date": "2026-02-09", "amount": 0.26, "currency": "USD"}, {"date": "2026-05-11", "amount": 0.27, "currency": "USD"}, {"date": "2026-08-10", "amount": 0.27, "currency": "USD"}], "results": "2026-11-02", "errors": []}, "MSFT": {"dividends": [{"date": "2025-11-20", "amount": 0.91, "currency": "USD"}, {"date": "2026-02-19", "amount": 0.91, "currency": "USD"}, {"date": "2026-05-21", "amount": 0.91, "currency": "USD"}, {"date": "2026-08-20", "amount": 0.91, "currency": "USD"}], "results": null, "errors": []}}, "halal": {"AAPL": {"symbol": "AAPL", "overall": "pass", "passed": 4, "total": 5}, "MSFT": {"symbol": "MSFT", "overall": "pass", "passed": 4, "total": 5}}, "ranges": {"SPY|1": {"symbol": "SPY", "years": 1, "n": 2261, "separate": 9, "since": "2016-10-27", "middle": 16.7, "bad": -5.0, "good": 33.0, "lower_pct": 14.0, "worst_drop": -33.7}, "SPY|3": {"symbol": "SPY", "years": 3, "n": 1757, "separate": 3, "since": "2016-10-27", "middle": 47.5, "bad": 29.7, "good": 80.0, "lower_pct": 0.0, "worst_drop": -33.7}, "SPY|5": {"symbol": "SPY", "years": 5, "n": 1253, "separate": 1, "since": "2016-10-27", "middle": 94.2, "bad": 64.8, "good": 114.1, "lower_pct": 0.0, "worst_drop": -33.7}, "SPUS|1": {"symbol": "SPUS", "years": 1, "n": 1471, "separate": 6, "since": "2019-12-18", "middle": 23.2, "bad": -7.8, "good": 37.7, "lower_pct": 16.0, "worst_drop": -30.8}, "SPUS|3": {"symbol": "SPUS", "years": 3, "n": 967, "separate": 2, "since": "2019-12-18", "middle": 50.5, "bad": 34.3, "good": 95.9, "lower_pct": 0.0, "worst_drop": -30.8}, "SPUS|5": {"symbol": "SPUS", "years": 5, "n": 463, "separate": 1, "since": "2019-12-18", "middle": 115.9, "bad": 100.9, "good": 127.2, "lower_pct": 0.0, "worst_drop": -30.8}, "GC=F|1": {"symbol": "GC=F", "years": 1, "n": 2262, "separate": 9, "since": "2016-10-27", "middle": 13.2, "bad": -4.2, "good": 41.4, "lower_pct": 23.3, "worst_drop": -24.9}, "GC=F|3": {"symbol": "GC=F", "years": 3, "n": 1758, "separate": 3, "since": "2016-10-27", "middle": 42.6, "bad": 11.3, "good": 128.3, "lower_pct": 1.9, "worst_drop": -24.9}, "GC=F|5": {"symbol": "GC=F", "years": 5, "n": 1254, "separate": 1, "since": "2016-10-27", "middle": 67.9, "bad": 41.7, "good": 141.6, "lower_pct": 0.0, "worst_drop": -24.9}}, "snapshots": []};</script>
 <script>
 (function () {
   // The demo's stand-in for the server: answers from the frozen data, and keeps
@@ -195,7 +225,14 @@
     }
     if (u.pathname.endsWith("/api/events")) return json(Object.fromEntries(list("symbols").map((s) => [s.toUpperCase(), D.events[s.toUpperCase()] || { dividends: [], results: null }])));
     if (u.pathname.endsWith("/api/halal")) return json(D.halal[(q.symbol || "").toUpperCase()] || { overall: "unknown" });
+    if (u.pathname.endsWith("/api/ranges")) return json(D.ranges[`${(q.symbol || "").toUpperCase()}|${q.years}`] || { error: "Not in this demo." });
     return json({ error: "That part needs the full Family Office on a Mac." });
+  };
+  // Start empty, to put in your own family; kept only in this browser.
+  window.startOwn = function () {
+    if (!confirm("Start empty, to put in your own family? The sample is set aside, and what you add stays only in this browser, on this device.")) return;
+    try { ["owners", "holdings", "events", "snapshots"].forEach((k) => localStorage.setItem(KEY + k, "[]")); } catch (e) { D.data.owners = []; D.data.holdings = []; D.data.events = []; }
+    location.reload();
   };
   window.resetDemo = function () {
     try { Object.keys(localStorage).filter((k) => k.startsWith(KEY)).forEach((k) => localStorage.removeItem(k)); } catch (e) { /* fine */ }
@@ -603,6 +640,65 @@
     await mobleeApp.save("holdings", holdings);
     $("importMsg").textContent = `Added ${added}.`; $("importGo").hidden = true; pending = [];
     await refreshPrices();
+  });
+
+  // ---- Options for cash, and the property check ----
+  // Facts side by side, never a recommendation: past ranges for funds and gold,
+  // and the owner's own numbers for deposits, sukuk and property.
+  const money0 = (v, cur) => v == null || isNaN(v) ? "–" : `${cur} ${Math.round(v).toLocaleString("en-US")}`;
+
+  $("cashGo").addEventListener("click", async () => {
+    const amt = Number($("c_amount").value), cur = $("c_cur").value, yrs = Number($("c_years").value);
+    if (!(amt > 0)) { $("cashMsg").textContent = "Put in an amount."; return; }
+    $("cashMsg").textContent = "Reading the past…"; $("cashOut").innerHTML = "";
+    const funds = [["SPY", "The S&P 500 (a fund such as SPY)", "Any trading day, within two days", "Swings with the market"],
+                   ...(settings.halal ? [["SPUS", "A halal S&P 500 fund (SPUS)", "Any trading day, within two days", "Swings with the market"]] : []),
+                   ["GC=F", "Gold", "Any trading day, if held as a fund; bars take longer to sell", "Swings with the gold price"]];
+    const got = await Promise.all(funds.map(([s]) => fetch(`/api/ranges?symbol=${encodeURIComponent(s)}&years=${yrs}`).then((r) => r.json()).catch(() => ({ error: "Could not be read just now." }))));
+    const fixed = (rate) => rate === "" || isNaN(Number(rate)) ? null : amt * Math.pow(1 + Number(rate) / 100, yrs);
+    const dep = fixed($("c_deposit").value), suk = fixed($("c_sukuk").value);
+    const rows = [
+      [`A bank deposit${settings.halal ? " (an Islamic one, at the rate you typed)" : " (at the rate you typed)"}`, dep != null ? money0(dep, cur) : "Type your bank's rate", "", "", "None in money terms", "Usually days; breaking it early can cost the profit", settings.halal ? "Islamic deposits pass; interest-bearing ones do not" : ""],
+      ["A sukuk held to the end (at the rate you typed)", suk != null ? money0(suk, cur) : "Type the sukuk's rate", "", "", "Only if sold before it ends", "Sold before the end at the market's price", settings.halal ? "Sukuk are built to pass; check the issue" : ""],
+      ...funds.map(([s, name, out, swing], i) => {
+        const r = got[i];
+        if (!r || r.error) return [name, r ? r.error : "Could not be read just now.", "", "", "", out, ""];
+        return [name, money0(amt * (1 + r.middle / 100), cur), money0(amt * (1 + r.bad / 100), cur), money0(amt * (1 + r.good / 100), cur),
+          `${swing}; deepest fall since ${r.since.slice(0, 4)}: ${r.worst_drop}%. Lower after ${yrs} ${yrs === 1 ? "year" : "years"} ${r.lower_pct}% of the time`, out,
+          s === "SPUS" ? "Built to pass" : s === "SPY" ? (settings.halal ? "Holds banks and others that do not pass" : "") : (settings.halal ? "Gold passes when bought and held in full" : ""),
+          r.separate];
+      }),
+    ];
+    const few = got.some((r) => r && !r.error && r.separate < 4);
+    $("cashOut").innerHTML = `<table><thead><tr><th>Where it sits</th><th class="num">Middle result</th><th class="num">A bad case (1 in 10)</th><th class="num">A good case (1 in 10)</th><th>Swings</th><th>Getting it back</th>${settings.halal ? "<th>Halal</th>" : ""}</tr></thead><tbody>${
+      rows.map((r) => `<tr><td><b>${esc(r[0])}</b></td><td class="num">${esc(r[1])}</td><td class="num">${esc(r[2])}</td><td class="num">${esc(r[3])}</td><td class="small">${esc(r[4])}</td><td class="small">${esc(r[5])}</td>${settings.halal ? `<td class="small">${esc(r[6])}</td>` : ""}</tr>`).join("")
+    }<tr><td><b>Property</b></td><td colspan="${settings.halal ? 6 : 5}" class="small">Depends on the property; the Property check below works out what one really earns.</td></tr></tbody></table>
+      <p class="note">${money0(amt, cur)} for ${yrs} ${yrs === 1 ? "year" : "years"}. Funds and gold: every ${yrs}-year stretch of the last ten years, dividends counted${few ? `; ${yrs}-year stretches rest on only a few separate periods, too few to lean on` : ""}. Dollar funds are shown as the same change on your dinars, leaving out the dinar's own move against the dollar (small, as the dinar follows a basket weighted to the dollar). Deposits and sukuk use your rates and assume the profit is left in. Side by side, never ranked: one may suit your time and needs better than another.</p>`;
+    $("cashMsg").textContent = "";
+  });
+  $("propGo").addEventListener("click", () => {
+    const n = (id) => { const v = $(id).value; return v === "" ? null : Number(v); };
+    const price = n("p_price"), rent = n("p_rent"), cur = $("p_cur").value;
+    if (!(price > 0) || !(rent > 0)) { $("propMsg").textContent = "Put in at least the price and the rent."; return; }
+    $("propMsg").textContent = "";
+    const costs = n("p_costs") || 0, empty = Math.min(12, n("p_empty") || 0), buy = n("p_buycost") || 0;
+    const down = n("p_down") == null ? 100 : Math.min(100, n("p_down")), rate = n("p_rate") || 0, term = n("p_term") || 0;
+    const grossYear = rent * 12, netYear = rent * (12 - empty) - costs;
+    const loan = price * (1 - down / 100), r = rate / 100 / 12, months = term * 12;
+    const pay = loan > 0 && months > 0 ? (r > 0 ? loan * r / (1 - Math.pow(1 + r, -months)) : loan / months) : 0;
+    const cashIn = price * down / 100 + buy, leftMonth = netYear / 12 - pay;
+    const rows = [
+      ["Rent a year, if never empty", money0(grossYear, cur), `${(100 * grossYear / price).toFixed(2)}% of the price (the "gross yield" adverts quote)`],
+      ["Rent a year after empty months and costs", money0(netYear, cur), `${(100 * netYear / price).toFixed(2)}% of the price (what it really earns)`],
+      ...(loan > 0 ? [["Loan", money0(loan, cur), `${(100 - down).toFixed(0)}% of the price, over ${term || "?"} years`],
+                     ["Loan payment a month", money0(pay, cur), months ? `${money0(pay * months - loan, cur)} in profit to the bank over the loan` : "Put in the loan years"],
+                     ["Left each month after the loan", money0(leftMonth, cur), leftMonth < 0 ? "The rent does not cover the loan; the rest comes from you" : "After costs and empty months"]] : []),
+      ["Money you put in", money0(cashIn, cur), buy ? `Including ${money0(buy, cur)} of buying costs` : "No buying costs typed in"],
+      ["What that money earns a year", cashIn ? `${(100 * (netYear - pay * 12) / cashIn).toFixed(2)}%` : "–", "The year's rent after costs, empty months and loan payments, against what you put in"],
+      ["Years for the rent to pay back the price", netYear > 0 ? `${(price / netYear).toFixed(1)} years` : "Never, at these numbers", "Before any change in the property's value or the rent"],
+    ];
+    $("propOut").innerHTML = `<table><tbody>${rows.map(([k, v, note]) => `<tr><td>${esc(k)}</td><td class="num"><b>${esc(v)}</b></td><td class="small muted">${esc(note)}</td></tr>`).join("")}</tbody></table>
+      <p class="note">Worked out only from what you typed. It leaves out what the property may gain or lose in value, rent rises and taxes. ${settings.halal ? "For a halal purchase, the financing would be Islamic (murabaha or ijara); the payment works out the same way at its profit rate. " : ""}Not advice: a picture of the numbers.</p>`;
   });
 
   // ---- The monthly record ----
