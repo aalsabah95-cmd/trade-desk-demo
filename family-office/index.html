@@ -93,7 +93,7 @@
   .wigrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr)); gap: .9rem 1.5rem; }
   .wigrid label { display: flex; justify-content: space-between; font-size: .9rem; margin-bottom: .2rem; } .wigrid b { font-variant-numeric: tabular-nums; }
   .wigrid input[type="range"] { width: 100%; padding: 0; border: 0; accent-color: var(--accent); background: none; }
-  .up { color: var(--good); } .down { color: var(--bad); } #wiKinds td.num, #wiOwners td.num { white-space: nowrap; }
+  .up { color: var(--good); } .down { color: var(--bad); } #wiKinds td.num, #wiOwners td.num { white-space: nowrap; } .tile span.up, .tile span.down { display: inline; font-size: inherit; } .tile span.up { color: var(--good); } .tile span.down { color: var(--bad); }
   label.filebtn { display: inline-block; border: 1px solid var(--line); background: var(--surface); border-radius: 10px; padding: .45rem .8rem; cursor: pointer; }
   label.filebtn:hover { border-color: var(--accent); }
   .doc { display: flex; justify-content: space-between; gap: 1rem; padding: .35rem 0; border-bottom: 1px solid var(--line); font-size: .92rem; }
@@ -143,6 +143,8 @@
     header, .navwrap, .modal, .no-print, main > section, .tab:not(#tab-report), #importCard, #formCard { display: none !important; }
     #tab-report { display: block !important; }
     body.print-person #tab-report { display: none !important; } body.print-person #tab-person { display: block !important; }
+    body.print-pack #tab-report { display: none !important; } body.print-pack #tab-pack { display: block !important; }
+    .notes-lines div { border-bottom: 1px solid #999; height: 1.6rem; }
     html, body { background: #fff; color: #000; font-size: 11pt; }
     .card { box-shadow: none; border: 0; padding: 0; }
     .report { break-inside: auto; } .report table { break-inside: avoid; }
@@ -166,7 +168,7 @@
     <button data-tab="overview" aria-selected="true">Overview</button><button data-tab="holdings">Holdings</button>
     <button data-tab="calendar">Calendar</button><button data-tab="insights">Insights</button><button id="moreBtn" aria-haspopup="true" aria-expanded="false">More <span aria-hidden="true">▾</span></button>
   </nav>
-  <div class="more-menu" id="moreMenu" hidden><button data-tab="goals">Goals</button><button data-tab="zakat">Zakat</button><button data-tab="person">Each person</button><button data-tab="whatif">What if</button><button data-tab="report">Report</button><button data-tab="options">Options</button><button data-tab="finder">Property finder</button><button data-tab="owners">Owners</button><button data-tab="settings">Settings</button></div>
+  <div class="more-menu" id="moreMenu" hidden><button data-tab="goals">Goals</button><button data-tab="zakat">Zakat</button><button data-tab="pack">Meeting pack</button><button data-tab="rent">Rent</button><button data-tab="person">Each person</button><button data-tab="whatif">What if</button><button data-tab="report">Report</button><button data-tab="options">Options</button><button data-tab="finder">Property finder</button><button data-tab="owners">Owners</button><button data-tab="settings">Settings</button></div>
   </div>
 
   <div class="tab" id="tab-overview">
@@ -305,9 +307,11 @@
   </div>
 
   <div class="card" id="importCard" hidden>
-    <h2>Bring in a spreadsheet</h2>
-    <p class="muted">From Excel or Numbers, save the sheet as CSV, then choose it here. One row per holding. The first row names the columns; only <b>kind</b> and <b>owner</b> are needed, with <b>symbol and qty</b> for shares, gold and crypto, or <b>value and currency</b> for everything else. New owners are added by name. Nothing is changed until you press "Add these".</p>
+    <h2>Bring in from the bank or a spreadsheet</h2>
+    <p class="muted">A broker's or bank's list of holdings or balances, or your own sheet, saved as CSV (Excel and Numbers both save as CSV), one row per holding. The usual column names are understood: Ticker or Symbol, Quantity or Shares, Market value or Balance, Currency, Description. When the file does not say whose it is, pick below. A list of payments in and out is not read, only what is held. Nothing is changed until you press "Add these".</p>
+    <form class="grid" onsubmit="return false" style="margin:.4rem 0"><div><label for="importOwner">These belong to, if the file does not say</label><select id="importOwner"></select></div></form>
     <div class="actions"><input type="file" id="csvFile" accept=".csv,text/csv" style="width:auto"><button id="templateBtn">Download a blank template</button></div>
+    <p class="note" id="importPdfNote">A PDF statement: keep it under Papers on a holding, or tell Claude "bring in my statement" and give it the file; it reads it and shows you what it found before anything is added.</p>
     <div id="importPreview" style="margin-top:.75rem"></div>
     <div class="actions"><button class="primary" id="importGo" hidden>Add these</button><button id="importCancel">Close</button><span class="note" id="importMsg"></span></div>
   </div>
@@ -350,6 +354,17 @@
     <div class="card report" id="person"></div>
   </div>
 
+  <div class="tab" id="tab-pack" hidden>
+    <div class="actions no-print" style="margin:0 0 1rem"><button class="primary" id="packPrint">Print, or save as PDF</button><span class="note">One page for a family meeting: where things stand, what changed, the goals and what is due.</span></div>
+    <div class="card report" id="pack"></div>
+  </div>
+
+  <div class="tab" id="tab-rent" hidden>
+    <div class="card"><h2>Rent, month by month</h2>
+      <p class="muted">Each property with a rent, and each month: mark it paid, late or not paid. Unmarked months are left alone. What is owed is worked out from the months marked late or not paid.</p>
+      <div class="tiles" id="rentTiles"></div><div id="rentList" style="margin-top:1rem"></div></div>
+  </div>
+
   <div class="tab" id="tab-whatif" hidden>
     <div class="card"><h2>What if</h2>
       <p class="muted">Move a slider to see what a rise or a fall would do to the family's total. Plain arithmetic on today's values, not a forecast; loans stay as they are.</p>
@@ -367,6 +382,17 @@
       <div class="switch"><input type="checkbox" id="set_halal"><label for="set_halal"><b>Halal checks</b>: show which holdings pass a Shariah screen, and how much of the total does. Off hides them everywhere.</label></div>
       <p class="note">The same switch is on the Trade Desk. For US shares the Trade Desk's screen is used; for everything else you mark it yourself on each holding (an Islamic bank account, sukuk and gold usually pass; interest-bearing deposits and bonds do not). A screen, not a ruling.</p>
       <div class="actions"><span class="note" id="setMsg"></span></div></div>
+    <div class="card" id="lockCard"><h2>Lock with a code</h2>
+      <p class="muted" id="lockState">Off: anyone at this Mac can open the Family Office.</p>
+      <form class="grid" onsubmit="return false">
+        <div id="lockCurWrap" hidden><label for="lock_cur">Current code</label><input id="lock_cur" type="password" autocomplete="current-password"></div>
+        <div><label for="lock_new">New code (4 or more)</label><input id="lock_new" type="password" autocomplete="new-password"></div>
+        <div><label for="lock_again">The new code again</label><input id="lock_again" type="password" autocomplete="new-password"></div></form>
+      <div class="actions"><button class="primary" id="lockSet">Set the code</button><button id="lockOff" hidden>Turn the lock off</button><button id="lockNow" hidden>Lock now</button><span class="note" id="lockMsg"></span></div>
+      <p class="note">Asked for on this Mac and from the phone. The code is kept only in a scrambled form in this Mac's Keychain, never in a file. A forgotten code: open the Keychain Access app, find "Family Office lock" and remove it, and the lock is off.</p></div>
+    <div class="card" id="phoneCard"><h2>Open on your phone</h2>
+      <p class="muted" id="phoneState">Checking…</p>
+      <p class="note">It opens while this Mac is awake and the Family Office is open on it, over the private route chosen in the Moblee app (Reach your things from your phone). It needs the lock above.</p></div>
     <div class="card"><h2>Phone reminders</h2>
       <div class="switch"><input type="checkbox" id="rem_on"><label for="rem_on"><b>Send a message to the phone</b> before money comes in or goes out.</label></div>
       <form class="grid" onsubmit="return false" style="margin-top:.7rem"><div><label for="rem_days">How long before</label><select id="rem_days">
@@ -411,7 +437,7 @@
 
   <section><p class="note">A demo with a made-up family; what you change stays in your browser. Prices come from Yahoo Finance's public data and can be 15 minutes old; Boursa Kuwait prices are turned from fils into dinars. Values you type in (property, private holdings, cash) are as of the day you last changed them. Nothing here is advice.</p></section>
 </main>
-<script>window.DEMO = {"frozen": "2026-10-28", "data": {"owners": [{"id": "o-1", "name": "Parent (sample)", "kind": "person"}, {"id": "o-2", "name": "Daughter (sample)", "kind": "person"}, {"id": "o-3", "name": "Son (sample)", "kind": "person"}, {"id": "o-4", "name": "Family Holding Co. (sample)", "kind": "company"}], "holdings": [{"id": "h-1", "owner": "o-1", "kind": "stock", "symbol": "NBK.KW", "qty": 25000, "cost": 0.7, "halal": "no"}, {"id": "h-2", "owner": "o-1", "kind": "stock", "symbol": "KFH.KW", "qty": 40000, "halal": "yes"}, {"id": "h-3", "owner": "o-4", "kind": "stock", "symbol": "ZAIN.KW", "qty": 30000, "halal": "unknown"}, {"id": "h-4", "owner": "o-2", "kind": "stock", "symbol": "AAPL", "qty": 60, "halal": "auto"}, {"id": "h-5", "owner": "o-3", "kind": "stock", "symbol": "MSFT", "qty": 25, "halal": "auto"}, {"id": "h-6", "owner": "o-1", "kind": "cash", "name": "Islamic current account", "value": 45000, "currency": "KWD", "country": "Kuwait", "halal": "yes"}, {"id": "h-7", "owner": "o-4", "kind": "cash", "name": "Dollar deposit", "value": 150000, "currency": "USD", "country": "United States", "halal": "no"}, {"id": "h-8", "owner": "o-4", "kind": "property", "name": "Apartment building", "value": 780000, "currency": "KWD", "rent_month": 4500, "rent_day": 5, "costs_year": 6000, "empty_months": 1, "area": "Salmiya", "size_m2": 1400, "mortgage_left": 240000, "mortgage_payment": 2600, "mortgage_day": 15, "country": "Kuwait", "halal": "yes"}, {"id": "h-9", "owner": "o-1", "kind": "property", "name": "London flat", "value": 650000, "currency": "GBP", "rent_month": 2400, "rent_day": 1, "country": "United Kingdom", "halal": "yes"}, {"id": "h-10", "owner": "o-4", "kind": "sukuk", "name": "Gulf sukuk 2029", "value": 200000, "currency": "USD", "coupon_pct": 5.1, "per_year": 2, "maturity": "2029-06-30", "country": "Saudi Arabia", "halal": "yes"}, {"id": "h-11", "owner": "o-4", "kind": "private", "name": "Regional growth fund", "value": 120000, "currency": "USD", "committed": 250000, "called": 140000, "next_call_date": "2027-02-15", "next_call_amount": 30000, "country": "United Arab Emirates", "halal": "unknown"}, {"id": "h-12", "owner": "o-2", "kind": "gold", "name": "Gold bars", "qty": 1000, "unit": "g", "country": "Kuwait", "halal": "yes"}, {"id": "h-13", "owner": "o-3", "kind": "crypto", "symbol": "BTC-USD", "qty": 0.25, "halal": "unknown"}], "events": [{"id": "e-1", "title": "School fees (sample)", "date": "2027-01-10", "amount": 6000, "currency": "KWD", "dir": "out", "repeat": "yearly", "owner": "o-1"}, {"id": "e-2", "title": "Zakat reminder (sample)", "date": "2027-03-20", "amount": null, "currency": "KWD", "dir": "none", "repeat": "yearly", "owner": null}], "settings": {"halal": true, "show": "KWD", "deposit_rate": 4, "sukuk_rate": 5.1}, "finder": {"answers": {"country": "Kuwait", "areas": ["Salmiya", "Jabriya"], "type": "flat", "min": 100000, "max": 200000, "currency": "KWD", "size": 150, "purpose": "rent"}, "shortlist": [{"id": "p-1", "title": "3-bedroom flat (sample listing)", "area": "Salmiya", "type": "flat", "price": 165000, "currency": "KWD", "size_m2": 180, "rent_month": 650, "costs_year": 900, "source": "owner"}, {"id": "p-2", "title": "2-bedroom flat (sample listing)", "area": "Jabriya", "type": "flat", "price": 120000, "currency": "KWD", "size_m2": 120, "rent_month": 480, "source": "owner"}, {"id": "p-3", "title": "Villa (sample listing)", "area": "Mishref", "type": "villa", "price": 450000, "currency": "KWD", "size_m2": 400, "source": "owner"}]}, "area-notes": [{"area": "Salmiya", "country": "Kuwait", "date": "2026-10-28", "currency": "KWD", "price_m2_low": 800, "price_m2_high": 1000, "rent_note": "made-up figures for the demo, not real market data", "summary": "A sample note to show how an area note looks. In the full Family Office, Claude writes real ones from sources, with their dates.", "sources": []}], "snapshots": [{"month": "2025-11", "taken": "2025-11-28T12:00", "kwd": 1015459, "usd": null, "made_up": true}, {"month": "2025-12", "taken": "2025-12-28T12:00", "kwd": 1023313, "usd": null, "made_up": true}, {"month": "2026-01", "taken": "2026-01-28T12:00", "kwd": 1039022, "usd": null, "made_up": true}, {"month": "2026-02", "taken": "2026-02-28T12:00", "kwd": 1033411, "usd": null, "made_up": true}, {"month": "2026-03", "taken": "2026-03-28T12:00", "kwd": 1047998, "usd": null, "made_up": true}, {"month": "2026-04", "taken": "2026-04-28T12:00", "kwd": 1062585, "usd": null, "made_up": true}, {"month": "2026-05", "taken": "2026-05-28T12:00", "kwd": 1055853, "usd": null, "made_up": true}, {"month": "2026-06", "taken": "2026-06-28T12:00", "kwd": 1071561, "usd": null, "made_up": true}, {"month": "2026-07", "taken": "2026-07-28T12:00", "kwd": 1086148, "usd": null, "made_up": true}, {"month": "2026-08", "taken": "2026-08-28T12:00", "kwd": 1092880, "usd": null, "made_up": true}, {"month": "2026-09", "taken": "2026-09-28T12:00", "kwd": 1108589, "usd": null, "made_up": true}]}, "prices": {"quotes": {"AAPL": {"symbol": "AAPL", "name": "Apple Inc.", "price": 345.6451110839844, "currency": "USD", "change_pct": -0.42, "date": "2026-10-28"}, "BTC-USD": {"symbol": "BTC-USD", "name": "Bitcoin USD", "price": 80368.4921875, "currency": "USD", "change_pct": -0.54, "date": "2026-10-28"}, "GC=F": {"symbol": "GC=F", "name": "Gold Dec 26", "price": 4053.10009765625, "currency": "USD", "change_pct": -0.53, "date": "2026-10-28"}, "KFH.KW": {"symbol": "KFH.KW", "name": "Kuwait Finance House K.S.C.P.", "price": 0.752, "currency": "KWD", "change_pct": -1.05, "date": "2026-10-28"}, "MSFT": {"symbol": "MSFT", "name": "Microsoft Corporation", "price": 527.3599853515625, "currency": "USD", "change_pct": -0.75, "date": "2026-10-28"}, "NBK.KW": {"symbol": "NBK.KW", "name": "National Bank of Kuwait S.A.K.P.", "price": 0.851, "currency": "KWD", "change_pct": -0.82, "date": "2026-10-28"}, "ZAIN.KW": {"symbol": "ZAIN.KW", "name": "Mobile Telecommunications Company K.S.C.P.", "price": 0.583, "currency": "KWD", "change_pct": -1.85, "date": "2026-10-28"}}, "errors": {}}, "fx": {"kwd_per": {"KWD": 1.0, "USD": 0.3080999814080941, "GBP": 0.41017105067627596}, "errors": {}}, "events": {"NBK.KW": {"dividends": [{"date": "2026-04-02", "amount": 0.035, "currency": "KWD"}], "results": null, "errors": []}, "KFH.KW": {"dividends": [{"date": "2026-04-16", "amount": 0.014, "currency": "KWD"}, {"date": "2026-08-11", "amount": 0.01, "currency": "KWD"}], "results": null, "errors": []}, "ZAIN.KW": {"dividends": [{"date": "2025-11-12", "amount": 0.025, "currency": "KWD"}, {"date": "2026-09-29", "amount": 0.017, "currency": "KWD"}], "results": null, "errors": []}, "AAPL": {"dividends": [{"date": "2025-11-10", "amount": 0.26, "currency": "USD"}, {"date": "2026-02-09", "amount": 0.26, "currency": "USD"}, {"date": "2026-05-11", "amount": 0.27, "currency": "USD"}, {"date": "2026-08-10", "amount": 0.27, "currency": "USD"}], "results": "2026-11-02", "errors": []}, "MSFT": {"dividends": [{"date": "2025-11-20", "amount": 0.91, "currency": "USD"}, {"date": "2026-02-19", "amount": 0.91, "currency": "USD"}, {"date": "2026-05-21", "amount": 0.91, "currency": "USD"}, {"date": "2026-08-20", "amount": 0.91, "currency": "USD"}], "results": null, "errors": []}}, "halal": {"AAPL": {"symbol": "AAPL", "overall": "pass", "passed": 4, "total": 5}, "MSFT": {"symbol": "MSFT", "overall": "pass", "passed": 4, "total": 5}}, "ranges": {"SPY|1": {"symbol": "SPY", "years": 1, "n": 2261, "separate": 9, "since": "2016-10-27", "middle": 16.7, "bad": -5.0, "good": 33.0, "lower_pct": 14.0, "worst_drop": -33.7}, "SPY|3": {"symbol": "SPY", "years": 3, "n": 1757, "separate": 3, "since": "2016-10-27", "middle": 47.5, "bad": 29.7, "good": 80.0, "lower_pct": 0.0, "worst_drop": -33.7}, "SPY|5": {"symbol": "SPY", "years": 5, "n": 1253, "separate": 1, "since": "2016-10-27", "middle": 94.2, "bad": 64.8, "good": 114.1, "lower_pct": 0.0, "worst_drop": -33.7}, "SPUS|1": {"symbol": "SPUS", "years": 1, "n": 1471, "separate": 6, "since": "2019-12-18", "middle": 23.2, "bad": -7.8, "good": 37.7, "lower_pct": 16.0, "worst_drop": -30.8}, "SPUS|3": {"symbol": "SPUS", "years": 3, "n": 967, "separate": 2, "since": "2019-12-18", "middle": 50.5, "bad": 34.3, "good": 95.9, "lower_pct": 0.0, "worst_drop": -30.8}, "SPUS|5": {"symbol": "SPUS", "years": 5, "n": 463, "separate": 1, "since": "2019-12-18", "middle": 115.9, "bad": 100.9, "good": 127.2, "lower_pct": 0.0, "worst_drop": -30.8}, "GC=F|1": {"symbol": "GC=F", "years": 1, "n": 2262, "separate": 9, "since": "2016-10-27", "middle": 13.2, "bad": -4.2, "good": 41.4, "lower_pct": 23.3, "worst_drop": -24.9}, "GC=F|3": {"symbol": "GC=F", "years": 3, "n": 1758, "separate": 3, "since": "2016-10-27", "middle": 42.6, "bad": 11.3, "good": 128.3, "lower_pct": 1.9, "worst_drop": -24.9}, "GC=F|5": {"symbol": "GC=F", "years": 5, "n": 1254, "separate": 1, "since": "2016-10-27", "middle": 67.9, "bad": 41.7, "good": 141.6, "lower_pct": 0.0, "worst_drop": -24.9}}, "stockfacts": {"facts": {"NBK.KW": {"symbol": "NBK.KW", "higher_1y": 65.4, "separate": 9, "beat_market": 41.3, "middle_1y": 12.3, "bad_1y": -13.6, "dividend": 0.035, "results": null}, "KFH.KW": {"symbol": "KFH.KW", "higher_1y": 84.1, "separate": 9, "beat_market": 42.4, "middle_1y": 12.6, "bad_1y": -5.6, "dividend": 0.024, "results": null}, "ZAIN.KW": {"symbol": "ZAIN.KW", "higher_1y": 56.9, "separate": 9, "beat_market": 25.0, "middle_1y": 2.1, "bad_1y": -12.9, "dividend": 0.042, "results": null}, "AAPL": {"symbol": "AAPL", "higher_1y": 89.5, "separate": 9, "beat_market": 67.3, "middle_1y": 26.0, "bad_1y": -0.6, "dividend": 1.08, "results": "2026-11-02", "buys_3m": 0, "sells_3m": 16, "gifts_3m": 8}, "MSFT": {"symbol": "MSFT", "higher_1y": 83.6, "separate": 9, "beat_market": 71.0, "middle_1y": 31.5, "bad_1y": -6.9, "dividend": 3.64, "results": null, "buys_3m": 0, "sells_3m": 5, "gifts_3m": 26}}, "pairs": [{"a": "NBK.KW", "b": "KFH.KW", "pct": 49}, {"a": "NBK.KW", "b": "ZAIN.KW", "pct": 38}, {"a": "NBK.KW", "b": "MSFT", "pct": 22}, {"a": "KFH.KW", "b": "ZAIN.KW", "pct": 22}, {"a": "KFH.KW", "b": "MSFT", "pct": 12}, {"a": "AAPL", "b": "MSFT", "pct": 9}, {"a": "NBK.KW", "b": "AAPL", "pct": 3}, {"a": "KFH.KW", "b": "AAPL", "pct": 1}, {"a": "ZAIN.KW", "b": "AAPL", "pct": -8}, {"a": "ZAIN.KW", "b": "MSFT", "pct": -18}]}, "snapshots": []};</script>
+<script>window.DEMO = {"frozen": "2026-10-28", "data": {"owners": [{"id": "o-1", "name": "Parent (sample)", "kind": "person"}, {"id": "o-2", "name": "Daughter (sample)", "kind": "person"}, {"id": "o-3", "name": "Son (sample)", "kind": "person"}, {"id": "o-4", "name": "Family Holding Co. (sample)", "kind": "company"}], "holdings": [{"id": "h-1", "owner": "o-1", "kind": "stock", "symbol": "NBK.KW", "qty": 25000, "cost": 0.7, "halal": "no"}, {"id": "h-2", "owner": "o-1", "kind": "stock", "symbol": "KFH.KW", "qty": 40000, "halal": "yes"}, {"id": "h-3", "owner": "o-4", "kind": "stock", "symbol": "ZAIN.KW", "qty": 30000, "halal": "unknown"}, {"id": "h-4", "owner": "o-2", "kind": "stock", "symbol": "AAPL", "qty": 60, "halal": "auto"}, {"id": "h-5", "owner": "o-3", "kind": "stock", "symbol": "MSFT", "qty": 25, "halal": "auto"}, {"id": "h-6", "owner": "o-1", "kind": "cash", "name": "Islamic current account", "value": 45000, "currency": "KWD", "country": "Kuwait", "halal": "yes"}, {"id": "h-7", "owner": "o-4", "kind": "cash", "name": "Dollar deposit", "value": 150000, "currency": "USD", "country": "United States", "halal": "no"}, {"id": "h-8", "owner": "o-4", "kind": "property", "name": "Apartment building", "value": 780000, "currency": "KWD", "rent_month": 4500, "rent_day": 5, "costs_year": 6000, "empty_months": 1, "area": "Salmiya", "size_m2": 1400, "mortgage_left": 240000, "mortgage_payment": 2600, "mortgage_day": 15, "country": "Kuwait", "halal": "yes"}, {"id": "h-9", "owner": "o-1", "kind": "property", "name": "London flat", "value": 650000, "currency": "GBP", "rent_month": 2400, "rent_day": 1, "country": "United Kingdom", "halal": "yes"}, {"id": "h-10", "owner": "o-4", "kind": "sukuk", "name": "Gulf sukuk 2029", "value": 200000, "currency": "USD", "coupon_pct": 5.1, "per_year": 2, "maturity": "2029-06-30", "country": "Saudi Arabia", "halal": "yes"}, {"id": "h-11", "owner": "o-4", "kind": "private", "name": "Regional growth fund", "value": 120000, "currency": "USD", "committed": 250000, "called": 140000, "next_call_date": "2027-02-15", "next_call_amount": 30000, "country": "United Arab Emirates", "halal": "unknown"}, {"id": "h-12", "owner": "o-2", "kind": "gold", "name": "Gold bars", "qty": 1000, "unit": "g", "country": "Kuwait", "halal": "yes"}, {"id": "h-13", "owner": "o-3", "kind": "crypto", "symbol": "BTC-USD", "qty": 0.25, "halal": "unknown"}], "events": [{"id": "e-1", "title": "School fees (sample)", "date": "2027-01-10", "amount": 6000, "currency": "KWD", "dir": "out", "repeat": "yearly", "owner": "o-1"}, {"id": "e-2", "title": "Zakat reminder (sample)", "date": "2027-03-20", "amount": null, "currency": "KWD", "dir": "none", "repeat": "yearly", "owner": null}], "settings": {"halal": true, "show": "KWD", "deposit_rate": 4, "sukuk_rate": 5.1}, "finder": {"answers": {"country": "Kuwait", "areas": ["Salmiya", "Jabriya"], "type": "flat", "min": 100000, "max": 200000, "currency": "KWD", "size": 150, "purpose": "rent"}, "shortlist": [{"id": "p-1", "title": "3-bedroom flat (sample listing)", "area": "Salmiya", "type": "flat", "price": 165000, "currency": "KWD", "size_m2": 180, "rent_month": 650, "costs_year": 900, "source": "owner"}, {"id": "p-2", "title": "2-bedroom flat (sample listing)", "area": "Jabriya", "type": "flat", "price": 120000, "currency": "KWD", "size_m2": 120, "rent_month": 480, "source": "owner"}, {"id": "p-3", "title": "Villa (sample listing)", "area": "Mishref", "type": "villa", "price": 450000, "currency": "KWD", "size_m2": 400, "source": "owner"}]}, "area-notes": [{"area": "Salmiya", "country": "Kuwait", "date": "2026-10-28", "currency": "KWD", "price_m2_low": 800, "price_m2_high": 1000, "rent_note": "made-up figures for the demo, not real market data", "summary": "A sample note to show how an area note looks. In the full Family Office, Claude writes real ones from sources, with their dates.", "sources": []}], "goals": [{"id": "g-1", "title": "Deposit for the son's flat (sample)", "amount": 150000, "currency": "KWD", "date": "2028-06-30", "what": "kind:cash", "added": "2026-10-28"}], "rent-log": [{"holding": "h-8", "month": "2026-08", "status": "paid", "at": "2026-08-06T09:00"}, {"holding": "h-8", "month": "2026-09", "status": "paid", "at": "2026-09-06T09:00"}, {"holding": "h-8", "month": "2026-10", "status": "late", "at": "2026-10-10T09:00"}, {"holding": "h-9", "month": "2026-09", "status": "paid", "at": "2026-09-02T09:00"}, {"holding": "h-9", "month": "2026-10", "status": "paid", "at": "2026-10-02T09:00"}], "snapshots": [{"month": "2025-11", "taken": "2025-11-28T12:00", "kwd": 1019011, "usd": null, "made_up": true}, {"month": "2025-12", "taken": "2025-12-28T12:00", "kwd": 1026893, "usd": null, "made_up": true}, {"month": "2026-01", "taken": "2026-01-28T12:00", "kwd": 1042657, "usd": null, "made_up": true}, {"month": "2026-02", "taken": "2026-02-28T12:00", "kwd": 1037027, "usd": null, "made_up": true}, {"month": "2026-03", "taken": "2026-03-28T12:00", "kwd": 1051665, "usd": null, "made_up": true}, {"month": "2026-04", "taken": "2026-04-28T12:00", "kwd": 1066302, "usd": null, "made_up": true}, {"month": "2026-05", "taken": "2026-05-28T12:00", "kwd": 1059547, "usd": null, "made_up": true}, {"month": "2026-06", "taken": "2026-06-28T12:00", "kwd": 1075310, "usd": null, "made_up": true}, {"month": "2026-07", "taken": "2026-07-28T12:00", "kwd": 1089948, "usd": null, "made_up": true}, {"month": "2026-08", "taken": "2026-08-28T12:00", "kwd": 1096704, "usd": null, "made_up": true}, {"month": "2026-09", "taken": "2026-09-28T12:00", "kwd": 1112468, "usd": null, "made_up": true}]}, "prices": {"quotes": {"AAPL": {"symbol": "AAPL", "name": "Apple Inc.", "price": 345.2900085449219, "currency": "USD", "change_pct": -0.52, "date": "2026-10-28"}, "BTC-USD": {"symbol": "BTC-USD", "name": "Bitcoin USD", "price": 80537.4765625, "currency": "USD", "change_pct": -0.33, "date": "2026-10-28"}, "GC=F": {"symbol": "GC=F", "name": "Gold Dec 26", "price": 4051.60009765625, "currency": "USD", "change_pct": -0.56, "date": "2026-10-28"}, "KFH.KW": {"symbol": "KFH.KW", "name": "Kuwait Finance House K.S.C.P.", "price": 0.752, "currency": "KWD", "change_pct": -1.05, "date": "2026-10-28"}, "MSFT": {"symbol": "MSFT", "name": "Microsoft Corporation", "price": 527.364990234375, "currency": "USD", "change_pct": -0.75, "date": "2026-10-28"}, "NBK.KW": {"symbol": "NBK.KW", "name": "National Bank of Kuwait S.A.K.P.", "price": 0.851, "currency": "KWD", "change_pct": -0.82, "date": "2026-10-28"}, "ZAIN.KW": {"symbol": "ZAIN.KW", "name": "Mobile Telecommunications Company K.S.C.P.", "price": 0.583, "currency": "KWD", "change_pct": -1.85, "date": "2026-10-28"}}, "errors": {}}, "fx": {"kwd_per": {"KWD": 1.0, "USD": 0.31075000011113285, "GBP": 0.4135558603394827}, "errors": {}}, "events": {"NBK.KW": {"dividends": [{"date": "2026-04-02", "amount": 0.035, "currency": "KWD"}], "results": null, "errors": []}, "KFH.KW": {"dividends": [{"date": "2026-04-16", "amount": 0.014, "currency": "KWD"}, {"date": "2026-08-11", "amount": 0.01, "currency": "KWD"}], "results": null, "errors": []}, "ZAIN.KW": {"dividends": [{"date": "2025-11-12", "amount": 0.025, "currency": "KWD"}, {"date": "2026-09-29", "amount": 0.017, "currency": "KWD"}], "results": null, "errors": []}, "AAPL": {"dividends": [{"date": "2025-11-10", "amount": 0.26, "currency": "USD"}, {"date": "2026-02-09", "amount": 0.26, "currency": "USD"}, {"date": "2026-05-11", "amount": 0.27, "currency": "USD"}, {"date": "2026-08-10", "amount": 0.27, "currency": "USD"}], "results": "2026-11-02", "errors": []}, "MSFT": {"dividends": [{"date": "2025-11-20", "amount": 0.91, "currency": "USD"}, {"date": "2026-02-19", "amount": 0.91, "currency": "USD"}, {"date": "2026-05-21", "amount": 0.91, "currency": "USD"}, {"date": "2026-08-20", "amount": 0.91, "currency": "USD"}], "results": null, "errors": []}}, "halal": {"AAPL": {"symbol": "AAPL", "overall": "pass", "passed": 4, "total": 5}, "MSFT": {"symbol": "MSFT", "overall": "pass", "passed": 4, "total": 5}}, "ranges": {"SPY|1": {"symbol": "SPY", "years": 1, "n": 2261, "separate": 9, "since": "2016-10-27", "middle": 16.7, "bad": -5.0, "good": 33.0, "lower_pct": 14.0, "worst_drop": -33.7}, "SPY|3": {"symbol": "SPY", "years": 3, "n": 1757, "separate": 3, "since": "2016-10-27", "middle": 47.5, "bad": 29.7, "good": 80.0, "lower_pct": 0.0, "worst_drop": -33.7}, "SPY|5": {"symbol": "SPY", "years": 5, "n": 1253, "separate": 1, "since": "2016-10-27", "middle": 94.2, "bad": 64.8, "good": 114.1, "lower_pct": 0.0, "worst_drop": -33.7}, "SPUS|1": {"symbol": "SPUS", "years": 1, "n": 1471, "separate": 6, "since": "2019-12-18", "middle": 23.2, "bad": -7.8, "good": 37.7, "lower_pct": 16.0, "worst_drop": -30.8}, "SPUS|3": {"symbol": "SPUS", "years": 3, "n": 967, "separate": 2, "since": "2019-12-18", "middle": 50.5, "bad": 34.3, "good": 95.9, "lower_pct": 0.0, "worst_drop": -30.8}, "SPUS|5": {"symbol": "SPUS", "years": 5, "n": 463, "separate": 1, "since": "2019-12-18", "middle": 115.9, "bad": 100.9, "good": 127.2, "lower_pct": 0.0, "worst_drop": -30.8}, "GC=F|1": {"symbol": "GC=F", "years": 1, "n": 2262, "separate": 9, "since": "2016-10-27", "middle": 13.2, "bad": -4.2, "good": 41.4, "lower_pct": 23.3, "worst_drop": -24.9}, "GC=F|3": {"symbol": "GC=F", "years": 3, "n": 1758, "separate": 3, "since": "2016-10-27", "middle": 42.6, "bad": 11.3, "good": 128.3, "lower_pct": 1.9, "worst_drop": -24.9}, "GC=F|5": {"symbol": "GC=F", "years": 5, "n": 1254, "separate": 1, "since": "2016-10-27", "middle": 67.9, "bad": 41.7, "good": 141.6, "lower_pct": 0.0, "worst_drop": -24.9}}, "stockfacts": {"facts": {"NBK.KW": {"symbol": "NBK.KW", "higher_1y": 65.4, "separate": 9, "beat_market": 41.3, "middle_1y": 12.3, "bad_1y": -13.6, "dividend": 0.035, "results": null}, "KFH.KW": {"symbol": "KFH.KW", "higher_1y": 84.1, "separate": 9, "beat_market": 42.4, "middle_1y": 12.6, "bad_1y": -5.6, "dividend": 0.024, "results": null}, "ZAIN.KW": {"symbol": "ZAIN.KW", "higher_1y": 56.9, "separate": 9, "beat_market": 25.0, "middle_1y": 2.1, "bad_1y": -12.9, "dividend": 0.042, "results": null}, "AAPL": {"symbol": "AAPL", "higher_1y": 89.5, "separate": 9, "beat_market": 67.3, "middle_1y": 26.0, "bad_1y": -0.6, "dividend": 1.08, "results": "2026-11-02", "buys_3m": 0, "sells_3m": 16, "gifts_3m": 8}, "MSFT": {"symbol": "MSFT", "higher_1y": 83.6, "separate": 9, "beat_market": 71.0, "middle_1y": 31.5, "bad_1y": -6.9, "dividend": 3.64, "results": null, "buys_3m": 0, "sells_3m": 5, "gifts_3m": 26}}, "pairs": [{"a": "NBK.KW", "b": "KFH.KW", "pct": 49}, {"a": "NBK.KW", "b": "ZAIN.KW", "pct": 38}, {"a": "NBK.KW", "b": "MSFT", "pct": 22}, {"a": "KFH.KW", "b": "ZAIN.KW", "pct": 22}, {"a": "KFH.KW", "b": "MSFT", "pct": 12}, {"a": "AAPL", "b": "MSFT", "pct": 10}, {"a": "NBK.KW", "b": "AAPL", "pct": 3}, {"a": "KFH.KW", "b": "AAPL", "pct": 2}, {"a": "ZAIN.KW", "b": "AAPL", "pct": -8}, {"a": "ZAIN.KW", "b": "MSFT", "pct": -18}]}, "snapshots": []};</script>
 <script>
 (function () {
   // The demo's stand-in for the server: answers from the frozen data, and keeps
@@ -480,7 +506,7 @@
   // Start empty, to put in your own family; kept only in this browser.
   window.startOwn = function () {
     if (!confirm("Start empty, to put in your own family? The sample is set aside, and what you add stays only in this browser, on this device.")) return;
-    try { ["owners", "holdings", "events", "snapshots", "area-notes"].forEach((k) => localStorage.setItem(KEY + k, "[]")); localStorage.setItem(KEY + "finder", JSON.stringify({ answers: {}, shortlist: [] })); } catch (e) { D.data.owners = []; D.data.holdings = []; D.data.events = []; D.data.snapshots = []; }
+    try { ["owners", "holdings", "events", "snapshots", "area-notes", "goals", "rent-log"].forEach((k) => localStorage.setItem(KEY + k, "[]")); localStorage.setItem(KEY + "finder", JSON.stringify({ answers: {}, shortlist: [] })); } catch (e) { D.data.owners = []; D.data.holdings = []; D.data.events = []; D.data.snapshots = []; }
     try { sessionStorage.setItem("fo-guide", "1"); } catch (e) { /* the welcome card on the Overview still offers the guide */ }
     location.reload();
   };
@@ -503,7 +529,7 @@
     stock: ["owner", "symbol", "qty", "cost", "country", "halal", "notes"],
     cash: ["owner", "name", "value", "currency", "country", "halal", "notes"],
     sukuk: ["owner", "name", "value", "currency", "coupon_pct", "per_year", "maturity", "country", "halal", "notes"],
-    property: ["owner", "name", "value", "currency", "rent_month", "rent_day", "costs_year", "empty_months", "mortgage_left", "mortgage_payment", "mortgage_day", "area", "size_m2", "country", "halal", "notes"],
+    property: ["owner", "name", "value", "currency", "rent_month", "rent_day", "tenant", "costs_year", "empty_months", "mortgage_left", "mortgage_payment", "mortgage_day", "area", "size_m2", "country", "halal", "notes"],
     private: ["owner", "name", "value", "currency", "committed", "called", "next_call_date", "next_call_amount", "next_dist_date", "next_dist_amount", "country", "halal", "notes"],
     gold: ["owner", "name", "qty", "unit", "country", "halal", "notes"],
     crypto: ["owner", "symbol", "qty", "cost", "halal", "notes"],
@@ -516,13 +542,13 @@
     country: "Country", halal: "Halal", notes: "Notes", unit: "Unit", per_year: "Payments a year", rent_day: "Rent comes in on day (1 to 28)",
     mortgage_payment: "Mortgage payment a month", mortgage_day: "Paid on day (1 to 28)", next_call_date: "Next cash call on", next_call_amount: "Next cash call amount",
     next_dist_date: "Next payout expected on", next_dist_amount: "Next payout amount", costs_year: "Costs a year (upkeep, service)",
-    empty_months: "Months empty a year", area: "Area (e.g. Salmiya, or a postcode)", size_m2: "Size (square metres)",
+    tenant: "Tenant, optional", empty_months: "Months empty a year", area: "Area (e.g. Salmiya, or a postcode)", size_m2: "Size (square metres)",
   };
   const CURRENCIES = ["KWD", "USD", "EUR", "GBP", "SAR", "AED", "QAR", "BHD", "OMR", "EGP", "JOD", "TRY", "CHF", "SEK", "CAD", "AUD", "NZD", "JPY", "SGD", "MYR", "INR", "PKR", "THB", "IDR", "ZAR", "MAD", "GEL", "MXN", "BRL"];
   const HALAL_DEFAULT = { stock: "auto", cash: "unknown", sukuk: "yes", property: "yes", private: "unknown", gold: "yes", crypto: "unknown", other: "unknown" };
   const GRAMS_PER_OUNCE = 31.1035;
 
-  let owners = [], holdings = [], settings = { halal: true, show: "KWD" }, snapshots = [], events = [], shareEvents = {}, finder = { answers: {}, shortlist: [] }, areaNotes = [], goals = [], stockFacts = null, stockKey = "";
+  let owners = [], holdings = [], settings = { halal: true, show: "KWD" }, snapshots = [], events = [], shareEvents = {}, finder = { answers: {}, shortlist: [] }, areaNotes = [], goals = [], rentLog = [], stockFacts = null, stockKey = "";
   let quotes = {}, fx = { KWD: 1 }, priceErrors = {}, halalAuto = {}, editing = null;
 
   // ---- Tabs ----
@@ -601,15 +627,15 @@
 
   // ---- Loading ----
   async function load() {
-    [owners, holdings, settings, snapshots, events, finder, areaNotes, goals] = await Promise.all([
+    [owners, holdings, settings, snapshots, events, finder, areaNotes, goals, rentLog] = await Promise.all([
       mobleeApp.load("owners").then((x) => x || []), mobleeApp.load("holdings").then((x) => x || []),
       mobleeApp.load("settings").then((x) => Object.assign({ halal: true, show: "KWD" }, x || {})), mobleeApp.load("snapshots").then((x) => x || []),
       mobleeApp.load("events").then((x) => x || []),
-      mobleeApp.load("finder").then((x) => Object.assign({ answers: {}, shortlist: [] }, x || {})), mobleeApp.load("area-notes").then((x) => x || []), mobleeApp.load("goals").then((x) => x || []),
+      mobleeApp.load("finder").then((x) => Object.assign({ answers: {}, shortlist: [] }, x || {})), mobleeApp.load("area-notes").then((x) => x || []), mobleeApp.load("goals").then((x) => x || []), mobleeApp.load("rent-log").then((x) => x || []),
     ]);
     $("showCur").value = settings.show; $("set_halal").checked = !!settings.halal; $("zDebts").checked = !!settings.zakat_debts;
     docIndex = await docsApi.list();
-    drawReminders();
+    drawReminders(); drawLock();
     await refreshPrices();
   }
   async function refreshPrices() {
@@ -767,7 +793,7 @@
     drawReport(rows, total);
     drawInsights(rows, total);
     drawFinder();
-    drawGoals(); drawZakat(); drawPerson(); drawWhatIf();
+    drawGoals(); drawZakat(); drawPerson(); drawWhatIf(); drawPack(); drawRent();
     keepSnapshot(rows, total);
   }
 
@@ -946,7 +972,17 @@
                    "next_dist_date", "next_dist_amount", "halal", "notes"];
   const KIND_WORDS = { stock: "stock", share: "stock", shares: "stock", equity: "stock", cash: "cash", deposit: "cash", bank: "cash", sukuk: "sukuk", bond: "sukuk",
                        bonds: "sukuk", property: "property", "real estate": "property", realestate: "property", private: "private", fund: "private",
-                       "private equity": "private", gold: "gold", crypto: "crypto", bitcoin: "crypto", other: "other" };
+                       "private equity": "private", gold: "gold", crypto: "crypto", bitcoin: "crypto", other: "other",
+                       equities: "stock", etf: "stock", "mutual fund": "stock", "fixed income": "sukuk", "cash and equivalents": "cash", "current account": "cash", savings: "cash" };
+  const COLUMN_ALIAS = {
+    ticker: "symbol", ticker_symbol: "symbol", instrument: "symbol", security_symbol: "symbol", stock_code: "symbol", code: "symbol",
+    quantity: "qty", shares: "qty", units: "qty", position: "qty", holding: "qty", nominal: "qty",
+    market_value: "value", current_value: "value", value_today: "value", balance: "value", available_balance: "value", ledger_balance: "value", amount: "value",
+    ccy: "currency", currency_code: "currency",
+    description: "name", security: "name", security_name: "name", security_description: "name", account: "name", account_name: "name", product: "name",
+    asset_class: "kind", asset_type: "kind", security_type: "kind",
+    average_cost: "cost", avg_cost: "cost", cost_price: "cost", price_paid: "cost",
+  };
   function parseCSV(text) {
     const rows = [], s = text.replace(/^﻿/, "");
     let row = [], cell = "", q = false;
@@ -969,7 +1005,10 @@
     setTimeout(() => URL.revokeObjectURL(a.href), 2000);
   }
   let pending = [];
-  $("importBtn").addEventListener("click", () => { $("importCard").hidden = false; $("importCard").scrollIntoView({ behavior: "smooth" }); });
+  $("importBtn").addEventListener("click", () => {
+    $("importOwner").innerHTML = `<option value="">The file says (an owner column)</option>` + owners.map((o, i) => `<option value="${esc(o.id)}"${i === 0 ? " selected" : ""}>${esc(o.name)}</option>`).join("");
+    $("importCard").hidden = false; $("importCard").scrollIntoView({ behavior: "smooth" });
+  });
   $("importCancel").addEventListener("click", () => { $("importCard").hidden = true; pending = []; $("importPreview").innerHTML = ""; $("importGo").hidden = true; });
   $("templateBtn").addEventListener("click", () => download("family-office-template.csv", COLUMNS.join(",") + "\n"
     + "Parent,stock,,NBK.KW,1000,,,,Kuwait\nParent,cash,Current account,,,,25000,KWD,Kuwait\nFamily Co.,property,Building,,,,500000,KWD,Kuwait,,3000,1,150000\n"));
@@ -983,13 +1022,18 @@
     if (!file) return;
     const rows = parseCSV(await file.text());
     if (rows.length < 2) { $("importMsg").textContent = "The file has no rows under its first line."; return; }
-    const head = rows[0].map((h) => h.trim().toLowerCase().replace(/\s+/g, "_"));
+    // A bank's or broker's own column names are read as ours; anything else is left out.
+    const head = rows[0].map((h) => { const k = h.trim().toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, ""); return COLUMN_ALIAS[k] || k; });
+    const whose = $("importOwner").value ? ownerName($("importOwner").value) : "";
     const problems = [];
     pending = rows.slice(1).map((r, i) => {
-      const o = {}; head.forEach((h, j) => { if (COLUMNS.includes(h) && (r[j] ?? "").trim() !== "") o[h] = r[j].trim(); });
+      const o = {}; head.forEach((h, j) => { if (COLUMNS.includes(h) && o[h] == null && (r[j] ?? "").trim() !== "") o[h] = r[j].trim(); });
+      if (!o.symbol && /^(sub)?total|^grand total|^cash total/i.test(o.name || r.join(" ").trim())) return null;   // a statement's totals line
+      if (!o.kind) o.kind = o.symbol && o.qty != null ? (/-USD$/i.test(o.symbol) ? "crypto" : "stock") : o.value != null ? "cash" : "";
+      if (!o.owner && whose) o.owner = whose;
       o.kind = KIND_WORDS[(o.kind || "").toLowerCase()] || "";
       ["qty", "value", "cost", "rent_month", "rent_day", "mortgage_left", "mortgage_payment", "mortgage_day", "coupon_pct", "per_year", "committed", "called", "next_call_amount", "next_dist_amount"]
-        .forEach((k) => { if (o[k] != null) o[k] = Number(String(o[k]).replace(/[, ]/g, "")); });
+        .forEach((k) => { if (o[k] != null) { const neg = /^\(.*\)$/.test(String(o[k]).trim()); o[k] = Number(String(o[k]).replace(/[^0-9.\-]/g, "")) * (neg ? -1 : 1); } });
       if (o.symbol) o.symbol = o.symbol.toUpperCase();
       if (o.currency) o.currency = o.currency.toUpperCase();
       const line = i + 2;
@@ -997,7 +1041,7 @@
       else if (!o.owner) problems.push(`Row ${line}: no owner.`);
       else if (["stock", "crypto"].includes(o.kind) && !(o.symbol && o.qty > 0)) problems.push(`Row ${line}: a share or crypto needs a symbol and a number held.`);
       else if (o.kind === "gold" && !(o.qty > 0)) problems.push(`Row ${line}: gold needs how much is held.`);
-      else if (!["stock", "crypto", "gold"].includes(o.kind) && !(o.value >= 0 && o.value !== undefined)) problems.push(`Row ${line}: needs a value.`);
+      else if (!["stock", "crypto", "gold"].includes(o.kind) && !(o.value !== undefined && !Number.isNaN(o.value))) problems.push(`Row ${line}: needs a value.`);
       else return o;
       return null;
     }).filter(Boolean);
@@ -1472,6 +1516,72 @@
   const longDate = (d) => new Date(d + "T00:00:00Z").toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
   const sumNet = (rows) => rows.reduce((t, r) => t + (r.net_kwd || 0), 0);
 
+  // ---- The family meeting pack: one printable page ----
+  function drawPack() {
+    const now = new Date(), month = now.toLocaleDateString("en-GB", { month: "long", year: "numeric" }), key = now.toISOString().slice(0, 7);
+    const prev = snapshots.filter((s) => s.month < key).slice(-1)[0];
+    const yearKey = `${now.getFullYear() - 1}-${String(now.getMonth() + 1).padStart(2, "0")}`, yearAgo = snapshots.find((s) => s.month === yearKey);
+    const moved = (s) => !s ? "not kept yet" : `${lastTotal - s.kwd >= 0 ? "+" : "−"}${fmt(Math.abs(lastTotal - s.kwd))} (${s.kwd ? (100 * (lastTotal - s.kwd) / s.kwd).toFixed(1) : "0"}%)`;
+    const debt = lastRows.reduce((t, r) => t + (r.debt_kwd || 0), 0);
+    const byKind = sumBy(lastRows, DIMS.kind), byOwner = sumBy(lastRows, DIMS.owner);
+    const soon = calendar().filter((x) => (new Date(x.date + "T00:00:00Z") - now) / 864e5 <= 92);
+    const tin = soon.filter((x) => x.dir === "in").reduce((t, x) => t + (x.kwd || 0), 0), tout = soon.filter((x) => x.dir === "out").reduce((t, x) => t + (x.kwd || 0), 0);
+    const day = (d) => new Date(d + "T00:00:00Z").toLocaleDateString("en-GB", { day: "numeric", month: "short", timeZone: "UTC" });
+    const changes = prev && prev.by_kind ? Object.keys(Object.assign({}, prev.by_kind, Object.fromEntries(byKind.map(([k]) => [kindOfLabel(k), 1]))))
+      .map((k) => { const was = prev.by_kind[k] || 0, is = sumNet(lastRows.filter((r) => r.h.kind === k)); return [KINDS[k] || k, was, is]; }).filter(([, a, b]) => Math.round(a) !== Math.round(b)) : null;
+    const open = goals.filter((g) => !g.closed);
+    $("pack").innerHTML = `<h2>Family meeting, ${month}</h2><p class="muted">As of ${longDate(now.toISOString().slice(0, 10))}, from the Family Office.</p>
+      <div class="tiles" style="margin:.8rem 0">${[["Net worth", fmt(lastTotal)], ["Since last month", moved(prev)], ["Since a year ago", moved(yearAgo)], ["Owed on property", debt ? fmt(debt) : "–"]]
+        .map(([k, v]) => `<div class="tile"><span>${k}</span><b>${v}</b></div>`).join("")}</div>
+      ${lastRows.length ? `<div class="owns"><div class="packRing">${ring(byKind, lastTotal, "Net worth")}</div><div class="legend">${legend(byKind, lastTotal).replace(/<button type="button" class="pick[^"]*"/g, '<div class="pick"').replace(/<\/button>/g, "</div>")}</div></div>` : ""}
+      <div class="rgrid">
+        <div><h3>By owner</h3><table><tbody>${byOwner.map(([k, v]) => `<tr><td>${esc(k)}</td><td class="num">${fmt(v)}</td><td class="num">${lastTotal > 0 ? Math.round(100 * v / lastTotal) : 0}%</td></tr>`).join("")}</tbody></table></div>
+        <div><h3>What changed since last month</h3>${changes == null ? `<p class="muted">Shown from the second month kept.</p>` : changes.length ? `<table><tbody>${changes.map(([k, a, b]) =>
+          `<tr><td>${esc(k)}</td><td class="num">${fmt(a)}</td><td class="num">${fmt(b)}</td><td class="num ${b >= a ? "up" : "down"}">${b >= a ? "+" : "−"}${fmt(Math.abs(b - a))}</td></tr>`).join("")}</tbody></table>` : `<p class="muted">Nothing moved.</p>`}</div>
+        <div><h3>Goals</h3>${open.length ? `<table><tbody>${open.map((g) => { const t = Number(g.amount) * (fx[g.currency] || (g.currency === "KWD" ? 1 : 0)), n = goalNow(g.what);
+          return `<tr><td>${esc(g.title)}</td><td class="num">${t > 0 ? Math.min(100, Math.round(100 * n / t)) : 0}%</td><td class="num">${longDate(g.date)}</td></tr>`; }).join("")}</tbody></table>` : `<p class="muted">No goals yet.</p>`}</div>
+        ${lastZakat != null ? `<div><h3>Zakat, a rough estimate</h3><p>${fmt(lastZakat)}</p><p class="note">A guide for the family's scholar, not a ruling.</p></div>` : ""}
+      </div>
+      <h3>The next three months</h3>${soon.length ? `<p class="small">Coming in about ${fmt(tin)}; going out about ${fmt(tout)}.</p><table><tbody>${soon.slice(0, 18).map((x) =>
+        `<tr><td>${day(x.date)}</td><td>${esc(x.what)}</td><td class="num">${x.kwd != null ? (x.dir === "in" ? "+" : x.dir === "out" ? "−" : "") + fmt(x.kwd) : ""}</td></tr>`).join("")}</tbody></table>` : `<p class="muted">Nothing due.</p>`}
+      <h3>Notes from the meeting</h3><div class="notes-lines">${"<div></div>".repeat(6)}</div>
+      <p class="note">A record of what the family holds, not advice.</p>`;
+    const pr = $("pack").querySelector(".packRing"); if (pr) hoverRing(pr);
+  }
+  $("packPrint").addEventListener("click", () => { document.body.classList.add("print-pack"); print(); });
+  addEventListener("afterprint", () => document.body.classList.remove("print-pack"));
+
+  // ---- Rent, month by month: marks are added, never changed; the newest mark for a month counts ----
+  const RENT_WORDS = { paid: "Paid", late: "Late", unpaid: "Not paid", "": "Not marked" };
+  function drawRent() {
+    const props = holdings.filter((h) => !h.closed && h.kind === "property" && Number(h.rent_month));
+    if (!props.length) { $("rentTiles").innerHTML = ""; $("rentList").innerHTML = `<p class="empty">No property with a rent yet. Add the rent on the property under Holdings.</p>`; return; }
+    const now = new Date(), months = [...Array(12)].map((_, i) => { const d = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - i, 1)); return d.toISOString().slice(0, 7); });
+    const mark = (hid, m) => { const l = rentLog.filter((x) => x.holding === hid && x.month === m); return l.length ? l[l.length - 1].status : ""; };
+    let owed = 0, paidYear = 0;
+    const blocks = props.map((h) => {
+      const rate = fx[h.currency || "KWD"] || 0, rent = Number(h.rent_month);
+      const rows = months.map((m) => {
+        const s = mark(h.id, m);
+        if (s === "late" || s === "unpaid") owed += rent * rate;
+        if (s === "paid") paidYear += rent * rate;
+        return `<tr><td>${new Date(m + "-01T00:00:00Z").toLocaleDateString("en-GB", { month: "long", year: "numeric", timeZone: "UTC" })}</td><td class="num">${native(rent, h.currency || "KWD")}</td>
+          <td><select data-rent="${esc(h.id)}" data-month="${m}" style="width:auto">${Object.entries(RENT_WORDS).map(([k, t]) => `<option value="${k}"${k === s ? " selected" : ""}>${t}</option>`).join("")}</select></td></tr>`;
+      }).join("");
+      const due = months.filter((m) => ["late", "unpaid"].includes(mark(h.id, m))).length;
+      return `<details${due ? " open" : ""} class="goal"><summary><b>${esc(h.name || "Property")}</b> <span class="muted small">${esc(ownerName(h.owner))}${h.tenant ? ` · ${esc(h.tenant)}` : ""}</span>
+        ${due ? ` <span class="badge no">${due} ${due === 1 ? "month" : "months"} owed</span>` : ""}</summary><div class="scroll"><table><tbody>${rows}</tbody></table></div></details>`;
+    });
+    $("rentTiles").innerHTML = [["Owed now", owed ? fmt(owed) : "–"], ["Marked paid, last 12 months", paidYear ? fmt(paidYear) : "–"], ["Properties with a rent", String(props.length)]]
+      .map(([k, v]) => `<div class="tile"><span>${k}</span><b>${v}</b></div>`).join("");
+    $("rentList").innerHTML = blocks.join("");
+    $("rentList").querySelectorAll("[data-rent]").forEach((s) => s.addEventListener("change", async () => {
+      rentLog.push({ holding: s.dataset.rent, month: s.dataset.month, status: s.value, at: new Date().toISOString().slice(0, 16) });
+      await mobleeApp.save("rent-log", rentLog);
+      drawRent();
+    }));
+  }
+
   // ---- What if: today's values moved by the sliders, loans left as they are ----
   let wi = {}, wiKeys = "";
   const pctWords = (p) => `${p > 0 ? "+" : p < 0 ? "−" : ""}${Math.abs(p)}%`;
@@ -1516,6 +1626,35 @@
     wiKeys = ""; drawWhatIf();
   }));
   $("wiReset").addEventListener("click", () => { wi = {}; wiKeys = ""; drawWhatIf(); });
+
+  // ---- The lock and the phone route (the server keeps both; the website demo has neither) ----
+  async function drawLock() {
+    if (window.DEMO) { $("lockCard").hidden = true; $("phoneCard").hidden = true; return; }
+    const s = await fetch("/api/lock/state").then((r) => r.json()).catch(() => null);
+    if (!s) return;
+    $("lockState").textContent = s.set ? "On: the Family Office asks for the code before it opens, here and from the phone." : "Off: anyone at this Mac can open the Family Office.";
+    $("lockCurWrap").hidden = !s.set; $("lockOff").hidden = !s.set; $("lockNow").hidden = !s.set;
+    $("lockSet").textContent = s.set ? "Change the code" : "Set the code";
+    const r = await fetch("/api/reach").then((x) => x.json()).catch(() => ({}));
+    $("phoneState").innerHTML = !s.set ? "Set a code above first; without one the phone is turned away."
+      : r.url ? `Open this on your phone: <b>${esc(r.url)}</b>` : "Not set up yet: in the Moblee app, press \"Reach your things from your phone\", then close this tab and open the Family Office again.";
+  }
+  const lockPost = (path, body) => fetch(path, { method: "POST", headers: { "X-Requested-By": "moblee-app", "Content-Type": "application/json" }, body: JSON.stringify(body) })
+    .then(async (r) => ({ ok: r.ok, body: await r.json().catch(() => ({})) }));
+  $("lockSet").addEventListener("click", async () => {
+    if ($("lock_new").value.length < 4) { $("lockMsg").textContent = "A code needs 4 or more characters."; return; }
+    if ($("lock_new").value !== $("lock_again").value) { $("lockMsg").textContent = "The two new codes are not the same."; return; }
+    const r = await lockPost("/api/lock/set", { code: $("lock_new").value, current: $("lock_cur").value });
+    $("lockMsg").textContent = r.ok ? "Saved. The lock is on." : (r.body.error || "Not saved.");
+    ["lock_cur", "lock_new", "lock_again"].forEach((id) => { $(id).value = ""; });
+    drawLock();
+  });
+  $("lockOff").addEventListener("click", async () => {
+    const r = await lockPost("/api/lock/off", { current: $("lock_cur").value });
+    $("lockMsg").textContent = r.ok ? "The lock is off." : (r.body.error || "Not changed.");
+    $("lock_cur").value = ""; drawLock();
+  });
+  $("lockNow").addEventListener("click", async () => { await lockPost("/api/lock/close", {}); location.reload(); });
 
   // ---- Phone reminders: the page keeps the choices; job.py sends the messages ----
   const REM_DEFAULT = { on: false, days: 1, kinds: { rent: true, loan: true, sukuk: true, fund: true, own: true } };
@@ -1624,7 +1763,7 @@
   const ZAKAT_DEFAULT = { cash: "full", gold: "full", crypto: "full", stock: "full", sukuk: "full", property: "no", private: "no", other: "no" };
   const zakatOf = (h) => h.zakat || ZAKAT_DEFAULT[h.kind] || "no";
   const zakatPart = (r) => { const m = zakatOf(r.h); return r.gross_kwd == null ? 0 : m === "full" ? r.gross_kwd : m === "part" ? r.gross_kwd * Number(r.h.zakat_pct || 0) / 100 : 0; };
-  let goldAsked = false;
+  let goldAsked = false, lastZakat = null;
   async function needGold() {
     if (quotes["GC=F"] || goldAsked) return;
     goldAsked = true;
@@ -1647,6 +1786,7 @@
       return `<tr><td><b>${esc(o.name)}</b></td><td class="num">${fmt(counts)}</td><td class="num">${off ? fmt(off) : "–"}</td>
         <td>${nisab == null ? "–" : above ? "Above" : "Below"}</td><td class="num"><b>${above ? fmt(z) : "–"}</b></td></tr>`;
     });
+    lastZakat = nisab && people.length ? all : null;
     $("zTiles").innerHTML = [["Nisab today (85 g of gold)", nisab ? fmt(nisab) : "Reading…"], ["Gold, one gram", gram ? fmt(gram) : "–"],
       ["Estimate for all the people", nisab ? fmt(all) : "–"]].map(([k, v]) => `<div class="tile"><span>${k}</span><b>${v}</b></div>`).join("");
     $("zOwners").innerHTML = people.length ? `<table><thead><tr><th>Person</th><th class="num">Counts for zakat</th><th class="num">Taken off</th><th>The nisab</th><th class="num">Zakat, 2.5%</th></tr></thead><tbody>${rows.join("")}</tbody></table>`
@@ -1968,6 +2108,39 @@
     "See the whole picture": "اعرض الصورة الكاملة",
     "The calendar, the insights and the monthly report are now worked out from these. Change or add anything under Holdings.":
       "التقويم والملاحظات والتقرير الشهري تُحسب الآن من هذه. عدّل أو أضف أي شيء من تبويب الأصول.",
+    // Lock, phone, bank import, meeting pack and rent (28 October 2026).
+    "Lock with a code": "القفل برمز", "Off: anyone at this Mac can open the Family Office.": "متوقف: أي شخص على هذا الجهاز يمكنه فتح المكتب العائلي.",
+    "On: the Family Office asks for the code before it opens, here and from the phone.": "مفعّل: يطلب المكتب العائلي الرمز قبل أن يفتح، هنا ومن الهاتف.",
+    "Current code": "الرمز الحالي", "New code (4 or more)": "رمز جديد (4 أو أكثر)", "The new code again": "الرمز الجديد مرة أخرى",
+    "Set the code": "عيّن الرمز", "Change the code": "غيّر الرمز", "Turn the lock off": "أوقف القفل", "Lock now": "اقفل الآن",
+    "Asked for on this Mac and from the phone. The code is kept only in a scrambled form in this Mac's Keychain, never in a file. A forgotten code: open the Keychain Access app, find \"Family Office lock\" and remove it, and the lock is off.":
+      "يُطلب على هذا الجهاز ومن الهاتف. يُحفظ الرمز بشكل مشفّر فقط في سلسلة مفاتيح الجهاز، ولا يُحفظ في ملف. إذا نُسي الرمز: افتح تطبيق Keychain Access، وابحث عن \"Family Office lock\" واحذفه، فيتوقف القفل.",
+    "A code needs 4 or more characters.": "الرمز يحتاج 4 خانات أو أكثر.", "The two new codes are not the same.": "الرمزان الجديدان غير متطابقين.",
+    "Saved. The lock is on.": "حُفظ. القفل مفعّل.", "The lock is off.": "القفل متوقف.", "Not saved.": "لم يُحفظ.", "Not changed.": "لم يتغير.",
+    "The current code is not right.": "الرمز الحالي غير صحيح.", "A code needs 4 to 64 characters.": "الرمز يحتاج من 4 إلى 64 خانة.",
+    "Open on your phone": "افتحه من هاتفك", "Checking…": "جارٍ التحقق…", "Open this on your phone:": "افتح هذا الرابط من هاتفك:",
+    "It opens while this Mac is awake and the Family Office is open on it, over the private route chosen in the Moblee app (Reach your things from your phone). It needs the lock above.":
+      "يفتح ما دام هذا الجهاز مستيقظاً والمكتب العائلي مفتوحاً عليه، عبر الطريق الخاص المختار في تطبيق Moblee. يحتاج القفل أعلاه.",
+    "Set a code above first; without one the phone is turned away.": "عيّن رمزاً أعلاه أولاً؛ من دونه يُرفض الهاتف.",
+    "Not set up yet: in the Moblee app, press \"Reach your things from your phone\", then close this tab and open the Family Office again.":
+      "لم يُجهّز بعد: في تطبيق Moblee اضغط \"Reach your things from your phone\"، ثم أغلق هذه الصفحة وافتح المكتب العائلي من جديد.",
+    "Bring in from the bank or a spreadsheet": "استيراد من البنك أو جدول بيانات",
+    "A broker's or bank's list of holdings or balances, or your own sheet, saved as CSV (Excel and Numbers both save as CSV), one row per holding. The usual column names are understood: Ticker or Symbol, Quantity or Shares, Market value or Balance, Currency, Description. When the file does not say whose it is, pick below. A list of payments in and out is not read, only what is held. Nothing is changed until you press \"Add these\".":
+      "قائمة الأصول أو الأرصدة من الوسيط أو البنك، أو جدولك الخاص، محفوظة بصيغة CSV (يحفظ Excel وNumbers بها)، صف لكل أصل. تُفهم أسماء الأعمدة المعتادة: الرمز، الكمية، القيمة السوقية أو الرصيد، العملة، الوصف. إذا لم يذكر الملف لمن تعود، اختر أدناه. قائمة المدفوعات الداخلة والخارجة لا تُقرأ، فقط ما هو مملوك. لا يتغير شيء حتى تضغط \"أضف هذه\".",
+    "These belong to, if the file does not say": "تعود إلى، إن لم يذكر الملف", "The file says (an owner column)": "الملف يذكر (عمود المالك)",
+    "A PDF statement: keep it under Papers on a holding, or tell Claude \"bring in my statement\" and give it the file; it reads it and shows you what it found before anything is added.":
+      "كشف حساب PDF: احفظه في مستندات الأصل، أو قل لـClaude \"bring in my statement\" وأعطه الملف؛ يقرؤه ويعرض عليك ما وجده قبل إضافة أي شيء.",
+    "Meeting pack": "ملف الاجتماع", "Rent": "الإيجارات",
+    "One page for a family meeting: where things stand, what changed, the goals and what is due.": "صفحة واحدة لاجتماع العائلة: الوضع الحالي، وما تغيّر، والأهداف، وما يستحق.",
+    "What changed since last month": "ما تغيّر منذ الشهر الماضي", "Shown from the second month kept.": "يظهر من الشهر الثاني المحفوظ.", "Nothing moved.": "لم يتحرك شيء.",
+    "No goals yet.": "لا توجد أهداف بعد.", "A guide for the family's scholar, not a ruling.": "دليل لعالِم العائلة، وليس فتوى.", "The next three months": "الأشهر الثلاثة القادمة",
+    "Notes from the meeting": "ملاحظات الاجتماع", "A record of what the family holds, not advice.": "سجل لما تملكه العائلة، وليس نصيحة.",
+    "Rent, month by month": "الإيجار، شهراً بشهر",
+    "Each property with a rent, and each month: mark it paid, late or not paid. Unmarked months are left alone. What is owed is worked out from the months marked late or not paid.":
+      "كل عقار له إيجار، وكل شهر: سجّله مدفوعاً أو متأخراً أو غير مدفوع. الأشهر غير المسجلة تُترك. المستحق يُحسب من الأشهر المسجلة متأخرة أو غير مدفوعة.",
+    "Paid": "مدفوع", "Late": "متأخر", "Not paid": "غير مدفوع", "Not marked": "غير مسجل", "Owed now": "المستحق الآن",
+    "Marked paid, last 12 months": "المدفوع، آخر 12 شهراً", "Properties with a rent": "عقارات لها إيجار", "Tenant, optional": "المستأجر (اختياري)",
+    "No property with a rent yet. Add the rent on the property under Holdings.": "لا يوجد عقار له إيجار بعد. أضف الإيجار للعقار من تبويب الأصول.",
     // Papers, phone reminders and What if (28 October 2026).
     "Papers": "المستندات", "Add a paper": "أضف مستنداً", "No papers kept with this holding yet.": "لا توجد مستندات محفوظة مع هذا الأصل بعد.",
     "Title deeds, certificates, bank letters. Kept on this Mac in a folder of their own, outside the wiki, and never sent anywhere.":
@@ -2035,6 +2208,9 @@
     [/^(\d+) holdings?, (.+), (-?\d+)% of the total$/, (m) => `${m[1]} ${m[1] === "1" ? "أصل" : "أصول"}، ${m[2]}، ${m[3]}% من المجموع`],
     [/^Showing (\d+) of (\d+)$/, (m) => `يظهر ${m[1]} من ${m[2]}`],
     [/^Net worth of (.+)$/, (m) => `صافي ثروة ${w(m[1])}`],
+    [/^Family meeting, (.+)$/, (m) => `اجتماع العائلة، ${mon(m[1])}`],
+    [/^Coming in about (.+); going out about (.+)\.$/, (m) => `يدخل حوالي ${m[1]}؛ ويخرج حوالي ${m[2]}.`],
+    [/^(\d+) months? owed$/, (m) => `${m[1]} ${m[1] === "1" ? "شهر" : "أشهر"} مستحقة`],
     [/^(\d+) papers? kept$/, (m) => `${m[1] === "1" ? "مستند محفوظ" : `${m[1]} مستندات محفوظة`}`],
     [/^Kept (\d+)\.$/, (m) => `حُفظ ${m[1]}.`],
     [/^([^:]+): ((?:KWD |\$)[\d.,]+)$/, (m) => `${w(m[1])}: ${m[2]}`],
