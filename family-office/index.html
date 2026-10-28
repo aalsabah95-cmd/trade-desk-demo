@@ -9,26 +9,86 @@
   :root {
     --bg: #f6f7fb; --surface: #ffffff; --fg: #15171c; --muted: #646b7a; --line: #e3e6ee; --accent: #1f5fd1; --accent-2: #0f8a7a;
     --good: #12805c; --bad: #c2412d; --warn: #a86400; --radius: 14px; --shadow: 0 1px 2px rgba(20,30,60,.06), 0 8px 24px rgba(20,30,60,.06);
-    color-scheme: light dark;
+    --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a; --s4: #eda100; --s5: #e87ba4; --s6: #008300; --s7: #6250d6;
+    color-scheme: light;
   }
+  /* Dark: the Mac's own setting, unless the switch in the header says otherwise. */
   @media (prefers-color-scheme: dark) {
-    :root { --bg: #0d1016; --surface: #161a22; --fg: #eef1f7; --muted: #98a1b3; --line: #262c38; --accent: #7aa7ff; --accent-2: #3cc4b0;
-      --good: #4ade80; --bad: #f87171; --warn: #fbbf24; --shadow: 0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.35); }
+    :root:not([data-theme="light"]) { --bg: #0d1016; --surface: #161a22; --fg: #eef1f7; --muted: #98a1b3; --line: #262c38; --accent: #7aa7ff; --accent-2: #3cc4b0;
+      --good: #4ade80; --bad: #f87171; --warn: #fbbf24; --shadow: 0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.35);
+      --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500; --s5: #d55181; --s6: #008300; --s7: #9085e9; color-scheme: dark; }
   }
+  :root[data-theme="dark"] { --bg: #0d1016; --surface: #161a22; --fg: #eef1f7; --muted: #98a1b3; --line: #262c38; --accent: #7aa7ff; --accent-2: #3cc4b0;
+    --good: #4ade80; --bad: #f87171; --warn: #fbbf24; --shadow: 0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.35);
+    --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500; --s5: #d55181; --s6: #008300; --s7: #9085e9; color-scheme: dark; }
   * { box-sizing: border-box; }
   html, body { margin: 0; background: var(--bg); color: var(--fg); font: 15px/1.5 -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif; }
   body { overflow-anchor: none; }
-  header { background: linear-gradient(135deg, #12306b, #0f6b63); color: #fff; padding: 1.4rem 1rem 1.2rem; }
+  header { background: radial-gradient(120% 140% at 0% 0%, #1d4fa3 0%, #12306b 45%, #0f6b63 100%); color: #fff; padding: 1.1rem 1rem 2.6rem; }
   header .in, main { max-width: 68rem; margin: 0 auto; }
-  header h1 { margin: 0; font-size: 1.5rem; letter-spacing: -.01em; }
-  header p { margin: .25rem 0 0; opacity: .85; }
-  .big { display: flex; flex-wrap: wrap; gap: 1.5rem; margin-top: 1rem; align-items: baseline; }
-  .big b { font-size: 2.1rem; letter-spacing: -.02em; } .big span { opacity: .85; }
+  header .top { display: flex; justify-content: space-between; align-items: center; gap: .75rem; flex-wrap: wrap; }
+  header h1 { margin: 0; font-size: .85rem; letter-spacing: .12em; text-transform: uppercase; font-weight: 600; opacity: .85; }
+  header p { margin: .3rem 0 0; opacity: .8; font-size: .9rem; }
+  .hdr-tools { display: flex; flex-wrap: wrap; gap: .45rem; align-items: center; font-size: .85rem; }
+  .hdr-tools select, .hdr-tools button { width: auto; background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.28); color: #fff; border-radius: 999px; padding: .3rem .8rem; }
+  .hdr-tools button:hover, .hdr-tools select:hover { background: rgba(255,255,255,.22); }
+  .hdr-tools option { color: #15171c; background: #fff; }
+  .big { display: flex; flex-wrap: wrap; gap: .4rem 1rem; margin-top: 1.1rem; align-items: baseline; }
+  .big b { font-size: 2.7rem; letter-spacing: -.03em; line-height: 1.1; font-variant-numeric: tabular-nums; } .big span { opacity: .85; }
+  .chg { font-size: .85rem; padding: .15rem .6rem; border-radius: 999px; background: rgba(255,255,255,.14); }
   main { padding: 0 1rem 3rem; }
-  nav.tabs { display: flex; gap: .3rem; margin: -1.1rem 0 1rem; position: sticky; top: .5rem; z-index: 5; background: var(--surface); border: 1px solid var(--line);
+  .navwrap { position: sticky; top: .5rem; z-index: 5; margin: -1.4rem 0 1rem; }
+  nav.tabs { display: flex; gap: .3rem; background: var(--surface); border: 1px solid var(--line);
     border-radius: 999px; padding: .3rem; width: max-content; max-width: 100%; overflow-x: auto; box-shadow: var(--shadow); }
-  nav.tabs button { border: 0; background: none; padding: .45rem .95rem; border-radius: 999px; font: inherit; color: var(--muted); cursor: pointer; white-space: nowrap; }
+  nav.tabs button { border: 0; background: none; padding: .45rem 1rem; border-radius: 999px; font: inherit; color: var(--muted); cursor: pointer; white-space: nowrap; transition: background .15s, color .15s; }
+  nav.tabs button:hover { color: var(--fg); }
   nav.tabs button[aria-selected="true"] { background: var(--fg); color: var(--bg); }
+  @media (max-width: 560px) { nav.tabs { width: 100%; justify-content: space-between; gap: 0; } nav.tabs button { padding: .42rem .55rem; font-size: .84rem; } }
+  .more-menu { position: absolute; top: calc(100% + .4rem); display: flex; flex-direction: column; min-width: 13rem; padding: .35rem;
+    background: var(--surface); border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow); }
+  .more-menu[hidden] { display: none; }
+  .more-menu button { border: 0; background: none; text-align: start; padding: .6rem .85rem; border-radius: 10px; }
+  .more-menu button:hover, .more-menu button[aria-selected="true"] { background: color-mix(in srgb, var(--accent) 14%, transparent); }
+  .tab { animation: fadein .18s ease-out; } @keyframes fadein { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+  @media (prefers-reduced-motion: reduce) { .tab { animation: none; } }
+  /* The ring chart and anything clickable that leads further in. */
+  .owns { display: grid; grid-template-columns: minmax(12rem, 15rem) 1fr; gap: 1.2rem 2rem; align-items: center; }
+  @media (max-width: 640px) { .owns { grid-template-columns: 1fr; justify-items: center; } .owns .legend { width: 100%; } }
+  .donut { width: 100%; max-width: 15rem; height: auto; display: block; }
+  .donut .seg { cursor: pointer; transition: stroke-width .15s, opacity .15s; }
+  .donut:hover .seg { opacity: .55; } .donut .seg:hover, .donut .seg.on { opacity: 1; stroke-width: 30; }
+  .donut text.c1 { fill: var(--fg); font-size: 17px; font-weight: 700; } .donut text.c2 { fill: var(--muted); font-size: 11px; }
+  .legend { display: grid; gap: .15rem; }
+  .pick { display: grid; grid-template-columns: auto 1fr auto; gap: .25rem .65rem; align-items: center; width: 100%; text-align: start; border: 0; background: none; padding: .45rem .55rem; border-radius: 10px; }
+  button.pick:hover, button.pick.on { background: color-mix(in srgb, var(--accent) 10%, transparent); }
+  .sw { width: .8rem; height: .8rem; border-radius: 4px; display: inline-block; }
+  .pick .val { font-variant-numeric: tabular-nums; font-size: .9rem; }
+  .bars button.row { width: 100%; border: 0; background: none; text-align: start; padding: .3rem .45rem; margin: .2rem 0; border-radius: 10px; }
+  .bars button.row:hover, .bars button.row.on { background: color-mix(in srgb, var(--accent) 10%, transparent); }
+  .hint { font-size: .8rem; color: var(--muted); margin: .2rem 0 0; }
+  #drill { border-color: color-mix(in srgb, var(--accent) 45%, var(--line)); }
+  .drill-head { display: flex; justify-content: space-between; align-items: start; gap: 1rem; }
+  .minibar { height: .45rem; border-radius: 999px; background: linear-gradient(90deg, var(--accent), var(--accent-2)); min-width: 2px; }
+  .welcome { background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 14%, var(--surface)), var(--surface)); }
+  .welcome h2 { font-size: 1.3rem; }
+  /* The guided start. */
+  .modal { position: fixed; inset: 0; z-index: 50; background: rgba(8,12,20,.55); display: grid; place-items: start center; padding: 6vh 1rem 1rem; }
+  .modal[hidden] { display: none; }
+  .sheet { background: var(--surface); color: var(--fg); border-radius: 18px; box-shadow: 0 20px 60px rgba(0,0,0,.35); width: min(46rem, 100%); max-height: calc(94vh - 1rem); overflow: auto; padding: 1.3rem 1.4rem; }
+  @media (max-width: 560px) { .modal { padding: 0; } .sheet { border-radius: 0; max-height: 100vh; height: 100vh; } }
+  .steps { display: flex; gap: .4rem; margin-bottom: 1rem; flex-wrap: wrap; }
+  .steps span { font-size: .8rem; padding: .25rem .7rem; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); }
+  .steps span.on { background: var(--accent); border-color: var(--accent); color: #fff; } .steps span.done { color: var(--fg); }
+  .kindgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr)); gap: .6rem; margin: .4rem 0 1rem; }
+  .kindgrid button { text-align: start; padding: .8rem .9rem; border-radius: 14px; display: grid; gap: .15rem; }
+  .kindgrid button b { display: flex; align-items: center; gap: .45rem; } .kindgrid button span { font-size: .8rem; color: var(--muted); }
+  .kindgrid button:hover, .kindgrid button.on { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, var(--surface)); }
+  .chips { display: flex; flex-wrap: wrap; gap: .4rem; margin: .6rem 0; }
+  .chip { font-size: .85rem; padding: .25rem .7rem; border-radius: 999px; background: color-mix(in srgb, var(--accent) 12%, transparent); }
+  .actions.end { justify-content: flex-end; border-top: 1px solid var(--line); padding-top: .9rem; margin-top: 1rem; }
+  th[data-sort] { cursor: pointer; } th[data-sort]:hover { color: var(--fg); } th.sorted { color: var(--accent); }
+  .tools-row { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; margin: 0 0 .75rem; }
+  .tools-row input[type="search"] { width: auto; flex: 1 1 14rem; max-width: 22rem; }
   .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 1.1rem 1.2rem; box-shadow: var(--shadow); margin: 0 0 1rem; }
   .card h2 { margin: 0 0 .6rem; font-size: 1.1rem; }
   .muted { color: var(--muted); } .small { font-size: .85rem; }
@@ -68,7 +128,7 @@
   .report .rgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); gap: 1rem 1.5rem; }
   .report table { font-size: .9rem; } .report td.num { white-space: nowrap; } .report td { padding: .35rem .4rem; }
   @media print {
-    header, nav.tabs, .no-print, main > section, .tab:not(#tab-report), #importCard, #formCard { display: none !important; }
+    header, .navwrap, .modal, .no-print, main > section, .tab:not(#tab-report), #importCard, #formCard { display: none !important; }
     #tab-report { display: block !important; }
     html, body { background: #fff; color: #000; font-size: 11pt; }
     .card { box-shadow: none; border: 0; padding: 0; }
@@ -79,34 +139,51 @@
 </head>
 <body>
 <header><div class="in">
-  <h1>Family Office</h1>
+  <div class="top"><h1>Family Office</h1>
+    <div class="hdr-tools" id="hdrTools"><label for="showCur">Show in</label>
+      <select id="showCur"><option value="KWD">Kuwaiti dinars</option><option value="USD">US dollars</option></select>
+      <button type="button" id="themeBtn">Dark</button></div></div>
+  <div class="big"><b id="nwMain">–</b> <span id="nwOther"></span> <span class="chg" id="nwChange" hidden></span></div>
   <p id="status">Loading…</p>
-  <div class="big"><div><b id="nwMain">–</b> <span id="nwOther"></span></div><div class="switch small"><label for="showCur">Show in</label>
-    <select id="showCur" style="width:auto"><option value="KWD">Kuwaiti dinars</option><option value="USD">US dollars</option></select></div></div>
 </div></header>
 <main>
 <div class="card no-print" style="margin:1rem 0;border-style:dashed"><b>Demo.</b> A made-up family, with prices frozen on 28 October 2026. Change anything or add your own: it stays in your own browser, on your own device, and is never sent anywhere. <button type="button" class="primary" onclick="startOwn()">Start with my own family</button> <button type="button" onclick="resetDemo()">Back to the sample family</button> <a href="../">Try the Trade Desk demo</a>, which checks a single stock before you buy. The full Family Office runs on its owner's Mac, with live prices for any symbol. <a class="go" href="mailto:aalsabah95@gmail.com?subject=Family%20Office%20feedback">Send feedback</a></div>
+  <div class="navwrap" id="navwrap">
   <nav class="tabs" role="tablist">
     <button data-tab="overview" aria-selected="true">Overview</button><button data-tab="holdings">Holdings</button>
-    <button data-tab="calendar">Calendar</button><button data-tab="insights">Insights</button><button data-tab="report">Report</button><button data-tab="options">Options</button><button data-tab="finder">Property finder</button><button data-tab="owners">Owners</button><button data-tab="settings">Settings</button>
+    <button data-tab="calendar">Calendar</button><button data-tab="insights">Insights</button><button id="moreBtn" aria-haspopup="true" aria-expanded="false">More <span aria-hidden="true">▾</span></button>
   </nav>
+  <div class="more-menu" id="moreMenu" hidden><button data-tab="report">Report</button><button data-tab="options">Options</button><button data-tab="finder">Property finder</button><button data-tab="owners">Owners</button><button data-tab="settings">Settings</button></div>
+  </div>
 
   <div class="tab" id="tab-overview">
+    <div class="card welcome" id="welcome" hidden><h2>Set up your family in three steps</h2>
+      <p class="muted">Who is in the family, what you own, and then the whole picture. About ten minutes; rough numbers are fine.</p>
+      <div class="actions"><button class="primary" id="guideBtn">Start</button></div></div>
     <div class="card"><h2>The whole picture</h2><div class="tiles" id="tiles"></div></div>
+    <div class="card"><h2>What the family owns</h2>
+      <div class="owns"><div id="kindRing"></div><div class="legend" id="byKind"></div></div>
+      <p class="hint">Press any part to see what is in it.</p></div>
+    <div class="card" id="drill" hidden><div class="drill-head"><div><h2 id="drillTitle"></h2><p class="muted small" id="drillSub" style="margin:0"></p></div><button id="drillClose">Close</button></div>
+      <div class="scroll" id="drillBody" style="margin-top:.6rem"></div>
+      <div class="actions"><button id="drillOpen">Open in Holdings</button></div></div>
     <div class="split">
-      <div class="card"><h2>By kind</h2><div class="bars" id="byKind"></div></div>
       <div class="card"><h2>By owner</h2><div class="bars" id="byOwner"></div></div>
       <div class="card"><h2>By currency</h2><div class="bars" id="byCur"></div></div>
       <div class="card"><h2>By country</h2><div class="bars" id="byCountry"></div></div>
     </div>
     <div class="card" id="halalCard"><h2>Halal</h2><div class="bars" id="byHalal"></div><p class="note" id="halalNote"></p></div>
-    <div class="card"><h2>Month by month</h2><div id="history"></div><p class="note">The total is kept once a month, the latest look of each month, so you can see it grow. Nothing is deleted.</p></div>
+    <div class="card"><h2>Month by month</h2><div id="history"></div><p class="note" id="historyNote">The total is kept once a month, the latest look of each month, so you can see it grow. Nothing is deleted. <span>In this demo, the earlier months are made up.</span></p></div>
   </div>
 
   <div class="tab" id="tab-holdings" hidden>
     <div class="card"><h2>Everything the family owns</h2>
-      <div class="actions" style="margin:0 0 .75rem"><button class="primary" id="addBtn">Add something</button><button id="importBtn">Bring in a spreadsheet</button><button id="exportBtn">Download as a spreadsheet</button>
-        <select id="filterOwner" style="width:auto"></select><span class="note" id="priceNote"></span></div>
+      <div class="actions" style="margin:0 0 .75rem"><button class="primary" id="addBtn">Add something</button><button id="importBtn">Bring in a spreadsheet</button><button id="exportBtn">Download as a spreadsheet</button></div>
+      <div class="tools-row"><input type="search" id="hSearch" placeholder="Find a holding, owner, country or currency" aria-label="Find a holding">
+        <select id="filterOwner" style="width:auto"></select>
+        <select id="hSort" style="width:auto" aria-label="Sort"><option value="kind">Grouped by kind</option><option value="value">Largest first</option><option value="name">Name, A to Z</option><option value="owner">By owner</option></select>
+        <span class="note" id="hCount"></span></div>
+      <p class="note" id="priceNote" style="margin:0 0 .5rem"></p>
       <div class="scroll" id="holdingsTable"></div></div>
     <div class="card" id="formCard" hidden><h2 id="formTitle">Add something</h2>
       <form class="grid" id="hForm" onsubmit="return false"></form>
@@ -235,9 +312,37 @@
       <div class="actions"><span class="note" id="setMsg"></span></div></div>
   </div>
 
+  <div class="modal" id="guide" hidden role="dialog" aria-modal="true" aria-labelledby="gTitle"><div class="sheet">
+    <div class="steps"><span data-step="1">1. Your family</span><span data-step="2">2. What you own</span><span data-step="3">3. The whole picture</span></div>
+    <div id="gStep1">
+      <h2 id="gTitle">Who is in the family?</h2>
+      <p class="muted">Add each person or family company that owns something. More can be added later.</p>
+      <form class="grid" onsubmit="return false"><div><label for="g_name">Name</label><input id="g_name" placeholder="e.g. a family member or a family company"></div>
+        <div><label for="g_kind">Kind</label><select id="g_kind"><option value="person">Person</option><option value="company">Company</option><option value="trust">Trust or fund</option></select></div></form>
+      <div class="actions"><button id="gAddOwner">Add</button><span class="note" id="gOwnerMsg"></span></div>
+      <div class="chips" id="gOwners"></div>
+      <div class="actions end"><button id="gClose1">Close</button><button class="primary" id="gNext1">Next</button></div>
+    </div>
+    <div id="gStep2" hidden>
+      <h2>What does the family own?</h2>
+      <p class="muted">Press one, fill in the short box, and press Add. Rough numbers are fine. Add as many as you like.</p>
+      <div class="kindgrid" id="gKinds"></div>
+      <div id="gFormWrap" hidden><form class="grid" id="gForm" onsubmit="return false"></form>
+        <div class="actions"><button class="primary" id="gAddH">Add</button><button id="gCancelH">Cancel</button><span class="note" id="gHMsg"></span></div></div>
+      <div class="chips" id="gAdded"></div>
+      <div class="actions end"><button id="gBack2">Back</button><button class="primary" id="gNext2">See the whole picture</button></div>
+    </div>
+    <div id="gStep3" hidden>
+      <h2>The whole picture</h2>
+      <div class="owns"><div id="gRing"></div><div class="legend" id="gLegend"></div></div>
+      <p class="muted">The calendar, the insights and the monthly report are now worked out from these. Change or add anything under Holdings.</p>
+      <div class="actions end"><button id="gBack3">Add more</button><button class="primary" id="gDone">Done</button></div>
+    </div>
+  </div></div>
+
   <section><p class="note">A demo with a made-up family; what you change stays in your browser. Prices come from Yahoo Finance's public data and can be 15 minutes old; Boursa Kuwait prices are turned from fils into dinars. Values you type in (property, private holdings, cash) are as of the day you last changed them. Nothing here is advice.</p></section>
 </main>
-<script>window.DEMO = {"frozen": "2026-10-28", "data": {"owners": [{"id": "o-1", "name": "Parent (sample)", "kind": "person"}, {"id": "o-2", "name": "Daughter (sample)", "kind": "person"}, {"id": "o-3", "name": "Son (sample)", "kind": "person"}, {"id": "o-4", "name": "Family Holding Co. (sample)", "kind": "company"}], "holdings": [{"id": "h-1", "owner": "o-1", "kind": "stock", "symbol": "NBK.KW", "qty": 25000, "cost": 0.7, "halal": "no"}, {"id": "h-2", "owner": "o-1", "kind": "stock", "symbol": "KFH.KW", "qty": 40000, "halal": "yes"}, {"id": "h-3", "owner": "o-4", "kind": "stock", "symbol": "ZAIN.KW", "qty": 30000, "halal": "unknown"}, {"id": "h-4", "owner": "o-2", "kind": "stock", "symbol": "AAPL", "qty": 60, "halal": "auto"}, {"id": "h-5", "owner": "o-3", "kind": "stock", "symbol": "MSFT", "qty": 25, "halal": "auto"}, {"id": "h-6", "owner": "o-1", "kind": "cash", "name": "Islamic current account", "value": 45000, "currency": "KWD", "country": "Kuwait", "halal": "yes"}, {"id": "h-7", "owner": "o-4", "kind": "cash", "name": "Dollar deposit", "value": 150000, "currency": "USD", "country": "United States", "halal": "no"}, {"id": "h-8", "owner": "o-4", "kind": "property", "name": "Apartment building", "value": 780000, "currency": "KWD", "rent_month": 4500, "rent_day": 5, "costs_year": 6000, "empty_months": 1, "area": "Salmiya", "size_m2": 1400, "mortgage_left": 240000, "mortgage_payment": 2600, "mortgage_day": 15, "country": "Kuwait", "halal": "yes"}, {"id": "h-9", "owner": "o-1", "kind": "property", "name": "London flat", "value": 650000, "currency": "GBP", "rent_month": 2400, "rent_day": 1, "country": "United Kingdom", "halal": "yes"}, {"id": "h-10", "owner": "o-4", "kind": "sukuk", "name": "Gulf sukuk 2029", "value": 200000, "currency": "USD", "coupon_pct": 5.1, "per_year": 2, "maturity": "2029-06-30", "country": "Saudi Arabia", "halal": "yes"}, {"id": "h-11", "owner": "o-4", "kind": "private", "name": "Regional growth fund", "value": 120000, "currency": "USD", "committed": 250000, "called": 140000, "next_call_date": "2027-02-15", "next_call_amount": 30000, "country": "United Arab Emirates", "halal": "unknown"}, {"id": "h-12", "owner": "o-2", "kind": "gold", "name": "Gold bars", "qty": 1000, "unit": "g", "country": "Kuwait", "halal": "yes"}, {"id": "h-13", "owner": "o-3", "kind": "crypto", "symbol": "BTC-USD", "qty": 0.25, "halal": "unknown"}], "events": [{"id": "e-1", "title": "School fees (sample)", "date": "2027-01-10", "amount": 6000, "currency": "KWD", "dir": "out", "repeat": "yearly", "owner": "o-1"}, {"id": "e-2", "title": "Zakat reminder (sample)", "date": "2027-03-20", "amount": null, "currency": "KWD", "dir": "none", "repeat": "yearly", "owner": null}], "settings": {"halal": true, "show": "KWD", "deposit_rate": 4, "sukuk_rate": 5.1}, "finder": {"answers": {"country": "Kuwait", "areas": ["Salmiya", "Jabriya"], "type": "flat", "min": 100000, "max": 200000, "currency": "KWD", "size": 150, "purpose": "rent"}, "shortlist": [{"id": "p-1", "title": "3-bedroom flat (sample listing)", "area": "Salmiya", "type": "flat", "price": 165000, "currency": "KWD", "size_m2": 180, "rent_month": 650, "costs_year": 900, "source": "owner"}, {"id": "p-2", "title": "2-bedroom flat (sample listing)", "area": "Jabriya", "type": "flat", "price": 120000, "currency": "KWD", "size_m2": 120, "rent_month": 480, "source": "owner"}, {"id": "p-3", "title": "Villa (sample listing)", "area": "Mishref", "type": "villa", "price": 450000, "currency": "KWD", "size_m2": 400, "source": "owner"}]}, "area-notes": [{"area": "Salmiya", "country": "Kuwait", "date": "2026-10-28", "currency": "KWD", "price_m2_low": 800, "price_m2_high": 1000, "rent_note": "made-up figures for the demo, not real market data", "summary": "A sample note to show how an area note looks. In the full Family Office, Claude writes real ones from sources, with their dates.", "sources": []}]}, "prices": {"quotes": {"AAPL": {"symbol": "AAPL", "name": "Apple Inc.", "price": 345.2900085449219, "currency": "USD", "change_pct": -0.52, "date": "2026-10-28"}, "BTC-USD": {"symbol": "BTC-USD", "name": "Bitcoin USD", "price": 80529.5703125, "currency": "USD", "change_pct": -0.34, "date": "2026-10-28"}, "GC=F": {"symbol": "GC=F", "name": "Gold Dec 26", "price": 4054.60009765625, "currency": "USD", "change_pct": -0.49, "date": "2026-10-28"}, "KFH.KW": {"symbol": "KFH.KW", "name": "Kuwait Finance House K.S.C.P.", "price": 0.752, "currency": "KWD", "change_pct": -1.05, "date": "2026-10-28"}, "MSFT": {"symbol": "MSFT", "name": "Microsoft Corporation", "price": 527.7899780273438, "currency": "USD", "change_pct": -0.67, "date": "2026-10-28"}, "NBK.KW": {"symbol": "NBK.KW", "name": "National Bank of Kuwait S.A.K.P.", "price": 0.851, "currency": "KWD", "change_pct": -0.82, "date": "2026-10-28"}, "ZAIN.KW": {"symbol": "ZAIN.KW", "name": "Mobile Telecommunications Company K.S.C.P.", "price": 0.583, "currency": "KWD", "change_pct": -1.85, "date": "2026-10-28"}}, "errors": {}}, "fx": {"kwd_per": {"KWD": 1.0, "USD": 0.3080999814080941, "GBP": 0.40992544799992303}, "errors": {}}, "events": {"NBK.KW": {"dividends": [{"date": "2026-04-02", "amount": 0.035, "currency": "KWD"}], "results": null, "errors": []}, "KFH.KW": {"dividends": [{"date": "2026-04-16", "amount": 0.014, "currency": "KWD"}, {"date": "2026-08-11", "amount": 0.01, "currency": "KWD"}], "results": null, "errors": []}, "ZAIN.KW": {"dividends": [{"date": "2025-11-12", "amount": 0.025, "currency": "KWD"}, {"date": "2026-09-29", "amount": 0.017, "currency": "KWD"}], "results": null, "errors": []}, "AAPL": {"dividends": [{"date": "2025-11-10", "amount": 0.26, "currency": "USD"}, {"date": "2026-02-09", "amount": 0.26, "currency": "USD"}, {"date": "2026-05-11", "amount": 0.27, "currency": "USD"}, {"date": "2026-08-10", "amount": 0.27, "currency": "USD"}], "results": "2026-11-02", "errors": []}, "MSFT": {"dividends": [{"date": "2025-11-20", "amount": 0.91, "currency": "USD"}, {"date": "2026-02-19", "amount": 0.91, "currency": "USD"}, {"date": "2026-05-21", "amount": 0.91, "currency": "USD"}, {"date": "2026-08-20", "amount": 0.91, "currency": "USD"}], "results": null, "errors": []}}, "halal": {"AAPL": {"symbol": "AAPL", "overall": "pass", "passed": 4, "total": 5}, "MSFT": {"symbol": "MSFT", "overall": "pass", "passed": 4, "total": 5}}, "ranges": {"SPY|1": {"symbol": "SPY", "years": 1, "n": 2261, "separate": 9, "since": "2016-10-27", "middle": 16.7, "bad": -5.0, "good": 33.0, "lower_pct": 14.0, "worst_drop": -33.7}, "SPY|3": {"symbol": "SPY", "years": 3, "n": 1757, "separate": 3, "since": "2016-10-27", "middle": 47.5, "bad": 29.7, "good": 80.0, "lower_pct": 0.0, "worst_drop": -33.7}, "SPY|5": {"symbol": "SPY", "years": 5, "n": 1253, "separate": 1, "since": "2016-10-27", "middle": 94.2, "bad": 64.8, "good": 114.1, "lower_pct": 0.0, "worst_drop": -33.7}, "SPUS|1": {"symbol": "SPUS", "years": 1, "n": 1471, "separate": 6, "since": "2019-12-18", "middle": 23.2, "bad": -7.8, "good": 37.7, "lower_pct": 16.0, "worst_drop": -30.8}, "SPUS|3": {"symbol": "SPUS", "years": 3, "n": 967, "separate": 2, "since": "2019-12-18", "middle": 50.5, "bad": 34.3, "good": 95.9, "lower_pct": 0.0, "worst_drop": -30.8}, "SPUS|5": {"symbol": "SPUS", "years": 5, "n": 463, "separate": 1, "since": "2019-12-18", "middle": 115.9, "bad": 100.9, "good": 127.2, "lower_pct": 0.0, "worst_drop": -30.8}, "GC=F|1": {"symbol": "GC=F", "years": 1, "n": 2262, "separate": 9, "since": "2016-10-27", "middle": 13.2, "bad": -4.2, "good": 41.4, "lower_pct": 23.3, "worst_drop": -24.9}, "GC=F|3": {"symbol": "GC=F", "years": 3, "n": 1758, "separate": 3, "since": "2016-10-27", "middle": 42.6, "bad": 11.3, "good": 128.3, "lower_pct": 1.9, "worst_drop": -24.9}, "GC=F|5": {"symbol": "GC=F", "years": 5, "n": 1254, "separate": 1, "since": "2016-10-27", "middle": 67.9, "bad": 41.7, "good": 141.6, "lower_pct": 0.0, "worst_drop": -24.9}}, "stockfacts": {"facts": {"NBK.KW": {"symbol": "NBK.KW", "higher_1y": 65.4, "separate": 9, "beat_market": 41.3, "middle_1y": 12.3, "bad_1y": -13.6, "dividend": 0.035, "results": null}, "KFH.KW": {"symbol": "KFH.KW", "higher_1y": 84.1, "separate": 9, "beat_market": 42.4, "middle_1y": 12.6, "bad_1y": -5.6, "dividend": 0.024, "results": null}, "ZAIN.KW": {"symbol": "ZAIN.KW", "higher_1y": 56.9, "separate": 9, "beat_market": 25.0, "middle_1y": 2.1, "bad_1y": -12.9, "dividend": 0.042, "results": null}, "AAPL": {"symbol": "AAPL", "higher_1y": 89.5, "separate": 9, "beat_market": 67.3, "middle_1y": 26.0, "bad_1y": -0.6, "dividend": 1.08, "results": "2026-11-02", "buys_3m": 0, "sells_3m": 16, "gifts_3m": 8}, "MSFT": {"symbol": "MSFT", "higher_1y": 83.6, "separate": 9, "beat_market": 71.0, "middle_1y": 31.5, "bad_1y": -6.9, "dividend": 3.64, "results": null, "buys_3m": 0, "sells_3m": 5, "gifts_3m": 26}}, "pairs": [{"a": "NBK.KW", "b": "KFH.KW", "pct": 49}, {"a": "NBK.KW", "b": "ZAIN.KW", "pct": 38}, {"a": "NBK.KW", "b": "MSFT", "pct": 22}, {"a": "KFH.KW", "b": "ZAIN.KW", "pct": 22}, {"a": "KFH.KW", "b": "MSFT", "pct": 12}, {"a": "AAPL", "b": "MSFT", "pct": 9}, {"a": "NBK.KW", "b": "AAPL", "pct": 3}, {"a": "KFH.KW", "b": "AAPL", "pct": 2}, {"a": "ZAIN.KW", "b": "AAPL", "pct": -8}, {"a": "ZAIN.KW", "b": "MSFT", "pct": -18}]}, "snapshots": []};</script>
+<script>window.DEMO = {"frozen": "2026-10-28", "data": {"owners": [{"id": "o-1", "name": "Parent (sample)", "kind": "person"}, {"id": "o-2", "name": "Daughter (sample)", "kind": "person"}, {"id": "o-3", "name": "Son (sample)", "kind": "person"}, {"id": "o-4", "name": "Family Holding Co. (sample)", "kind": "company"}], "holdings": [{"id": "h-1", "owner": "o-1", "kind": "stock", "symbol": "NBK.KW", "qty": 25000, "cost": 0.7, "halal": "no"}, {"id": "h-2", "owner": "o-1", "kind": "stock", "symbol": "KFH.KW", "qty": 40000, "halal": "yes"}, {"id": "h-3", "owner": "o-4", "kind": "stock", "symbol": "ZAIN.KW", "qty": 30000, "halal": "unknown"}, {"id": "h-4", "owner": "o-2", "kind": "stock", "symbol": "AAPL", "qty": 60, "halal": "auto"}, {"id": "h-5", "owner": "o-3", "kind": "stock", "symbol": "MSFT", "qty": 25, "halal": "auto"}, {"id": "h-6", "owner": "o-1", "kind": "cash", "name": "Islamic current account", "value": 45000, "currency": "KWD", "country": "Kuwait", "halal": "yes"}, {"id": "h-7", "owner": "o-4", "kind": "cash", "name": "Dollar deposit", "value": 150000, "currency": "USD", "country": "United States", "halal": "no"}, {"id": "h-8", "owner": "o-4", "kind": "property", "name": "Apartment building", "value": 780000, "currency": "KWD", "rent_month": 4500, "rent_day": 5, "costs_year": 6000, "empty_months": 1, "area": "Salmiya", "size_m2": 1400, "mortgage_left": 240000, "mortgage_payment": 2600, "mortgage_day": 15, "country": "Kuwait", "halal": "yes"}, {"id": "h-9", "owner": "o-1", "kind": "property", "name": "London flat", "value": 650000, "currency": "GBP", "rent_month": 2400, "rent_day": 1, "country": "United Kingdom", "halal": "yes"}, {"id": "h-10", "owner": "o-4", "kind": "sukuk", "name": "Gulf sukuk 2029", "value": 200000, "currency": "USD", "coupon_pct": 5.1, "per_year": 2, "maturity": "2029-06-30", "country": "Saudi Arabia", "halal": "yes"}, {"id": "h-11", "owner": "o-4", "kind": "private", "name": "Regional growth fund", "value": 120000, "currency": "USD", "committed": 250000, "called": 140000, "next_call_date": "2027-02-15", "next_call_amount": 30000, "country": "United Arab Emirates", "halal": "unknown"}, {"id": "h-12", "owner": "o-2", "kind": "gold", "name": "Gold bars", "qty": 1000, "unit": "g", "country": "Kuwait", "halal": "yes"}, {"id": "h-13", "owner": "o-3", "kind": "crypto", "symbol": "BTC-USD", "qty": 0.25, "halal": "unknown"}], "events": [{"id": "e-1", "title": "School fees (sample)", "date": "2027-01-10", "amount": 6000, "currency": "KWD", "dir": "out", "repeat": "yearly", "owner": "o-1"}, {"id": "e-2", "title": "Zakat reminder (sample)", "date": "2027-03-20", "amount": null, "currency": "KWD", "dir": "none", "repeat": "yearly", "owner": null}], "settings": {"halal": true, "show": "KWD", "deposit_rate": 4, "sukuk_rate": 5.1}, "finder": {"answers": {"country": "Kuwait", "areas": ["Salmiya", "Jabriya"], "type": "flat", "min": 100000, "max": 200000, "currency": "KWD", "size": 150, "purpose": "rent"}, "shortlist": [{"id": "p-1", "title": "3-bedroom flat (sample listing)", "area": "Salmiya", "type": "flat", "price": 165000, "currency": "KWD", "size_m2": 180, "rent_month": 650, "costs_year": 900, "source": "owner"}, {"id": "p-2", "title": "2-bedroom flat (sample listing)", "area": "Jabriya", "type": "flat", "price": 120000, "currency": "KWD", "size_m2": 120, "rent_month": 480, "source": "owner"}, {"id": "p-3", "title": "Villa (sample listing)", "area": "Mishref", "type": "villa", "price": 450000, "currency": "KWD", "size_m2": 400, "source": "owner"}]}, "area-notes": [{"area": "Salmiya", "country": "Kuwait", "date": "2026-10-28", "currency": "KWD", "price_m2_low": 800, "price_m2_high": 1000, "rent_note": "made-up figures for the demo, not real market data", "summary": "A sample note to show how an area note looks. In the full Family Office, Claude writes real ones from sources, with their dates.", "sources": []}], "snapshots": [{"month": "2025-11", "taken": "2025-11-28T12:00", "kwd": 1015328, "usd": null, "made_up": true}, {"month": "2025-12", "taken": "2025-12-28T12:00", "kwd": 1023181, "usd": null, "made_up": true}, {"month": "2026-01", "taken": "2026-01-28T12:00", "kwd": 1038888, "usd": null, "made_up": true}, {"month": "2026-02", "taken": "2026-02-28T12:00", "kwd": 1033279, "usd": null, "made_up": true}, {"month": "2026-03", "taken": "2026-03-28T12:00", "kwd": 1047863, "usd": null, "made_up": true}, {"month": "2026-04", "taken": "2026-04-28T12:00", "kwd": 1062448, "usd": null, "made_up": true}, {"month": "2026-05", "taken": "2026-05-28T12:00", "kwd": 1055717, "usd": null, "made_up": true}, {"month": "2026-06", "taken": "2026-06-28T12:00", "kwd": 1071424, "usd": null, "made_up": true}, {"month": "2026-07", "taken": "2026-07-28T12:00", "kwd": 1086008, "usd": null, "made_up": true}, {"month": "2026-08", "taken": "2026-08-28T12:00", "kwd": 1092740, "usd": null, "made_up": true}, {"month": "2026-09", "taken": "2026-09-28T12:00", "kwd": 1108447, "usd": null, "made_up": true}]}, "prices": {"quotes": {"AAPL": {"symbol": "AAPL", "name": "Apple Inc.", "price": 345.4800109863281, "currency": "USD", "change_pct": -0.47, "date": "2026-10-28"}, "BTC-USD": {"symbol": "BTC-USD", "name": "Bitcoin USD", "price": 80408.0625, "currency": "USD", "change_pct": -0.49, "date": "2026-10-28"}, "GC=F": {"symbol": "GC=F", "name": "Gold Dec 26", "price": 4054.10009765625, "currency": "USD", "change_pct": -0.5, "date": "2026-10-28"}, "KFH.KW": {"symbol": "KFH.KW", "name": "Kuwait Finance House K.S.C.P.", "price": 0.752, "currency": "KWD", "change_pct": -1.05, "date": "2026-10-28"}, "MSFT": {"symbol": "MSFT", "name": "Microsoft Corporation", "price": 527.6199951171875, "currency": "USD", "change_pct": -0.7, "date": "2026-10-28"}, "NBK.KW": {"symbol": "NBK.KW", "name": "National Bank of Kuwait S.A.K.P.", "price": 0.851, "currency": "KWD", "change_pct": -0.82, "date": "2026-10-28"}, "ZAIN.KW": {"symbol": "ZAIN.KW", "name": "Mobile Telecommunications Company K.S.C.P.", "price": 0.583, "currency": "KWD", "change_pct": -1.85, "date": "2026-10-28"}}, "errors": {}}, "fx": {"kwd_per": {"KWD": 1.0, "USD": 0.3080999814080941, "GBP": 0.40993092052852725}, "errors": {}}, "events": {"NBK.KW": {"dividends": [{"date": "2026-04-02", "amount": 0.035, "currency": "KWD"}], "results": null, "errors": []}, "KFH.KW": {"dividends": [{"date": "2026-04-16", "amount": 0.014, "currency": "KWD"}, {"date": "2026-08-11", "amount": 0.01, "currency": "KWD"}], "results": null, "errors": []}, "ZAIN.KW": {"dividends": [{"date": "2025-11-12", "amount": 0.025, "currency": "KWD"}, {"date": "2026-09-29", "amount": 0.017, "currency": "KWD"}], "results": null, "errors": []}, "AAPL": {"dividends": [{"date": "2025-11-10", "amount": 0.26, "currency": "USD"}, {"date": "2026-02-09", "amount": 0.26, "currency": "USD"}, {"date": "2026-05-11", "amount": 0.27, "currency": "USD"}, {"date": "2026-08-10", "amount": 0.27, "currency": "USD"}], "results": "2026-11-02", "errors": []}, "MSFT": {"dividends": [{"date": "2025-11-20", "amount": 0.91, "currency": "USD"}, {"date": "2026-02-19", "amount": 0.91, "currency": "USD"}, {"date": "2026-05-21", "amount": 0.91, "currency": "USD"}, {"date": "2026-08-20", "amount": 0.91, "currency": "USD"}], "results": null, "errors": []}}, "halal": {"AAPL": {"symbol": "AAPL", "overall": "pass", "passed": 4, "total": 5}, "MSFT": {"symbol": "MSFT", "overall": "pass", "passed": 4, "total": 5}}, "ranges": {"SPY|1": {"symbol": "SPY", "years": 1, "n": 2261, "separate": 9, "since": "2016-10-27", "middle": 16.7, "bad": -5.0, "good": 33.0, "lower_pct": 14.0, "worst_drop": -33.7}, "SPY|3": {"symbol": "SPY", "years": 3, "n": 1757, "separate": 3, "since": "2016-10-27", "middle": 47.5, "bad": 29.7, "good": 80.0, "lower_pct": 0.0, "worst_drop": -33.7}, "SPY|5": {"symbol": "SPY", "years": 5, "n": 1253, "separate": 1, "since": "2016-10-27", "middle": 94.2, "bad": 64.8, "good": 114.1, "lower_pct": 0.0, "worst_drop": -33.7}, "SPUS|1": {"symbol": "SPUS", "years": 1, "n": 1471, "separate": 6, "since": "2019-12-18", "middle": 23.2, "bad": -7.8, "good": 37.7, "lower_pct": 16.0, "worst_drop": -30.8}, "SPUS|3": {"symbol": "SPUS", "years": 3, "n": 967, "separate": 2, "since": "2019-12-18", "middle": 50.5, "bad": 34.3, "good": 95.9, "lower_pct": 0.0, "worst_drop": -30.8}, "SPUS|5": {"symbol": "SPUS", "years": 5, "n": 463, "separate": 1, "since": "2019-12-18", "middle": 115.9, "bad": 100.9, "good": 127.2, "lower_pct": 0.0, "worst_drop": -30.8}, "GC=F|1": {"symbol": "GC=F", "years": 1, "n": 2262, "separate": 9, "since": "2016-10-27", "middle": 13.2, "bad": -4.2, "good": 41.4, "lower_pct": 23.3, "worst_drop": -24.9}, "GC=F|3": {"symbol": "GC=F", "years": 3, "n": 1758, "separate": 3, "since": "2016-10-27", "middle": 42.6, "bad": 11.3, "good": 128.3, "lower_pct": 1.9, "worst_drop": -24.9}, "GC=F|5": {"symbol": "GC=F", "years": 5, "n": 1254, "separate": 1, "since": "2016-10-27", "middle": 67.9, "bad": 41.7, "good": 141.6, "lower_pct": 0.0, "worst_drop": -24.9}}, "stockfacts": {"facts": {"NBK.KW": {"symbol": "NBK.KW", "higher_1y": 65.4, "separate": 9, "beat_market": 41.3, "middle_1y": 12.3, "bad_1y": -13.6, "dividend": 0.035, "results": null}, "KFH.KW": {"symbol": "KFH.KW", "higher_1y": 84.1, "separate": 9, "beat_market": 42.4, "middle_1y": 12.6, "bad_1y": -5.6, "dividend": 0.024, "results": null}, "ZAIN.KW": {"symbol": "ZAIN.KW", "higher_1y": 56.9, "separate": 9, "beat_market": 25.0, "middle_1y": 2.1, "bad_1y": -12.9, "dividend": 0.042, "results": null}, "AAPL": {"symbol": "AAPL", "higher_1y": 89.5, "separate": 9, "beat_market": 67.3, "middle_1y": 26.0, "bad_1y": -0.6, "dividend": 1.08, "results": "2026-11-02", "buys_3m": 0, "sells_3m": 16, "gifts_3m": 8}, "MSFT": {"symbol": "MSFT", "higher_1y": 83.6, "separate": 9, "beat_market": 71.0, "middle_1y": 31.5, "bad_1y": -6.9, "dividend": 3.64, "results": null, "buys_3m": 0, "sells_3m": 5, "gifts_3m": 26}}, "pairs": [{"a": "NBK.KW", "b": "KFH.KW", "pct": 49}, {"a": "NBK.KW", "b": "ZAIN.KW", "pct": 38}, {"a": "NBK.KW", "b": "MSFT", "pct": 22}, {"a": "KFH.KW", "b": "ZAIN.KW", "pct": 22}, {"a": "KFH.KW", "b": "MSFT", "pct": 12}, {"a": "AAPL", "b": "MSFT", "pct": 9}, {"a": "NBK.KW", "b": "AAPL", "pct": 3}, {"a": "KFH.KW", "b": "AAPL", "pct": 1}, {"a": "ZAIN.KW", "b": "AAPL", "pct": -8}, {"a": "ZAIN.KW", "b": "MSFT", "pct": -18}]}, "snapshots": []};</script>
 <script>
 (function () {
   // The demo's stand-in for the server: answers from the frozen data, and keeps
@@ -279,7 +384,8 @@
   // Start empty, to put in your own family; kept only in this browser.
   window.startOwn = function () {
     if (!confirm("Start empty, to put in your own family? The sample is set aside, and what you add stays only in this browser, on this device.")) return;
-    try { ["owners", "holdings", "events", "snapshots", "area-notes"].forEach((k) => localStorage.setItem(KEY + k, "[]")); localStorage.setItem(KEY + "finder", JSON.stringify({ answers: {}, shortlist: [] })); } catch (e) { D.data.owners = []; D.data.holdings = []; D.data.events = []; }
+    try { ["owners", "holdings", "events", "snapshots", "area-notes"].forEach((k) => localStorage.setItem(KEY + k, "[]")); localStorage.setItem(KEY + "finder", JSON.stringify({ answers: {}, shortlist: [] })); } catch (e) { D.data.owners = []; D.data.holdings = []; D.data.events = []; D.data.snapshots = []; }
+    try { sessionStorage.setItem("fo-guide", "1"); } catch (e) { /* the welcome card on the Overview still offers the guide */ }
     location.reload();
   };
   window.resetDemo = function () {
@@ -324,14 +430,44 @@
   let quotes = {}, fx = { KWD: 1 }, priceErrors = {}, halalAuto = {}, editing = null;
 
   // ---- Tabs ----
-  const tabs = [...document.querySelectorAll("nav.tabs button")];
+  // Four tabs in view; the rest sit under More.
+  const tabs = [...document.querySelectorAll("#navwrap [data-tab]")];
+  const MORE = [...$("moreMenu").querySelectorAll("[data-tab]")].map((b) => b.dataset.tab);
   function show(name) {
     tabs.forEach((b) => b.setAttribute("aria-selected", String(b.dataset.tab === name)));
+    $("moreBtn").setAttribute("aria-selected", String(MORE.includes(name)));
+    closeMore();
     document.querySelectorAll(".tab").forEach((t) => { t.hidden = t.id !== "tab-" + name; });
     const top = $("tab-" + name).getBoundingClientRect().top + scrollY - 70;
     if (scrollY > top) scrollTo({ top: Math.max(0, top), behavior: "instant" });
   }
   tabs.forEach((b) => b.addEventListener("click", () => show(b.dataset.tab)));
+  function closeMore() { $("moreMenu").hidden = true; $("moreBtn").setAttribute("aria-expanded", "false"); }
+  $("moreBtn").addEventListener("click", (e) => {
+    e.stopPropagation();
+    const menu = $("moreMenu");
+    if (!menu.hidden) { closeMore(); return; }
+    menu.hidden = false; $("moreBtn").setAttribute("aria-expanded", "true");
+    const w = $("navwrap").getBoundingClientRect(), r = $("moreBtn").getBoundingClientRect();
+    const left = Math.max(0, Math.min(r.left - w.left, w.width - menu.offsetWidth));
+    menu.style.left = left + "px";
+  });
+  document.addEventListener("click", (e) => { if (!$("moreMenu").contains(e.target)) closeMore(); });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") { closeMore(); if (!$("guide").hidden) closeGuide(); } });
+
+  // Light or dark: the Mac's setting until the owner picks, then theirs, kept in this browser.
+  let isDark = false;
+  function setTheme(t) {
+    if (t) document.documentElement.dataset.theme = t; else delete document.documentElement.dataset.theme;
+    isDark = t ? t === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+    $("themeBtn").textContent = isDark ? "Light" : "Dark";
+  }
+  try { setTheme(localStorage.getItem("fo-theme")); } catch (e) { setTheme(null); }
+  $("themeBtn").addEventListener("click", () => {
+    const next = isDark ? "light" : "dark";
+    try { localStorage.setItem("fo-theme", next); } catch (e) { /* fine */ }
+    setTheme(next);
+  });
 
   // ---- Values ----
   const ownerName = (id) => (owners.find((o) => o.id === id) || {}).name || "Unassigned";
@@ -412,9 +548,82 @@
     rows.forEach((r) => { if (r.net_kwd == null) return; const k = key(r); m.set(k, (m.get(k) || 0) + r.net_kwd); });
     return [...m.entries()].sort((a, b) => b[1] - a[1]);
   }
-  function bars(id, list, total) {
-    $(id).innerHTML = list.length ? list.map(([k, v]) => `<div class="row"><span>${esc(k)}</span><div class="track"><div class="fill" style="width:${total > 0 ? Math.max(0, 100 * v / total) : 0}%"></div></div>
-      <span class="val">${fmt(v)} <span class="muted small">${total > 0 ? Math.round(100 * v / total) : 0}%</span></span></div>`).join("") : `<p class="empty">Nothing yet.</p>`;
+  // Each row leads further in: pressing it lists the holdings behind it.
+  const HALAL_WORDS = { yes: "Passes", no: "Does not pass", unknown: "Not checked" };
+  const DIMS = {
+    kind: (r) => KINDS[r.h.kind] || r.h.kind, owner: (r) => ownerName(r.h.owner), cur: (r) => r.cur,
+    country: (r) => countryOf(r.h), halal: (r) => HALAL_WORDS[halalOf(r.h)],
+  };
+  let drillOn = null, lastRows = [], lastTotal = 0;
+  function bars(id, list, total, dim) {
+    $(id).innerHTML = list.length ? list.map(([k, v]) => `<button type="button" class="row${drillOn && drillOn.dim === dim && drillOn.key === k ? " on" : ""}" data-dim="${dim}" data-key="${esc(k)}"><span>${esc(k)}</span><div class="track"><div class="fill" style="width:${total > 0 ? Math.max(0, 100 * v / total) : 0}%"></div></div>
+      <span class="val">${fmt(v)} <span class="muted small">${total > 0 ? Math.round(100 * v / total) : 0}%</span></span></button>`).join("") : `<p class="empty">Nothing yet.</p>`;
+  }
+  // The ring: one colour per kind, always the same colour for the same kind.
+  const KIND_COLOUR = { property: "var(--s1)", stock: "var(--s2)", sukuk: "var(--s3)", gold: "var(--s4)", private: "var(--s5)", cash: "var(--s6)", crypto: "var(--s7)", other: "var(--muted)" };
+  const kindOfLabel = (label) => Object.keys(KINDS).find((k) => KINDS[k] === label) || "other";
+  function ring(list, total, centre) {
+    const pos = list.filter(([, v]) => v > 0), sum = pos.reduce((t, [, v]) => t + v, 0);
+    if (!sum) return `<p class="empty">Nothing yet.</p>`;
+    const R = 72, C = 2 * Math.PI * R, gap = pos.length > 1 ? 2 : 0;
+    let off = 0;
+    const segs = pos.map(([k, v]) => {
+      const len = C * v / sum, dash = Math.max(0.5, len - gap);
+      const s = `<circle class="seg${drillOn && drillOn.dim === "kind" && drillOn.key === k ? " on" : ""}" data-dim="kind" data-key="${esc(k)}" data-val="${esc(fmt(v))}" cx="100" cy="100" r="${R}" fill="none" stroke="${KIND_COLOUR[kindOfLabel(k)]}" stroke-width="24"
+        stroke-dasharray="${dash} ${C - dash}" stroke-dashoffset="${-off}" transform="rotate(-90 100 100)"><title>${esc(k)}: ${esc(fmt(v))}</title></circle>`;
+      off += len; return s;
+    }).join("");
+    return `<svg class="donut" viewBox="0 0 200 200" role="img" aria-label="What the family owns, by kind">${segs}
+      <text class="c1" x="100" y="102" text-anchor="middle">${esc(fmt(total))}</text><text class="c2" x="100" y="121" text-anchor="middle">${esc(centre)}</text></svg>`;
+  }
+  function legend(list, total) {
+    return list.map(([k, v]) => `<button type="button" class="pick${drillOn && drillOn.dim === "kind" && drillOn.key === k ? " on" : ""}" data-dim="kind" data-key="${esc(k)}"><span class="sw" style="background:${KIND_COLOUR[kindOfLabel(k)]}"></span><span>${esc(k)}</span>
+      <span class="val">${fmt(v)} <span class="muted small">${total > 0 ? Math.round(100 * v / total) : 0}%</span></span></button>`).join("");
+  }
+  function hoverRing(box) {
+    // Pointing at a part of the ring shows its name and value in the middle.
+    const svg = box.querySelector("svg.donut"); if (!svg) return;
+    const [c1, c2] = svg.querySelectorAll("text"), t1 = c1.textContent, t2 = c2.textContent;
+    svg.querySelectorAll(".seg").forEach((s) => {
+      s.addEventListener("mouseenter", () => { c1.textContent = s.dataset.val; c2.textContent = s.dataset.key; });
+      s.addEventListener("mouseleave", () => { c1.textContent = t1; c2.textContent = t2; });
+    });
+  }
+  function drill(dim, key) {
+    drillOn = drillOn && drillOn.dim === dim && drillOn.key === key ? null : { dim, key };
+    render();
+    if (drillOn) $("drill").scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
+  function drawDrill() {
+    $("drill").hidden = !drillOn;
+    if (!drillOn) return;
+    const list = lastRows.filter((r) => DIMS[drillOn.dim](r) === drillOn.key).sort((a, b) => (b.net_kwd || 0) - (a.net_kwd || 0));
+    const sum = list.reduce((t, r) => t + (r.net_kwd || 0), 0), top = Math.max(1, ...list.map((r) => Math.abs(r.net_kwd || 0)));
+    $("drillTitle").textContent = drillOn.key;
+    $("drillSub").textContent = `${list.length} ${list.length === 1 ? "holding" : "holdings"}, ${fmt(sum)}, ${lastTotal > 0 ? Math.round(100 * sum / lastTotal) : 0}% of the total`;
+    $("drillBody").innerHTML = `<table><thead><tr><th>Holding</th><th>Owner</th><th class="num">${esc(settings.show)}</th><th style="width:30%"></th></tr></thead><tbody>${list.map((r) =>
+      `<tr><td><b>${esc(holdingName(r.h))}</b><div class="muted small">${esc(KINDS[r.h.kind])}</div></td><td>${esc(ownerName(r.h.owner))}</td><td class="num">${fmt(r.net_kwd)}</td>
+        <td><div class="minibar" style="width:${Math.max(0, 100 * (r.net_kwd || 0) / top)}%"></div></td></tr>`).join("")}</tbody></table>`;
+  }
+  const holdingName = (h) => isPriced(h) && h.kind !== "gold" ? (h.symbol || "") + ((quotes[symbolOf(h)] || {}).name ? ` · ${quotes[symbolOf(h)].name}` : "") : (h.name || KINDS[h.kind]);
+  document.addEventListener("click", (e) => {
+    const b = e.target.closest("#tab-overview [data-dim]");
+    if (b) drill(b.dataset.dim, b.dataset.key);
+  });
+  $("drillClose").addEventListener("click", () => { drillOn = null; render(); });
+  $("drillOpen").addEventListener("click", () => {
+    if (!drillOn) return;
+    $("hSearch").value = drillOn.dim === "owner" ? "" : drillOn.key;
+    $("filterOwner").value = drillOn.dim === "owner" ? (owners.find((o) => o.name === drillOn.key) || {}).id || "" : "";
+    show("holdings"); drawHoldings(lastRows);
+  });
+  function drawChange() {
+    // Up or down since the last month kept before this one.
+    const month = new Date().toISOString().slice(0, 7), prev = snapshots.filter((s) => s.month < month).slice(-1)[0];
+    if (!prev || !lastRows.length || !prev.kwd) { $("nwChange").hidden = true; return; }
+    const d = lastTotal - prev.kwd;
+    $("nwChange").hidden = false;
+    $("nwChange").textContent = `${d >= 0 ? "▲" : "▼"} ${fmt(Math.abs(d))} (${(100 * d / prev.kwd).toFixed(1)}%) since ${prev.month}`;
   }
   function render() {
     const live = holdings.filter((h) => !h.closed);
@@ -425,7 +634,7 @@
     const missing = rows.filter((r) => r.net_kwd == null);
     $("nwMain").textContent = live.length ? fmt(total) : "Nothing added yet";
     $("nwOther").textContent = live.length ? `about ${fmt(total, settings.show === "USD" ? "KWD" : "USD")}` : "";
-    $("status").textContent = !live.length ? "Start under Holdings: add what the family owns. Nothing is wrong; it is empty until then."
+    $("status").textContent = !live.length ? "Press Start below to put in what the family owns. Nothing is wrong; it is empty until then."
       : `Net worth today, ${live.length} holdings, ${owners.length || 1} ${owners.length === 1 ? "owner" : "owners"}${missing.length ? `. ${missing.length} could not be valued just now (see Holdings)` : ""}.`;
     const income = live.reduce((t, h) => {
       const r = fx[h.currency || "KWD"] || 0;
@@ -439,14 +648,19 @@
       ["Rent and sukuk profit a year", income ? fmt(income) : "–"], ["Still to pay into funds", unfunded ? fmt(unfunded) : "–"],
       ["One dinar", fx.USD ? `$${(1 / fx.USD).toFixed(4)}` : "–"],
     ].map(([k, v]) => `<div class="tile"><span>${k}</span><b>${v}</b></div>`).join("");
-    bars("byKind", sumBy(rows, (r) => KINDS[r.h.kind] || r.h.kind), total);
-    bars("byOwner", sumBy(rows, (r) => ownerName(r.h.owner)), total);
-    bars("byCur", sumBy(rows, (r) => r.cur), total);
-    bars("byCountry", sumBy(rows, (r) => countryOf(r.h)), total);
+    lastRows = rows; lastTotal = total;
+    $("welcome").hidden = live.length > 0;
+    const byKind = sumBy(rows, DIMS.kind);
+    $("kindRing").innerHTML = ring(byKind, total, "Net worth"); hoverRing($("kindRing"));
+    $("byKind").innerHTML = legend(byKind, total);
+    bars("byOwner", sumBy(rows, DIMS.owner), total, "owner");
+    bars("byCur", sumBy(rows, DIMS.cur), total, "cur");
+    bars("byCountry", sumBy(rows, DIMS.country), total, "country");
+    if (drillOn && drillOn.dim === "halal" && !settings.halal) drillOn = null;
+    drawDrill();
     $("halalCard").hidden = !settings.halal;
     if (settings.halal) {
-      const words = { yes: "Passes", no: "Does not pass", unknown: "Not checked" };
-      bars("byHalal", sumBy(rows, (r) => words[halalOf(r.h)]), total);
+      bars("byHalal", sumBy(rows, DIMS.halal), total, "halal");
       $("halalNote").textContent = "US shares use the Trade Desk's screen; Boursa Kuwait shares and everything else are as you marked them on each holding. Not checked means nobody has said yet. A screen, not a ruling.";
     }
     drawHoldings(rows);
@@ -462,13 +676,24 @@
     const f = $("filterOwner").value;
     const sel = [`<option value="">Every owner</option>`].concat(owners.map((o) => `<option value="${esc(o.id)}"${o.id === f ? " selected" : ""}>${esc(o.name)}</option>`));
     $("filterOwner").innerHTML = sel.join("");
-    const list = rows.filter((r) => !f || r.h.owner === f);
+    // Find: every word typed must appear somewhere on the holding (its name, owner, kind, country, currency, notes).
+    const words = $("hSearch").value.toLowerCase().split(/\s+/).filter(Boolean);
+    const said = (r) => [holdingName(r.h), ownerName(r.h.owner), KINDS[r.h.kind], countryOf(r.h), r.cur, r.h.area, r.h.notes, settings.halal ? HALAL_WORDS[halalOf(r.h)] : ""].join(" ").toLowerCase();
+    const all = rows.filter((r) => !f || r.h.owner === f);
+    const list = words.length ? all.filter((r) => { const s = said(r); return words.every((w) => s.includes(w)); }) : all;
+    const sort = $("hSort").value;
+    $("hCount").textContent = list.length !== rows.length ? `Showing ${list.length} of ${rows.length}` : "";
     const errs = Object.entries(priceErrors);
     $("priceNote").textContent = errs.length ? `Could not read: ${errs.map(([k, v]) => `${k} (${v})`).join("; ")}` : Object.keys(quotes).length ? "Prices read just now." : "";
-    if (!list.length) { $("holdingsTable").innerHTML = `<p class="empty">Nothing here yet. Press "Add something".</p>`; return; }
-    const groups = Object.keys(KINDS).map((k) => [k, list.filter((r) => r.h.kind === k)]).filter(([, l]) => l.length);
-    $("holdingsTable").innerHTML = `<table><thead><tr><th>Holding</th><th>Owner</th><th class="num">Held</th><th class="num">Value</th><th class="num">${esc(settings.show)}</th>${settings.halal ? "<th>Halal</th>" : ""}<th></th></tr></thead><tbody>${
-      groups.map(([k, l]) => `<tr class="group"><td colspan="${settings.halal ? 7 : 6}">${esc(KINDS[k])} <span class="muted small">${fmt(l.reduce((t, r) => t + (r.net_kwd || 0), 0))}</span></td></tr>` + l.map((r) => {
+    if (!rows.length) { $("holdingsTable").innerHTML = `<p class="empty">Nothing here yet. Press "Add something".</p>`; return; }
+    if (!list.length) { $("holdingsTable").innerHTML = `<p class="empty">Nothing matches. Clear the search box to see everything.</p>`; return; }
+    const byName = (a, b) => holdingName(a.h).localeCompare(holdingName(b.h));
+    const groups = sort === "kind" ? Object.keys(KINDS).map((k) => [KINDS[k], list.filter((r) => r.h.kind === k)]).filter(([, l]) => l.length)
+      : sort === "owner" ? [...new Set(list.map((r) => ownerName(r.h.owner)))].sort().map((o) => [o, list.filter((r) => ownerName(r.h.owner) === o).sort((a, b) => (b.net_kwd || 0) - (a.net_kwd || 0))])
+      : [[null, list.slice().sort(sort === "name" ? byName : (a, b) => (b.net_kwd || 0) - (a.net_kwd || 0))]];
+    const th = (key, text, cls) => `<th${cls ? ` class="${cls}${sort === key ? " sorted" : ""}"` : sort === key ? ' class="sorted"' : ""} data-sort="${key}">${text}</th>`;
+    $("holdingsTable").innerHTML = `<table><thead><tr>${th("name", "Holding")}${th("owner", "Owner")}<th class="num">Held</th><th class="num">Value</th>${th("value", esc(settings.show), "num")}${settings.halal ? "<th>Halal</th>" : ""}<th></th></tr></thead><tbody>${
+      groups.map(([k, l]) => (k ? `<tr class="group"><td colspan="${settings.halal ? 7 : 6}">${esc(k)} <span class="muted small">${fmt(l.reduce((t, r) => t + (r.net_kwd || 0), 0))}</span></td></tr>` : "") + l.map((r) => {
         const h = r.h, q = quotes[symbolOf(h)], hl = halalOf(h);
         const title = isPriced(h) && h.kind !== "gold" ? `<b>${esc(h.symbol)}</b> <span class="muted small">${esc(q ? q.name : "")}</span>` : `<b>${esc(h.name || KINDS[h.kind])}</b>`;
         const extra = h.kind === "property" && Number(h.mortgage_left) ? `<div class="muted small">Value ${native(h.value, h.currency)}, owed ${native(h.mortgage_left, h.currency)}</div>`
@@ -481,7 +706,10 @@
           <td><button data-edit="${esc(h.id)}">Change</button></td></tr>`;
       }).join("")).join("")}</tbody></table>`;
     $("holdingsTable").querySelectorAll("[data-edit]").forEach((b) => b.addEventListener("click", () => openForm(holdings.find((h) => h.id === b.dataset.edit))));
+    $("holdingsTable").querySelectorAll("th[data-sort]").forEach((t) => t.addEventListener("click", () => { $("hSort").value = $("hSort").value === t.dataset.sort ? "kind" : t.dataset.sort; drawHoldings(lastRows); }));
   }
+  $("hSearch").addEventListener("input", () => drawHoldings(lastRows));
+  $("hSort").addEventListener("change", () => drawHoldings(lastRows));
 
   function drawOwners(rows) {
     $("ownersTable").innerHTML = owners.length ? `<table><thead><tr><th>Owner</th><th>Kind</th><th class="num">Holdings</th><th class="num">Net worth</th></tr></thead><tbody>${
@@ -1036,13 +1264,30 @@
     drawHistory();
   }
   function drawHistory() {
+    drawChange();
     if (snapshots.length < 2) { $("history").innerHTML = `<p class="muted">${snapshots.length ? `${esc(snapshots[0].month)}: ${fmt(snapshots[0].kwd)}. The line appears from the second month.` : "Kept from the first complete look."}</p>`; return; }
-    const W = 640, H = 200, L = 70, R = 10, T = 10, B = 24, vals = snapshots.map((s) => s.kwd);
-    const lo = Math.min(...vals) * 0.98, hi = Math.max(...vals) * 1.02, x = (i) => L + i * (W - L - R) / (snapshots.length - 1), y = (v) => T + (1 - (v - lo) / (hi - lo || 1)) * (H - T - B);
-    $("history").innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Net worth month by month" style="width:100%;height:auto">
-      <polyline fill="none" stroke="var(--accent)" stroke-width="2.5" points="${snapshots.map((s, i) => `${x(i)},${y(s.kwd)}`).join(" ")}"/>
-      ${snapshots.map((s, i) => `<circle cx="${x(i)}" cy="${y(s.kwd)}" r="3.5" fill="var(--accent)"><title>${esc(s.month)}: ${fmt(s.kwd)}</title></circle><text x="${x(i)}" y="${H - 6}" text-anchor="middle">${esc(s.month)}</text>`).join("")}
-      <text x="${L - 6}" y="${y(hi) + 4}" text-anchor="end">${fmt(hi)}</text><text x="${L - 6}" y="${y(lo) + 4}" text-anchor="end">${fmt(lo)}</text></svg>`;
+    const W = 640, H = 220, L = 78, R = 14, T = 30, B = 24, vals = snapshots.map((s) => s.kwd), n = snapshots.length;
+    const lo = Math.min(...vals) * 0.98, hi = Math.max(...vals) * 1.02, x = (i) => L + i * (W - L - R) / (n - 1), y = (v) => T + (1 - (v - lo) / (hi - lo || 1)) * (H - T - B);
+    const pts = snapshots.map((s, i) => `${x(i)},${y(s.kwd)}`).join(" "), every = Math.ceil(n / 8);
+    $("history").innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Net worth month by month" style="width:100%;height:auto;touch-action:pan-y">
+      <defs><linearGradient id="nwFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--accent)" stop-opacity=".28"/><stop offset="1" stop-color="var(--accent)" stop-opacity="0"/></linearGradient></defs>
+      <line x1="${L}" x2="${W - R}" y1="${H - B}" y2="${H - B}" stroke="var(--line)"/>
+      <polygon fill="url(#nwFill)" points="${x(0)},${H - B} ${pts} ${x(n - 1)},${H - B}"/>
+      <polyline fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round" points="${pts}"/>
+      ${snapshots.map((s, i) => i % every && i !== n - 1 ? "" : `<text x="${x(i)}" y="${H - 6}" text-anchor="middle">${esc(s.month)}</text>`).join("")}
+      <text x="${L - 8}" y="${y(hi) + 4}" text-anchor="end">${fmt(hi)}</text><text x="${L - 8}" y="${y(lo) + 4}" text-anchor="end">${fmt(lo)}</text>
+      <g id="hTip" visibility="hidden"><line id="hTipLine" y1="${T - 6}" y2="${H - B}" stroke="var(--muted)" stroke-dasharray="3 3"/><circle id="hTipDot" r="5" fill="var(--accent)" stroke="var(--surface)" stroke-width="2"/>
+        <text id="hTipText" y="${T - 12}" text-anchor="middle" style="fill:var(--fg);font-size:12px;font-weight:600"></text></g>
+      ${snapshots.map((s, i) => `<rect data-i="${i}" x="${i ? (x(i - 1) + x(i)) / 2 : L}" width="${(i < n - 1 ? (x(i) + x(i + 1)) / 2 : W - R) - (i ? (x(i - 1) + x(i)) / 2 : L)}" y="0" height="${H - B}" fill="transparent"/>`).join("")}</svg>`;
+    // Pointing along the line shows that month's total.
+    const svg = $("history").querySelector("svg");
+    svg.querySelectorAll("rect[data-i]").forEach((r) => r.addEventListener("pointerenter", () => {
+      const i = Number(r.dataset.i), s = snapshots[i], cx = x(i), cy = y(s.kwd);
+      $("hTip").setAttribute("visibility", "visible");
+      $("hTipLine").setAttribute("x1", cx); $("hTipLine").setAttribute("x2", cx); $("hTipDot").setAttribute("cx", cx); $("hTipDot").setAttribute("cy", cy);
+      $("hTipText").setAttribute("x", Math.min(Math.max(cx, L + 70), W - R - 70)); $("hTipText").textContent = `${s.month}: ${fmt(s.kwd)}`;
+    }));
+    svg.addEventListener("pointerleave", () => $("hTip").setAttribute("visibility", "hidden"));
   }
 
   // ---- Adding and changing ----
@@ -1070,6 +1315,7 @@
     $("archiveH").hidden = !h;
     drawForm();
     $("formCard").scrollIntoView({ behavior: "smooth", block: "start" });
+    $("gForm").innerHTML = "";   // the guide's box uses the same field names
   }
   function drawForm() {
     const h = editing;
@@ -1112,7 +1358,7 @@
     $("o_name").value = ""; $("ownerMsg").textContent = `Added ${name}.`;
     render();
   });
-  $("filterOwner").addEventListener("change", render);
+  $("filterOwner").addEventListener("change", () => drawHoldings(lastRows));
   $("showCur").addEventListener("change", async () => { settings.show = $("showCur").value; await mobleeApp.save("settings", settings); render(); });
   $("set_halal").addEventListener("change", async () => {
     settings.halal = $("set_halal").checked;
@@ -1122,7 +1368,96 @@
     if (settings.halal) loadHalal(holdings.filter((h) => !h.closed));
   });
 
-  load().catch((e) => { $("status").textContent = "Could not read the family's data: " + e.message; });
+  // ---- The guided start: who, what, then the whole picture ----
+  // Asks only what each kind needs to be valued; the rest can be added later under Holdings.
+  const GUIDE_FIELDS = {
+    property: ["owner", "name", "value", "currency", "mortgage_left", "rent_month"], stock: ["owner", "symbol", "qty"], cash: ["owner", "name", "value", "currency"],
+    sukuk: ["owner", "name", "value", "currency", "coupon_pct"], gold: ["owner", "qty", "unit"], private: ["owner", "name", "value", "currency"],
+    crypto: ["owner", "symbol", "qty"], other: ["owner", "name", "value", "currency"],
+  };
+  const GUIDE_HINT = {
+    property: "Homes, buildings, land", stock: "US and Boursa Kuwait", cash: "Current and deposit accounts", sukuk: "With their profit rate",
+    gold: "Bars and coins, by weight", private: "Family companies, funds", crypto: "Bitcoin and others", other: "Cars, art, anything else",
+  };
+  let guideKind = null, guideAdded = [];
+  function guideStep(n) {
+    [1, 2, 3].forEach((i) => { $("gStep" + i).hidden = i !== n; });
+    document.querySelectorAll("#guide .steps span").forEach((s) => { const i = Number(s.dataset.step); s.className = i === n ? "on" : i < n ? "done" : ""; });
+    if (n === 1) drawGuideOwners();
+    if (n === 2) drawGuideKinds();
+    if (n === 3) drawGuidePicture();
+    $("guide").querySelector(".sheet").scrollTop = 0;
+  }
+  function openGuide() {
+    $("formCard").hidden = true; $("hForm").innerHTML = ""; editing = null;
+    guideAdded = []; guideKind = null; $("guide").hidden = false; guideStep(owners.length && holdings.some((h) => !h.closed) ? 2 : 1);
+    setTimeout(() => (owners.length ? null : $("g_name"))?.focus(), 50);
+  }
+  function closeGuide() { $("guide").hidden = true; $("gForm").innerHTML = ""; guideKind = null; editing = null; }
+  function drawGuideOwners() {
+    $("gOwners").innerHTML = owners.map((o) => `<span class="chip">${esc(o.name)}</span>`).join("");
+  }
+  async function guideAddOwner() {
+    const name = $("g_name").value.trim();
+    if (!name) { $("gOwnerMsg").textContent = "Put in a name."; return; }
+    owners.push({ id: `o-${Date.now()}`, name, kind: $("g_kind").value });
+    await mobleeApp.save("owners", owners);
+    $("g_name").value = ""; $("gOwnerMsg").textContent = ""; $("g_name").focus();
+    drawGuideOwners(); render();
+  }
+  function drawGuideKinds() {
+    $("gKinds").innerHTML = Object.keys(GUIDE_FIELDS).map((k) => `<button type="button" data-gkind="${k}"${k === guideKind ? ' class="on"' : ""}><b><span class="sw" style="background:${KIND_COLOUR[k]}"></span>${esc(KINDS[k])}</b><span>${esc(GUIDE_HINT[k])}</span></button>`).join("");
+    $("gKinds").querySelectorAll("[data-gkind]").forEach((b) => b.addEventListener("click", () => {
+      guideKind = b.dataset.gkind; editing = { id: null, kind: guideKind };
+      $("gForm").innerHTML = GUIDE_FIELDS[guideKind].map((k) => field(k, editing)).join("");
+      $("gFormWrap").hidden = false; $("gHMsg").textContent = "";
+      drawGuideKinds();
+      const first = $("gForm").querySelector("input"); if (first) first.focus();
+    }));
+    $("gAdded").innerHTML = guideAdded.length ? `<span class="muted small">Added:</span>` + guideAdded.map((t) => `<span class="chip">${esc(t)}</span>`).join("") : "";
+  }
+  async function guideAddHolding() {
+    if (!guideKind) return;
+    const h = { id: null, kind: guideKind };
+    GUIDE_FIELDS[guideKind].forEach((k) => { const el = $("f_" + k); if (el) h[k] = el.type === "number" ? (el.value === "" ? "" : Number(el.value)) : el.value.trim(); });
+    if (isPriced(h) && h.kind !== "gold" && !h.symbol) { $("gHMsg").textContent = "Put in the symbol."; return; }
+    if (isPriced(h) && !(Number(h.qty) > 0)) { $("gHMsg").textContent = "Put in how many are held."; return; }
+    if (!isPriced(h) && h.value === "") { $("gHMsg").textContent = "Put in what it is worth today."; return; }
+    if (h.symbol) h.symbol = h.symbol.toUpperCase();
+    h.updated = h.added = new Date().toISOString().slice(0, 10); h.id = `h-${Date.now()}`;
+    holdings.push(h);
+    await mobleeApp.save("holdings", holdings);
+    guideAdded.push(h.symbol || h.name || KINDS[h.kind]);
+    guideKind = null; editing = null; $("gFormWrap").hidden = true; $("gForm").innerHTML = "";
+    drawGuideKinds();
+  }
+  async function drawGuidePicture() {
+    $("gRing").innerHTML = `<p class="muted">Reading today's prices…</p>`; $("gLegend").innerHTML = "";
+    await refreshPrices();
+    const byKind = sumBy(lastRows, DIMS.kind);
+    $("gRing").innerHTML = ring(byKind, lastTotal, "Net worth"); hoverRing($("gRing"));
+    $("gLegend").innerHTML = legend(byKind, lastTotal).replace(/<button type="button" class="pick[^"]*"/g, '<div class="pick"').replace(/<\/button>/g, "</div>");
+  }
+  $("guideBtn").addEventListener("click", openGuide);
+  $("gAddOwner").addEventListener("click", guideAddOwner);
+  $("g_name").addEventListener("keydown", (e) => { if (e.key === "Enter") guideAddOwner(); });
+  $("gClose1").addEventListener("click", closeGuide);
+  $("gNext1").addEventListener("click", () => { if (!owners.length) { $("gOwnerMsg").textContent = "Add at least one; it can be you."; return; } guideStep(2); });
+  $("gAddH").addEventListener("click", guideAddHolding);
+  $("gForm").addEventListener("keydown", (e) => { if (e.key === "Enter") guideAddHolding(); });
+  $("gCancelH").addEventListener("click", () => { guideKind = null; editing = null; $("gFormWrap").hidden = true; $("gForm").innerHTML = ""; drawGuideKinds(); });
+  $("gBack2").addEventListener("click", () => guideStep(1));
+  $("gNext2").addEventListener("click", () => { if (!holdings.some((h) => !h.closed)) { $("gHMsg").textContent = ""; $("gFormWrap").hidden = false; $("gHMsg").textContent = "Add at least one thing first."; return; } guideStep(3); });
+  $("gBack3").addEventListener("click", () => guideStep(2));
+  $("gDone").addEventListener("click", () => { closeGuide(); show("overview"); scrollTo({ top: 0, behavior: "smooth" }); });
+  $("guide").addEventListener("click", (e) => { if (e.target === $("guide")) closeGuide(); });
+
+  load().then(() => {
+    // The demo's "Start with my own family" opens the guide once the page is empty.
+    let ask = false;
+    try { ask = sessionStorage.getItem("fo-guide") === "1"; sessionStorage.removeItem("fo-guide"); } catch (e) { /* fine */ }
+    if (ask) openGuide();
+  }).catch((e) => { $("status").textContent = "Could not read the family's data: " + e.message; });
 })();
 </script>
 <script>/* i18n.js - the Family Office in Arabic.
@@ -1263,7 +1598,7 @@
     "No payments due in 3 months": "لا دفعات مستحقة خلال 3 أشهر", "No property": "لا يوجد عقار", "No bank cash added yet.": "لم يُضف نقد بنكي بعد.",
     "The payments due need more than the cash; nothing is spare.": "الدفعات المستحقة تتجاوز النقد؛ لا يوجد فائض.",
     "Type a deposit or sukuk rate in Options to see each property beside them.": "أدخل نسبة وديعة أو صك في صفحة الخيارات لترى كل عقار بجانبها.",
-    "Nothing added yet": "لم يُضف شيء بعد", "Start under Holdings: add what the family owns. Nothing is wrong; it is empty until then.": "ابدأ من صفحة الأصول: أضف ما تملكه العائلة. لا يوجد خطأ؛ الصفحة فارغة حتى ذلك الحين.",
+    "Nothing added yet": "لم يُضف شيء بعد", "Press Start below to put in what the family owns. Nothing is wrong; it is empty until then.": "اضغط ابدأ في الأسفل لتُدخل ما تملكه العائلة. لا يوجد خطأ؛ الصفحة فارغة حتى ذلك الحين.",
     "Nothing here yet. Press \"Add something\".": "لا شيء هنا بعد. اضغط \"أضف أصلاً\".", "Nothing yet.": "لا شيء بعد.", "Nothing on the shortlist yet.": "لا شيء في القائمة بعد.",
     "Nothing due yet. Add rent, sukuk, fund calls or your own dates.": "لا شيء مستحق بعد. أضف إيجاراً أو صكوكاً أو طلبات تمويل أو مواعيدك.",
     "Nothing in the next 12 months yet.": "لا شيء خلال الأشهر الـ12 القادمة بعد.", "Nothing due.": "لا شيء مستحق.", "None yet.": "لا شيء بعد.",
@@ -1287,8 +1622,31 @@
     "Parent (sample)": "الوالد (نموذج)", "Daughter (sample)": "الابنة (نموذج)", "Son (sample)": "الابن (نموذج)", "Family Holding Co. (sample)": "الشركة القابضة للعائلة (نموذج)",
     "School fees (sample)": "رسوم مدرسية (نموذج)", "Zakat reminder (sample)": "تذكير الزكاة (نموذج)",
     "3-bedroom flat (sample listing)": "شقة 3 غرف (إعلان نموذجي)", "2-bedroom flat (sample listing)": "شقة غرفتين (إعلان نموذجي)", "Villa (sample listing)": "فيلا (إعلان نموذجي)",
+    // The header, the More menu, the ring and the guided start (28 October 2026).
+    "Light": "فاتح", "Dark": "داكن", "More": "المزيد",
+    "Set up your family in three steps": "جهّز عائلتك في ثلاث خطوات", "Start": "ابدأ",
+    "Who is in the family, what you own, and then the whole picture. About ten minutes; rough numbers are fine.":
+      "من في العائلة، وما تملكونه، ثم الصورة الكاملة. حوالي عشر دقائق؛ والأرقام التقريبية تكفي.",
+    "What the family owns": "ما تملكه العائلة", "Press any part to see what is in it.": "اضغط على أي جزء لترى ما فيه.", "Open in Holdings": "افتح في الأصول",
+    "In this demo, the earlier months are made up.": "في هذه النسخة التجريبية، الأشهر السابقة افتراضية.",
+    "Grouped by kind": "مجمّعة حسب النوع", "Largest first": "الأكبر أولاً", "Name, A to Z": "الاسم، أبجدياً",
+    "Nothing matches. Clear the search box to see everything.": "لا يوجد ما يطابق. امسح خانة البحث لترى كل شيء.",
+    "1. Your family": "1. عائلتك", "2. What you own": "2. ما تملكونه", "3. The whole picture": "3. الصورة الكاملة",
+    "Who is in the family?": "من في العائلة؟", "Add each person or family company that owns something. More can be added later.":
+      "أضف كل فرد أو شركة عائلية تملك شيئاً. يمكن إضافة المزيد لاحقاً.",
+    "Next": "التالي", "Back": "رجوع", "Add more": "أضف المزيد", "Done": "تم", "Added:": "أُضيف:",
+    "What does the family own?": "ماذا تملك العائلة؟", "Press one, fill in the short box, and press Add. Rough numbers are fine. Add as many as you like.":
+      "اضغط على نوع، واملأ الخانات القليلة، ثم اضغط إضافة. الأرقام التقريبية تكفي. أضف ما تشاء.",
+    "Homes, buildings, land": "بيوت، عمارات، أراضٍ", "US and Boursa Kuwait": "الأمريكية وبورصة الكويت", "Current and deposit accounts": "حسابات جارية وودائع",
+    "With their profit rate": "مع نسبة أرباحها", "Bars and coins, by weight": "سبائك وعملات، بالوزن", "Family companies, funds": "شركات عائلية، صناديق",
+    "Bitcoin and others": "بيتكوين وغيرها", "Cars, art, anything else": "سيارات، تحف، وأي شيء آخر",
+    "See the whole picture": "اعرض الصورة الكاملة",
+    "The calendar, the insights and the monthly report are now worked out from these. Change or add anything under Holdings.":
+      "التقويم والملاحظات والتقرير الشهري تُحسب الآن من هذه. عدّل أو أضف أي شيء من تبويب الأصول.",
+    "Add at least one; it can be you.": "أضف واحداً على الأقل؛ يمكن أن يكون أنت.", "Add at least one thing first.": "أضف شيئاً واحداً على الأقل أولاً.",
   };
   const PH = {
+    "Find a holding, owner, country or currency": "ابحث عن أصل أو مالك أو دولة أو عملة",
     "e.g. School fees": "مثل: رسوم مدرسية", "any country, e.g. Kuwait, Spain, Japan": "أي دولة، مثل: الكويت، إسبانيا، اليابان", "e.g. Salmiya, Jabriya": "مثل: السالمية، الجابرية",
     "e.g. KWD, EUR": "مثل: KWD، EUR", "e.g. KWD": "مثل: KWD", "ask your bank": "اسأل بنكك", "from the offer": "من العرض", "e.g. a family member or a family company": "مثل: فرد أو شركة للعائلة",
     "e.g. 3-bedroom flat, sea view": "مثل: شقة 3 غرف بإطلالة بحرية", "100 means no loan": "100 تعني بلا تمويل", "e.g. 100000": "مثل: 100000", "e.g. 500000": "مثل: 500000",
@@ -1301,6 +1659,9 @@
   const w = (s) => AR[s] || mon(s);   // a captured word: its Arabic if known, months turned, else as it is
   const yrs = (n) => Number(n) === 1 ? "سنة" : Number(n) === 2 ? "سنتين" : `${n} سنوات`;
   const PATTERNS = [
+    [/^([▲▼]) (.+) \((-?[\d.]+)%\) since (\d{4}-\d{2})$/, (m) => `${m[1]} ${m[2]} (${m[3]}%) منذ ${m[4]}`],
+    [/^(\d+) holdings?, (.+), (-?\d+)% of the total$/, (m) => `${m[1]} ${m[1] === "1" ? "أصل" : "أصول"}، ${m[2]}، ${m[3]}% من المجموع`],
+    [/^Showing (\d+) of (\d+)$/, (m) => `يظهر ${m[1]} من ${m[2]}`],
     [/^Net worth today, (\d+) holdings, (\d+) owners?\.(?: (\d+) could not be valued just now \(see Holdings\)\.)?$/, (m) => `صافي الثروة اليوم: ${m[1]} أصول، ${m[2]} مالكين.${m[3] ? ` تعذّر تقييم ${m[3]} الآن (انظر الأصول).` : ""}`],
     [/^about (.+)$/, (m) => `حوالي ${m[1]}`],
     [/^A made-up family, with prices frozen on (.+?)\. Change anything or add your own: it stays in your own browser, on your own device, and is never sent anywhere\.$/,
@@ -1400,7 +1761,7 @@
   }
 
   // The switch, in the header.
-  const host = document.querySelector("header .big") || document.querySelector("header");
+  const host = document.getElementById("hdrTools") || document.querySelector("header .big") || document.querySelector("header");
   host.insertAdjacentHTML("beforeend", `<div class="switch small" id="langSwitch"><button type="button" id="langBtn">${ar ? "English" : "العربية"}</button></div>`);
   document.getElementById("langBtn").addEventListener("click", () => {
     try { localStorage.setItem("fo-lang", ar ? "en" : "ar"); } catch (e) { /* fine */ }
