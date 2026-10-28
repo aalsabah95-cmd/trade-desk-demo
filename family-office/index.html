@@ -1883,7 +1883,7 @@
       reach = await fetch("/api/reach").then((r) => r.json()).catch(() => null);
     }
     $("connCards").innerHTML = [
-      card(priced > 0 && !errs, "Prices", "Yahoo Finance, public data", priced ? `${priced} read${errs ? `, ${errs} could not be read` : ""}` : "None needed yet", "holdings"),
+      card(errs ? false : priced > 0 ? true : null, "Prices", "Yahoo Finance, public data", priced ? `${priced} read${errs ? `, ${errs} could not be read` : ""}` : "None needed yet", "holdings"),
       card(!!fx.USD, "Currency rates", "Yahoo Finance, public data", fx.USD ? `One dinar is $${(1 / fx.USD).toFixed(4)}` : "Not read yet", null),
       card(screened > 0 ? true : null, "Trade Desk", "Halal screen and share facts", screened ? `${screened} US shares screened` : "Not beside it, or no US shares", null),
       card(!!rem.on, "Phone reminders", "One message a morning when something is due", rem.on ? `On, ${rem.days} ${rem.days === 1 ? "day" : "days"} ahead` : "Off", "settings"),
