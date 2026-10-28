@@ -86,6 +86,10 @@
   .chips { display: flex; flex-wrap: wrap; gap: .4rem; margin: .6rem 0; }
   .chip { font-size: .85rem; padding: .25rem .7rem; border-radius: 999px; background: color-mix(in srgb, var(--accent) 12%, transparent); }
   .actions.end { justify-content: flex-end; border-top: 1px solid var(--line); padding-top: .9rem; margin-top: 1rem; }
+  .goal { padding: .85rem 0; border-bottom: 1px solid var(--line); } .goal:last-child { border-bottom: 0; }
+  .goal-head, .goal-foot { display: flex; justify-content: space-between; align-items: center; gap: .4rem 1rem; flex-wrap: wrap; }
+  .goal .track { height: .75rem; margin: .5rem 0; background: color-mix(in srgb, var(--line) 70%, transparent); border-radius: 999px; overflow: hidden; }
+  .goal .fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent-2)); border-radius: 999px; }
   th[data-sort] { cursor: pointer; } th[data-sort]:hover { color: var(--fg); } th.sorted { color: var(--accent); }
   .tools-row { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; margin: 0 0 .75rem; }
   .tools-row input[type="search"] { width: auto; flex: 1 1 14rem; max-width: 22rem; }
@@ -130,6 +134,7 @@
   @media print {
     header, .navwrap, .modal, .no-print, main > section, .tab:not(#tab-report), #importCard, #formCard { display: none !important; }
     #tab-report { display: block !important; }
+    body.print-person #tab-report { display: none !important; } body.print-person #tab-person { display: block !important; }
     html, body { background: #fff; color: #000; font-size: 11pt; }
     .card { box-shadow: none; border: 0; padding: 0; }
     .report { break-inside: auto; } .report table { break-inside: avoid; }
@@ -153,7 +158,7 @@
     <button data-tab="overview" aria-selected="true">Overview</button><button data-tab="holdings">Holdings</button>
     <button data-tab="calendar">Calendar</button><button data-tab="insights">Insights</button><button id="moreBtn" aria-haspopup="true" aria-expanded="false">More <span aria-hidden="true">▾</span></button>
   </nav>
-  <div class="more-menu" id="moreMenu" hidden><button data-tab="report">Report</button><button data-tab="options">Options</button><button data-tab="finder">Property finder</button><button data-tab="owners">Owners</button><button data-tab="settings">Settings</button></div>
+  <div class="more-menu" id="moreMenu" hidden><button data-tab="goals">Goals</button><button data-tab="zakat">Zakat</button><button data-tab="person">Each person</button><button data-tab="report">Report</button><button data-tab="options">Options</button><button data-tab="finder">Property finder</button><button data-tab="owners">Owners</button><button data-tab="settings">Settings</button></div>
   </div>
 
   <div class="tab" id="tab-overview">
@@ -305,6 +310,34 @@
       <div class="actions"><button class="primary" id="addOwner">Add owner</button><span class="note" id="ownerMsg"></span></div></div>
   </div>
 
+  <div class="tab" id="tab-goals" hidden>
+    <div class="card"><h2>Goals</h2><p class="muted">What the family is working towards, and how close it is today, worked out from the Holdings tab.</p><div id="goalList"></div></div>
+    <div class="card"><h2>Add a goal</h2>
+      <form class="grid" id="goalForm" onsubmit="return false">
+        <div><label for="goal_title">What</label><input id="goal_title" placeholder="e.g. Deposit for a house"></div>
+        <div><label for="goal_amount">Amount</label><input id="goal_amount" type="number" min="0" step="any"></div>
+        <div><label for="goal_cur">Currency</label><select id="goal_cur"><option>KWD</option><option>USD</option></select></div>
+        <div><label for="goal_date">By</label><input id="goal_date" type="date"></div>
+        <div><label for="goal_what">Counted from</label><select id="goal_what"></select></div>
+      </form>
+      <div class="actions"><button class="primary" id="goalAdd">Add goal</button><span class="note" id="goalMsg"></span></div></div>
+  </div>
+
+  <div class="tab" id="tab-zakat" hidden>
+    <div class="card"><h2>Zakat, a rough estimate</h2>
+      <p class="muted">2.5% of what each person holds that counts for zakat, when it is above the nisab (the value of 85 grams of gold) and has been held for a full lunar year. Each person is worked out on their own. Scholars differ on shares, property and debts, so every holding below can be changed. A guide to take to your scholar or to Bait Al-Zakat, not a ruling.</p>
+      <div class="tiles" id="zTiles"></div>
+      <div class="switch" style="margin-top:.8rem"><input type="checkbox" id="zDebts"><label for="zDebts">Take off loan payments due in the next 12 months</label></div></div>
+    <div class="card"><h2>Each person</h2><div class="scroll" id="zOwners"></div><p class="note" id="zNote"></p></div>
+    <div class="card"><h2>What counts</h2><p class="muted">The usual starting point for each kind: cash, gold, crypto, sukuk and shares in full; a home or a rented property not counted (its rent is counted once it sits in the bank). Change any holding to match your scholar's view.</p><div class="scroll" id="zHoldings"></div></div>
+  </div>
+
+  <div class="tab" id="tab-person" hidden>
+    <div class="actions no-print" style="margin:0 0 1rem"><label for="pOwner" class="small" style="margin:0">Show</label><select id="pOwner" style="width:auto"></select>
+      <button class="primary" id="pPrint">Print, or save as PDF</button><span class="note">A page for one person, to keep or to share with them.</span></div>
+    <div class="card report" id="person"></div>
+  </div>
+
   <div class="tab" id="tab-settings" hidden>
     <div class="card"><h2>Settings</h2>
       <div class="switch"><input type="checkbox" id="set_halal"><label for="set_halal"><b>Halal checks</b>: show which holdings pass a Shariah screen, and how much of the total does. Off hides them everywhere.</label></div>
@@ -342,7 +375,7 @@
 
   <section><p class="note">A demo with a made-up family; what you change stays in your browser. Prices come from Yahoo Finance's public data and can be 15 minutes old; Boursa Kuwait prices are turned from fils into dinars. Values you type in (property, private holdings, cash) are as of the day you last changed them. Nothing here is advice.</p></section>
 </main>
-<script>window.DEMO = {"frozen": "2026-10-28", "data": {"owners": [{"id": "o-1", "name": "Parent (sample)", "kind": "person"}, {"id": "o-2", "name": "Daughter (sample)", "kind": "person"}, {"id": "o-3", "name": "Son (sample)", "kind": "person"}, {"id": "o-4", "name": "Family Holding Co. (sample)", "kind": "company"}], "holdings": [{"id": "h-1", "owner": "o-1", "kind": "stock", "symbol": "NBK.KW", "qty": 25000, "cost": 0.7, "halal": "no"}, {"id": "h-2", "owner": "o-1", "kind": "stock", "symbol": "KFH.KW", "qty": 40000, "halal": "yes"}, {"id": "h-3", "owner": "o-4", "kind": "stock", "symbol": "ZAIN.KW", "qty": 30000, "halal": "unknown"}, {"id": "h-4", "owner": "o-2", "kind": "stock", "symbol": "AAPL", "qty": 60, "halal": "auto"}, {"id": "h-5", "owner": "o-3", "kind": "stock", "symbol": "MSFT", "qty": 25, "halal": "auto"}, {"id": "h-6", "owner": "o-1", "kind": "cash", "name": "Islamic current account", "value": 45000, "currency": "KWD", "country": "Kuwait", "halal": "yes"}, {"id": "h-7", "owner": "o-4", "kind": "cash", "name": "Dollar deposit", "value": 150000, "currency": "USD", "country": "United States", "halal": "no"}, {"id": "h-8", "owner": "o-4", "kind": "property", "name": "Apartment building", "value": 780000, "currency": "KWD", "rent_month": 4500, "rent_day": 5, "costs_year": 6000, "empty_months": 1, "area": "Salmiya", "size_m2": 1400, "mortgage_left": 240000, "mortgage_payment": 2600, "mortgage_day": 15, "country": "Kuwait", "halal": "yes"}, {"id": "h-9", "owner": "o-1", "kind": "property", "name": "London flat", "value": 650000, "currency": "GBP", "rent_month": 2400, "rent_day": 1, "country": "United Kingdom", "halal": "yes"}, {"id": "h-10", "owner": "o-4", "kind": "sukuk", "name": "Gulf sukuk 2029", "value": 200000, "currency": "USD", "coupon_pct": 5.1, "per_year": 2, "maturity": "2029-06-30", "country": "Saudi Arabia", "halal": "yes"}, {"id": "h-11", "owner": "o-4", "kind": "private", "name": "Regional growth fund", "value": 120000, "currency": "USD", "committed": 250000, "called": 140000, "next_call_date": "2027-02-15", "next_call_amount": 30000, "country": "United Arab Emirates", "halal": "unknown"}, {"id": "h-12", "owner": "o-2", "kind": "gold", "name": "Gold bars", "qty": 1000, "unit": "g", "country": "Kuwait", "halal": "yes"}, {"id": "h-13", "owner": "o-3", "kind": "crypto", "symbol": "BTC-USD", "qty": 0.25, "halal": "unknown"}], "events": [{"id": "e-1", "title": "School fees (sample)", "date": "2027-01-10", "amount": 6000, "currency": "KWD", "dir": "out", "repeat": "yearly", "owner": "o-1"}, {"id": "e-2", "title": "Zakat reminder (sample)", "date": "2027-03-20", "amount": null, "currency": "KWD", "dir": "none", "repeat": "yearly", "owner": null}], "settings": {"halal": true, "show": "KWD", "deposit_rate": 4, "sukuk_rate": 5.1}, "finder": {"answers": {"country": "Kuwait", "areas": ["Salmiya", "Jabriya"], "type": "flat", "min": 100000, "max": 200000, "currency": "KWD", "size": 150, "purpose": "rent"}, "shortlist": [{"id": "p-1", "title": "3-bedroom flat (sample listing)", "area": "Salmiya", "type": "flat", "price": 165000, "currency": "KWD", "size_m2": 180, "rent_month": 650, "costs_year": 900, "source": "owner"}, {"id": "p-2", "title": "2-bedroom flat (sample listing)", "area": "Jabriya", "type": "flat", "price": 120000, "currency": "KWD", "size_m2": 120, "rent_month": 480, "source": "owner"}, {"id": "p-3", "title": "Villa (sample listing)", "area": "Mishref", "type": "villa", "price": 450000, "currency": "KWD", "size_m2": 400, "source": "owner"}]}, "area-notes": [{"area": "Salmiya", "country": "Kuwait", "date": "2026-10-28", "currency": "KWD", "price_m2_low": 800, "price_m2_high": 1000, "rent_note": "made-up figures for the demo, not real market data", "summary": "A sample note to show how an area note looks. In the full Family Office, Claude writes real ones from sources, with their dates.", "sources": []}], "snapshots": [{"month": "2025-11", "taken": "2025-11-28T12:00", "kwd": 1015328, "usd": null, "made_up": true}, {"month": "2025-12", "taken": "2025-12-28T12:00", "kwd": 1023181, "usd": null, "made_up": true}, {"month": "2026-01", "taken": "2026-01-28T12:00", "kwd": 1038888, "usd": null, "made_up": true}, {"month": "2026-02", "taken": "2026-02-28T12:00", "kwd": 1033279, "usd": null, "made_up": true}, {"month": "2026-03", "taken": "2026-03-28T12:00", "kwd": 1047863, "usd": null, "made_up": true}, {"month": "2026-04", "taken": "2026-04-28T12:00", "kwd": 1062448, "usd": null, "made_up": true}, {"month": "2026-05", "taken": "2026-05-28T12:00", "kwd": 1055717, "usd": null, "made_up": true}, {"month": "2026-06", "taken": "2026-06-28T12:00", "kwd": 1071424, "usd": null, "made_up": true}, {"month": "2026-07", "taken": "2026-07-28T12:00", "kwd": 1086008, "usd": null, "made_up": true}, {"month": "2026-08", "taken": "2026-08-28T12:00", "kwd": 1092740, "usd": null, "made_up": true}, {"month": "2026-09", "taken": "2026-09-28T12:00", "kwd": 1108447, "usd": null, "made_up": true}]}, "prices": {"quotes": {"AAPL": {"symbol": "AAPL", "name": "Apple Inc.", "price": 345.4800109863281, "currency": "USD", "change_pct": -0.47, "date": "2026-10-28"}, "BTC-USD": {"symbol": "BTC-USD", "name": "Bitcoin USD", "price": 80408.0625, "currency": "USD", "change_pct": -0.49, "date": "2026-10-28"}, "GC=F": {"symbol": "GC=F", "name": "Gold Dec 26", "price": 4054.10009765625, "currency": "USD", "change_pct": -0.5, "date": "2026-10-28"}, "KFH.KW": {"symbol": "KFH.KW", "name": "Kuwait Finance House K.S.C.P.", "price": 0.752, "currency": "KWD", "change_pct": -1.05, "date": "2026-10-28"}, "MSFT": {"symbol": "MSFT", "name": "Microsoft Corporation", "price": 527.6199951171875, "currency": "USD", "change_pct": -0.7, "date": "2026-10-28"}, "NBK.KW": {"symbol": "NBK.KW", "name": "National Bank of Kuwait S.A.K.P.", "price": 0.851, "currency": "KWD", "change_pct": -0.82, "date": "2026-10-28"}, "ZAIN.KW": {"symbol": "ZAIN.KW", "name": "Mobile Telecommunications Company K.S.C.P.", "price": 0.583, "currency": "KWD", "change_pct": -1.85, "date": "2026-10-28"}}, "errors": {}}, "fx": {"kwd_per": {"KWD": 1.0, "USD": 0.3080999814080941, "GBP": 0.40993092052852725}, "errors": {}}, "events": {"NBK.KW": {"dividends": [{"date": "2026-04-02", "amount": 0.035, "currency": "KWD"}], "results": null, "errors": []}, "KFH.KW": {"dividends": [{"date": "2026-04-16", "amount": 0.014, "currency": "KWD"}, {"date": "2026-08-11", "amount": 0.01, "currency": "KWD"}], "results": null, "errors": []}, "ZAIN.KW": {"dividends": [{"date": "2025-11-12", "amount": 0.025, "currency": "KWD"}, {"date": "2026-09-29", "amount": 0.017, "currency": "KWD"}], "results": null, "errors": []}, "AAPL": {"dividends": [{"date": "2025-11-10", "amount": 0.26, "currency": "USD"}, {"date": "2026-02-09", "amount": 0.26, "currency": "USD"}, {"date": "2026-05-11", "amount": 0.27, "currency": "USD"}, {"date": "2026-08-10", "amount": 0.27, "currency": "USD"}], "results": "2026-11-02", "errors": []}, "MSFT": {"dividends": [{"date": "2025-11-20", "amount": 0.91, "currency": "USD"}, {"date": "2026-02-19", "amount": 0.91, "currency": "USD"}, {"date": "2026-05-21", "amount": 0.91, "currency": "USD"}, {"date": "2026-08-20", "amount": 0.91, "currency": "USD"}], "results": null, "errors": []}}, "halal": {"AAPL": {"symbol": "AAPL", "overall": "pass", "passed": 4, "total": 5}, "MSFT": {"symbol": "MSFT", "overall": "pass", "passed": 4, "total": 5}}, "ranges": {"SPY|1": {"symbol": "SPY", "years": 1, "n": 2261, "separate": 9, "since": "2016-10-27", "middle": 16.7, "bad": -5.0, "good": 33.0, "lower_pct": 14.0, "worst_drop": -33.7}, "SPY|3": {"symbol": "SPY", "years": 3, "n": 1757, "separate": 3, "since": "2016-10-27", "middle": 47.5, "bad": 29.7, "good": 80.0, "lower_pct": 0.0, "worst_drop": -33.7}, "SPY|5": {"symbol": "SPY", "years": 5, "n": 1253, "separate": 1, "since": "2016-10-27", "middle": 94.2, "bad": 64.8, "good": 114.1, "lower_pct": 0.0, "worst_drop": -33.7}, "SPUS|1": {"symbol": "SPUS", "years": 1, "n": 1471, "separate": 6, "since": "2019-12-18", "middle": 23.2, "bad": -7.8, "good": 37.7, "lower_pct": 16.0, "worst_drop": -30.8}, "SPUS|3": {"symbol": "SPUS", "years": 3, "n": 967, "separate": 2, "since": "2019-12-18", "middle": 50.5, "bad": 34.3, "good": 95.9, "lower_pct": 0.0, "worst_drop": -30.8}, "SPUS|5": {"symbol": "SPUS", "years": 5, "n": 463, "separate": 1, "since": "2019-12-18", "middle": 115.9, "bad": 100.9, "good": 127.2, "lower_pct": 0.0, "worst_drop": -30.8}, "GC=F|1": {"symbol": "GC=F", "years": 1, "n": 2262, "separate": 9, "since": "2016-10-27", "middle": 13.2, "bad": -4.2, "good": 41.4, "lower_pct": 23.3, "worst_drop": -24.9}, "GC=F|3": {"symbol": "GC=F", "years": 3, "n": 1758, "separate": 3, "since": "2016-10-27", "middle": 42.6, "bad": 11.3, "good": 128.3, "lower_pct": 1.9, "worst_drop": -24.9}, "GC=F|5": {"symbol": "GC=F", "years": 5, "n": 1254, "separate": 1, "since": "2016-10-27", "middle": 67.9, "bad": 41.7, "good": 141.6, "lower_pct": 0.0, "worst_drop": -24.9}}, "stockfacts": {"facts": {"NBK.KW": {"symbol": "NBK.KW", "higher_1y": 65.4, "separate": 9, "beat_market": 41.3, "middle_1y": 12.3, "bad_1y": -13.6, "dividend": 0.035, "results": null}, "KFH.KW": {"symbol": "KFH.KW", "higher_1y": 84.1, "separate": 9, "beat_market": 42.4, "middle_1y": 12.6, "bad_1y": -5.6, "dividend": 0.024, "results": null}, "ZAIN.KW": {"symbol": "ZAIN.KW", "higher_1y": 56.9, "separate": 9, "beat_market": 25.0, "middle_1y": 2.1, "bad_1y": -12.9, "dividend": 0.042, "results": null}, "AAPL": {"symbol": "AAPL", "higher_1y": 89.5, "separate": 9, "beat_market": 67.3, "middle_1y": 26.0, "bad_1y": -0.6, "dividend": 1.08, "results": "2026-11-02", "buys_3m": 0, "sells_3m": 16, "gifts_3m": 8}, "MSFT": {"symbol": "MSFT", "higher_1y": 83.6, "separate": 9, "beat_market": 71.0, "middle_1y": 31.5, "bad_1y": -6.9, "dividend": 3.64, "results": null, "buys_3m": 0, "sells_3m": 5, "gifts_3m": 26}}, "pairs": [{"a": "NBK.KW", "b": "KFH.KW", "pct": 49}, {"a": "NBK.KW", "b": "ZAIN.KW", "pct": 38}, {"a": "NBK.KW", "b": "MSFT", "pct": 22}, {"a": "KFH.KW", "b": "ZAIN.KW", "pct": 22}, {"a": "KFH.KW", "b": "MSFT", "pct": 12}, {"a": "AAPL", "b": "MSFT", "pct": 9}, {"a": "NBK.KW", "b": "AAPL", "pct": 3}, {"a": "KFH.KW", "b": "AAPL", "pct": 1}, {"a": "ZAIN.KW", "b": "AAPL", "pct": -8}, {"a": "ZAIN.KW", "b": "MSFT", "pct": -18}]}, "snapshots": []};</script>
+<script>window.DEMO = {"frozen": "2026-10-28", "data": {"owners": [{"id": "o-1", "name": "Parent (sample)", "kind": "person"}, {"id": "o-2", "name": "Daughter (sample)", "kind": "person"}, {"id": "o-3", "name": "Son (sample)", "kind": "person"}, {"id": "o-4", "name": "Family Holding Co. (sample)", "kind": "company"}], "holdings": [{"id": "h-1", "owner": "o-1", "kind": "stock", "symbol": "NBK.KW", "qty": 25000, "cost": 0.7, "halal": "no"}, {"id": "h-2", "owner": "o-1", "kind": "stock", "symbol": "KFH.KW", "qty": 40000, "halal": "yes"}, {"id": "h-3", "owner": "o-4", "kind": "stock", "symbol": "ZAIN.KW", "qty": 30000, "halal": "unknown"}, {"id": "h-4", "owner": "o-2", "kind": "stock", "symbol": "AAPL", "qty": 60, "halal": "auto"}, {"id": "h-5", "owner": "o-3", "kind": "stock", "symbol": "MSFT", "qty": 25, "halal": "auto"}, {"id": "h-6", "owner": "o-1", "kind": "cash", "name": "Islamic current account", "value": 45000, "currency": "KWD", "country": "Kuwait", "halal": "yes"}, {"id": "h-7", "owner": "o-4", "kind": "cash", "name": "Dollar deposit", "value": 150000, "currency": "USD", "country": "United States", "halal": "no"}, {"id": "h-8", "owner": "o-4", "kind": "property", "name": "Apartment building", "value": 780000, "currency": "KWD", "rent_month": 4500, "rent_day": 5, "costs_year": 6000, "empty_months": 1, "area": "Salmiya", "size_m2": 1400, "mortgage_left": 240000, "mortgage_payment": 2600, "mortgage_day": 15, "country": "Kuwait", "halal": "yes"}, {"id": "h-9", "owner": "o-1", "kind": "property", "name": "London flat", "value": 650000, "currency": "GBP", "rent_month": 2400, "rent_day": 1, "country": "United Kingdom", "halal": "yes"}, {"id": "h-10", "owner": "o-4", "kind": "sukuk", "name": "Gulf sukuk 2029", "value": 200000, "currency": "USD", "coupon_pct": 5.1, "per_year": 2, "maturity": "2029-06-30", "country": "Saudi Arabia", "halal": "yes"}, {"id": "h-11", "owner": "o-4", "kind": "private", "name": "Regional growth fund", "value": 120000, "currency": "USD", "committed": 250000, "called": 140000, "next_call_date": "2027-02-15", "next_call_amount": 30000, "country": "United Arab Emirates", "halal": "unknown"}, {"id": "h-12", "owner": "o-2", "kind": "gold", "name": "Gold bars", "qty": 1000, "unit": "g", "country": "Kuwait", "halal": "yes"}, {"id": "h-13", "owner": "o-3", "kind": "crypto", "symbol": "BTC-USD", "qty": 0.25, "halal": "unknown"}], "events": [{"id": "e-1", "title": "School fees (sample)", "date": "2027-01-10", "amount": 6000, "currency": "KWD", "dir": "out", "repeat": "yearly", "owner": "o-1"}, {"id": "e-2", "title": "Zakat reminder (sample)", "date": "2027-03-20", "amount": null, "currency": "KWD", "dir": "none", "repeat": "yearly", "owner": null}], "settings": {"halal": true, "show": "KWD", "deposit_rate": 4, "sukuk_rate": 5.1}, "finder": {"answers": {"country": "Kuwait", "areas": ["Salmiya", "Jabriya"], "type": "flat", "min": 100000, "max": 200000, "currency": "KWD", "size": 150, "purpose": "rent"}, "shortlist": [{"id": "p-1", "title": "3-bedroom flat (sample listing)", "area": "Salmiya", "type": "flat", "price": 165000, "currency": "KWD", "size_m2": 180, "rent_month": 650, "costs_year": 900, "source": "owner"}, {"id": "p-2", "title": "2-bedroom flat (sample listing)", "area": "Jabriya", "type": "flat", "price": 120000, "currency": "KWD", "size_m2": 120, "rent_month": 480, "source": "owner"}, {"id": "p-3", "title": "Villa (sample listing)", "area": "Mishref", "type": "villa", "price": 450000, "currency": "KWD", "size_m2": 400, "source": "owner"}]}, "area-notes": [{"area": "Salmiya", "country": "Kuwait", "date": "2026-10-28", "currency": "KWD", "price_m2_low": 800, "price_m2_high": 1000, "rent_note": "made-up figures for the demo, not real market data", "summary": "A sample note to show how an area note looks. In the full Family Office, Claude writes real ones from sources, with their dates.", "sources": []}], "snapshots": [{"month": "2025-11", "taken": "2025-11-28T12:00", "kwd": 1015459, "usd": null, "made_up": true}, {"month": "2025-12", "taken": "2025-12-28T12:00", "kwd": 1023313, "usd": null, "made_up": true}, {"month": "2026-01", "taken": "2026-01-28T12:00", "kwd": 1039022, "usd": null, "made_up": true}, {"month": "2026-02", "taken": "2026-02-28T12:00", "kwd": 1033411, "usd": null, "made_up": true}, {"month": "2026-03", "taken": "2026-03-28T12:00", "kwd": 1047998, "usd": null, "made_up": true}, {"month": "2026-04", "taken": "2026-04-28T12:00", "kwd": 1062585, "usd": null, "made_up": true}, {"month": "2026-05", "taken": "2026-05-28T12:00", "kwd": 1055853, "usd": null, "made_up": true}, {"month": "2026-06", "taken": "2026-06-28T12:00", "kwd": 1071561, "usd": null, "made_up": true}, {"month": "2026-07", "taken": "2026-07-28T12:00", "kwd": 1086148, "usd": null, "made_up": true}, {"month": "2026-08", "taken": "2026-08-28T12:00", "kwd": 1092880, "usd": null, "made_up": true}, {"month": "2026-09", "taken": "2026-09-28T12:00", "kwd": 1108589, "usd": null, "made_up": true}]}, "prices": {"quotes": {"AAPL": {"symbol": "AAPL", "name": "Apple Inc.", "price": 345.6451110839844, "currency": "USD", "change_pct": -0.42, "date": "2026-10-28"}, "BTC-USD": {"symbol": "BTC-USD", "name": "Bitcoin USD", "price": 80368.4921875, "currency": "USD", "change_pct": -0.54, "date": "2026-10-28"}, "GC=F": {"symbol": "GC=F", "name": "Gold Dec 26", "price": 4053.10009765625, "currency": "USD", "change_pct": -0.53, "date": "2026-10-28"}, "KFH.KW": {"symbol": "KFH.KW", "name": "Kuwait Finance House K.S.C.P.", "price": 0.752, "currency": "KWD", "change_pct": -1.05, "date": "2026-10-28"}, "MSFT": {"symbol": "MSFT", "name": "Microsoft Corporation", "price": 527.3599853515625, "currency": "USD", "change_pct": -0.75, "date": "2026-10-28"}, "NBK.KW": {"symbol": "NBK.KW", "name": "National Bank of Kuwait S.A.K.P.", "price": 0.851, "currency": "KWD", "change_pct": -0.82, "date": "2026-10-28"}, "ZAIN.KW": {"symbol": "ZAIN.KW", "name": "Mobile Telecommunications Company K.S.C.P.", "price": 0.583, "currency": "KWD", "change_pct": -1.85, "date": "2026-10-28"}}, "errors": {}}, "fx": {"kwd_per": {"KWD": 1.0, "USD": 0.3080999814080941, "GBP": 0.41017105067627596}, "errors": {}}, "events": {"NBK.KW": {"dividends": [{"date": "2026-04-02", "amount": 0.035, "currency": "KWD"}], "results": null, "errors": []}, "KFH.KW": {"dividends": [{"date": "2026-04-16", "amount": 0.014, "currency": "KWD"}, {"date": "2026-08-11", "amount": 0.01, "currency": "KWD"}], "results": null, "errors": []}, "ZAIN.KW": {"dividends": [{"date": "2025-11-12", "amount": 0.025, "currency": "KWD"}, {"date": "2026-09-29", "amount": 0.017, "currency": "KWD"}], "results": null, "errors": []}, "AAPL": {"dividends": [{"date": "2025-11-10", "amount": 0.26, "currency": "USD"}, {"date": "2026-02-09", "amount": 0.26, "currency": "USD"}, {"date": "2026-05-11", "amount": 0.27, "currency": "USD"}, {"date": "2026-08-10", "amount": 0.27, "currency": "USD"}], "results": "2026-11-02", "errors": []}, "MSFT": {"dividends": [{"date": "2025-11-20", "amount": 0.91, "currency": "USD"}, {"date": "2026-02-19", "amount": 0.91, "currency": "USD"}, {"date": "2026-05-21", "amount": 0.91, "currency": "USD"}, {"date": "2026-08-20", "amount": 0.91, "currency": "USD"}], "results": null, "errors": []}}, "halal": {"AAPL": {"symbol": "AAPL", "overall": "pass", "passed": 4, "total": 5}, "MSFT": {"symbol": "MSFT", "overall": "pass", "passed": 4, "total": 5}}, "ranges": {"SPY|1": {"symbol": "SPY", "years": 1, "n": 2261, "separate": 9, "since": "2016-10-27", "middle": 16.7, "bad": -5.0, "good": 33.0, "lower_pct": 14.0, "worst_drop": -33.7}, "SPY|3": {"symbol": "SPY", "years": 3, "n": 1757, "separate": 3, "since": "2016-10-27", "middle": 47.5, "bad": 29.7, "good": 80.0, "lower_pct": 0.0, "worst_drop": -33.7}, "SPY|5": {"symbol": "SPY", "years": 5, "n": 1253, "separate": 1, "since": "2016-10-27", "middle": 94.2, "bad": 64.8, "good": 114.1, "lower_pct": 0.0, "worst_drop": -33.7}, "SPUS|1": {"symbol": "SPUS", "years": 1, "n": 1471, "separate": 6, "since": "2019-12-18", "middle": 23.2, "bad": -7.8, "good": 37.7, "lower_pct": 16.0, "worst_drop": -30.8}, "SPUS|3": {"symbol": "SPUS", "years": 3, "n": 967, "separate": 2, "since": "2019-12-18", "middle": 50.5, "bad": 34.3, "good": 95.9, "lower_pct": 0.0, "worst_drop": -30.8}, "SPUS|5": {"symbol": "SPUS", "years": 5, "n": 463, "separate": 1, "since": "2019-12-18", "middle": 115.9, "bad": 100.9, "good": 127.2, "lower_pct": 0.0, "worst_drop": -30.8}, "GC=F|1": {"symbol": "GC=F", "years": 1, "n": 2262, "separate": 9, "since": "2016-10-27", "middle": 13.2, "bad": -4.2, "good": 41.4, "lower_pct": 23.3, "worst_drop": -24.9}, "GC=F|3": {"symbol": "GC=F", "years": 3, "n": 1758, "separate": 3, "since": "2016-10-27", "middle": 42.6, "bad": 11.3, "good": 128.3, "lower_pct": 1.9, "worst_drop": -24.9}, "GC=F|5": {"symbol": "GC=F", "years": 5, "n": 1254, "separate": 1, "since": "2016-10-27", "middle": 67.9, "bad": 41.7, "good": 141.6, "lower_pct": 0.0, "worst_drop": -24.9}}, "stockfacts": {"facts": {"NBK.KW": {"symbol": "NBK.KW", "higher_1y": 65.4, "separate": 9, "beat_market": 41.3, "middle_1y": 12.3, "bad_1y": -13.6, "dividend": 0.035, "results": null}, "KFH.KW": {"symbol": "KFH.KW", "higher_1y": 84.1, "separate": 9, "beat_market": 42.4, "middle_1y": 12.6, "bad_1y": -5.6, "dividend": 0.024, "results": null}, "ZAIN.KW": {"symbol": "ZAIN.KW", "higher_1y": 56.9, "separate": 9, "beat_market": 25.0, "middle_1y": 2.1, "bad_1y": -12.9, "dividend": 0.042, "results": null}, "AAPL": {"symbol": "AAPL", "higher_1y": 89.5, "separate": 9, "beat_market": 67.3, "middle_1y": 26.0, "bad_1y": -0.6, "dividend": 1.08, "results": "2026-11-02", "buys_3m": 0, "sells_3m": 16, "gifts_3m": 8}, "MSFT": {"symbol": "MSFT", "higher_1y": 83.6, "separate": 9, "beat_market": 71.0, "middle_1y": 31.5, "bad_1y": -6.9, "dividend": 3.64, "results": null, "buys_3m": 0, "sells_3m": 5, "gifts_3m": 26}}, "pairs": [{"a": "NBK.KW", "b": "KFH.KW", "pct": 49}, {"a": "NBK.KW", "b": "ZAIN.KW", "pct": 38}, {"a": "NBK.KW", "b": "MSFT", "pct": 22}, {"a": "KFH.KW", "b": "ZAIN.KW", "pct": 22}, {"a": "KFH.KW", "b": "MSFT", "pct": 12}, {"a": "AAPL", "b": "MSFT", "pct": 9}, {"a": "NBK.KW", "b": "AAPL", "pct": 3}, {"a": "KFH.KW", "b": "AAPL", "pct": 1}, {"a": "ZAIN.KW", "b": "AAPL", "pct": -8}, {"a": "ZAIN.KW", "b": "MSFT", "pct": -18}]}, "snapshots": []};</script>
 <script>
 (function () {
   // The demo's stand-in for the server: answers from the frozen data, and keeps
@@ -426,7 +459,7 @@
   const HALAL_DEFAULT = { stock: "auto", cash: "unknown", sukuk: "yes", property: "yes", private: "unknown", gold: "yes", crypto: "unknown", other: "unknown" };
   const GRAMS_PER_OUNCE = 31.1035;
 
-  let owners = [], holdings = [], settings = { halal: true, show: "KWD" }, snapshots = [], events = [], shareEvents = {}, finder = { answers: {}, shortlist: [] }, areaNotes = [], stockFacts = null, stockKey = "";
+  let owners = [], holdings = [], settings = { halal: true, show: "KWD" }, snapshots = [], events = [], shareEvents = {}, finder = { answers: {}, shortlist: [] }, areaNotes = [], goals = [], stockFacts = null, stockKey = "";
   let quotes = {}, fx = { KWD: 1 }, priceErrors = {}, halalAuto = {}, editing = null;
 
   // ---- Tabs ----
@@ -505,13 +538,13 @@
 
   // ---- Loading ----
   async function load() {
-    [owners, holdings, settings, snapshots, events, finder, areaNotes] = await Promise.all([
+    [owners, holdings, settings, snapshots, events, finder, areaNotes, goals] = await Promise.all([
       mobleeApp.load("owners").then((x) => x || []), mobleeApp.load("holdings").then((x) => x || []),
       mobleeApp.load("settings").then((x) => Object.assign({ halal: true, show: "KWD" }, x || {})), mobleeApp.load("snapshots").then((x) => x || []),
       mobleeApp.load("events").then((x) => x || []),
-      mobleeApp.load("finder").then((x) => Object.assign({ answers: {}, shortlist: [] }, x || {})), mobleeApp.load("area-notes").then((x) => x || []),
+      mobleeApp.load("finder").then((x) => Object.assign({ answers: {}, shortlist: [] }, x || {})), mobleeApp.load("area-notes").then((x) => x || []), mobleeApp.load("goals").then((x) => x || []),
     ]);
-    $("showCur").value = settings.show; $("set_halal").checked = !!settings.halal;
+    $("showCur").value = settings.show; $("set_halal").checked = !!settings.halal; $("zDebts").checked = !!settings.zakat_debts;
     await refreshPrices();
   }
   async function refreshPrices() {
@@ -669,6 +702,7 @@
     drawReport(rows, total);
     drawInsights(rows, total);
     drawFinder();
+    drawGoals(); drawZakat(); drawPerson();
     keepSnapshot(rows, total);
   }
 
@@ -1368,6 +1402,132 @@
     if (settings.halal) loadHalal(holdings.filter((h) => !h.closed));
   });
 
+  const longDate = (d) => new Date(d + "T00:00:00Z").toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
+  const sumNet = (rows) => rows.reduce((t, r) => t + (r.net_kwd || 0), 0);
+
+  // ---- Goals ----
+  // A target, a date, and which part of the family's wealth counts towards it.
+  const goalMeasures = () => [["networth", "The family's net worth"], ["quick", "What could be cash within a week"]]
+    .concat(Object.entries(KINDS).map(([k, t]) => ["kind:" + k, t]))
+    .concat(owners.map((o) => ["owner:" + o.id, `Net worth of ${o.name}`]));
+  function goalNow(what) {
+    if (what === "networth") return lastTotal;
+    if (what === "quick") return sumNet(lastRows.filter((r) => QUICK[r.h.kind] === "Within a week"));
+    if (what.startsWith("kind:")) return sumNet(lastRows.filter((r) => r.h.kind === what.slice(5)));
+    if (what.startsWith("owner:")) return sumNet(lastRows.filter((r) => r.h.owner === what.slice(6)));
+    return 0;
+  }
+  function drawGoals() {
+    const sel = $("goal_what"), keep = sel.value;
+    sel.innerHTML = goalMeasures().map(([k, t]) => `<option value="${esc(k)}">${esc(t)}</option>`).join("");
+    if (keep) sel.value = keep;
+    const open = goals.filter((g) => !g.closed), done = goals.filter((g) => g.closed);
+    if (!goals.length) { $("goalList").innerHTML = `<p class="empty">No goals yet. Add the first one below.</p>`; return; }
+    const one = (g) => {
+      const target = Number(g.amount) * (fx[g.currency] || (g.currency === "KWD" ? 1 : 0)), now = goalNow(g.what);
+      const pct = target > 0 ? Math.max(0, Math.min(100, Math.round(100 * now / target))) : 0;
+      const label = (goalMeasures().find(([k]) => k === g.what) || [null, ""])[1];
+      const months = (new Date(g.date + "T00:00:00Z") - Date.now()) / (30.44 * 864e5);
+      const line = now >= target ? "Reached." : months <= 0 ? "The date has passed." : `About ${fmt((target - now) / Math.max(1, months))} a month more would reach it by ${longDate(g.date)}.`;
+      return `<div class="goal"><div class="goal-head"><b>${esc(g.title)}</b><span class="muted small">${esc(label)}</span></div>
+        <div class="track"><div class="fill" style="width:${pct}%"></div></div>
+        <div class="goal-foot"><span>${fmt(now)} of ${fmt(target)} (${pct}%)</span><span class="muted small">${line}</span>
+        ${g.closed ? "" : `<button data-goal-close="${esc(g.id)}">Mark as done or dropped</button>`}</div></div>`;
+    };
+    $("goalList").innerHTML = (open.length ? open.map(one).join("") : `<p class="muted">Nothing open.</p>`)
+      + (done.length ? `<details style="margin-top:.8rem"><summary class="muted">Finished or dropped (${done.length})</summary>${done.map(one).join("")}</details>` : "");
+    $("goalList").querySelectorAll("[data-goal-close]").forEach((b) => b.addEventListener("click", async () => {
+      // Kept, marked closed, so the record of what the family aimed for is never lost.
+      goals = goals.map((g) => g.id === b.dataset.goalClose ? Object.assign({}, g, { closed: new Date().toISOString().slice(0, 10) }) : g);
+      await mobleeApp.save("goals", goals); drawGoals();
+    }));
+  }
+  $("goalAdd").addEventListener("click", async () => {
+    const title = $("goal_title").value.trim(), amount = Number($("goal_amount").value), date = $("goal_date").value;
+    if (!title) { $("goalMsg").textContent = "Put in what the goal is."; return; }
+    if (!(amount > 0)) { $("goalMsg").textContent = "Put in the amount."; return; }
+    if (!date) { $("goalMsg").textContent = "Put in the date."; return; }
+    goals.push({ id: `g-${Date.now()}`, title, amount, currency: $("goal_cur").value, date, what: $("goal_what").value, added: new Date().toISOString().slice(0, 10) });
+    await mobleeApp.save("goals", goals);
+    $("goal_title").value = ""; $("goal_amount").value = ""; $("goal_date").value = ""; $("goalMsg").textContent = "";
+    drawGoals();
+  });
+
+  // ---- Zakat, a rough estimate ----
+  // Per person: 2.5% of what counts, if it is at least the nisab (85 g of gold at today's price).
+  // What counts is a starting point per kind, changed per holding to the family's own scholar's view.
+  const ZAKAT_DEFAULT = { cash: "full", gold: "full", crypto: "full", stock: "full", sukuk: "full", property: "no", private: "no", other: "no" };
+  const zakatOf = (h) => h.zakat || ZAKAT_DEFAULT[h.kind] || "no";
+  const zakatPart = (r) => { const m = zakatOf(r.h); return r.gross_kwd == null ? 0 : m === "full" ? r.gross_kwd : m === "part" ? r.gross_kwd * Number(r.h.zakat_pct || 0) / 100 : 0; };
+  let goldAsked = false;
+  async function needGold() {
+    if (quotes["GC=F"] || goldAsked) return;
+    goldAsked = true;
+    const p = await fetch("/api/prices?symbols=GC%3DF").then((r) => r.json()).catch(() => ({}));
+    if (p.quotes && p.quotes["GC=F"]) { quotes["GC=F"] = p.quotes["GC=F"]; drawZakat(); }
+  }
+  function drawZakat() {
+    const g = quotes["GC=F"];
+    if (!g) needGold();
+    const gram = g && fx[g.currency] ? g.price * fx[g.currency] / GRAMS_PER_OUNCE : null, nisab = gram ? 85 * gram : null;
+    const people = owners.filter((o) => o.kind === "person"), others = owners.filter((o) => o.kind !== "person");
+    let all = 0;
+    const rows = people.map((o) => {
+      const mine = lastRows.filter((r) => r.h.owner === o.id);
+      const counts = mine.reduce((t, r) => t + zakatPart(r), 0);
+      const off = settings.zakat_debts ? mine.filter((r) => r.h.kind === "property").reduce((t, r) =>
+        t + Math.min(12 * Number(r.h.mortgage_payment || 0), Number(r.h.mortgage_left || 0)) * (fx[r.h.currency || "KWD"] || 0), 0) : 0;
+      const base = Math.max(0, counts - off), above = nisab != null && base >= nisab, z = above ? base * 0.025 : 0;
+      all += z;
+      return `<tr><td><b>${esc(o.name)}</b></td><td class="num">${fmt(counts)}</td><td class="num">${off ? fmt(off) : "–"}</td>
+        <td>${nisab == null ? "–" : above ? "Above" : "Below"}</td><td class="num"><b>${above ? fmt(z) : "–"}</b></td></tr>`;
+    });
+    $("zTiles").innerHTML = [["Nisab today (85 g of gold)", nisab ? fmt(nisab) : "Reading…"], ["Gold, one gram", gram ? fmt(gram) : "–"],
+      ["Estimate for all the people", nisab ? fmt(all) : "–"]].map(([k, v]) => `<div class="tile"><span>${k}</span><b>${v}</b></div>`).join("");
+    $("zOwners").innerHTML = people.length ? `<table><thead><tr><th>Person</th><th class="num">Counts for zakat</th><th class="num">Taken off</th><th>The nisab</th><th class="num">Zakat, 2.5%</th></tr></thead><tbody>${rows.join("")}</tbody></table>`
+      : `<p class="empty">No people yet. Under Owners, a person's kind is "Person".</p>`;
+    $("zNote").textContent = others.length ? `Not worked out here: ${others.map((o) => o.name).join(", ")}. A company's or a trust's zakat follows its own rules.` : "";
+    const list = lastRows.filter((r) => people.some((o) => o.id === r.h.owner)).sort((a, b) => (b.gross_kwd || 0) - (a.gross_kwd || 0));
+    $("zHoldings").innerHTML = list.length ? `<table><thead><tr><th>Holding</th><th>Owner</th><th class="num">Value</th><th>Counted</th><th class="num">Counts</th></tr></thead><tbody>${list.map((r) => {
+      const m = zakatOf(r.h);
+      return `<tr><td><b>${esc(holdingName(r.h))}</b><div class="muted small">${esc(KINDS[r.h.kind])}</div></td><td>${esc(ownerName(r.h.owner))}</td><td class="num">${fmt(r.gross_kwd)}</td>
+        <td><select data-zakat="${esc(r.h.id)}" style="width:auto">${[["full", "In full"], ["part", "A part"], ["no", "Not counted"]].map(([k, t]) => `<option value="${k}"${k === m ? " selected" : ""}>${t}</option>`).join("")}</select>
+        ${m === "part" ? `<input data-zakat-pct="${esc(r.h.id)}" type="number" min="0" max="100" step="any" value="${esc(r.h.zakat_pct ?? "")}" placeholder="%" style="width:5rem" aria-label="Part counted, %"> %` : ""}</td>
+        <td class="num">${fmt(zakatPart(r))}</td></tr>`;
+    }).join("")}</tbody></table>` : `<p class="empty">Nothing held by a person yet.</p>`;
+    const keep = async (id, change) => { holdings = holdings.map((h) => h.id === id ? Object.assign({}, h, change) : h); await mobleeApp.save("holdings", holdings); render(); };
+    $("zHoldings").querySelectorAll("[data-zakat]").forEach((s) => s.addEventListener("change", () => keep(s.dataset.zakat, { zakat: s.value })));
+    $("zHoldings").querySelectorAll("[data-zakat-pct]").forEach((i) => i.addEventListener("change", () => keep(i.dataset.zakatPct, { zakat_pct: i.value === "" ? "" : Number(i.value) })));
+  }
+  $("zDebts").addEventListener("change", async () => { settings.zakat_debts = $("zDebts").checked; await mobleeApp.save("settings", settings); drawZakat(); });
+
+  // ---- Each person: one page, to keep or to share with them ----
+  function drawPerson() {
+    const sel = $("pOwner"), keep = sel.value || (owners[0] || {}).id || "";
+    sel.innerHTML = owners.map((o) => `<option value="${esc(o.id)}"${o.id === keep ? " selected" : ""}>${esc(o.name)}</option>`).join("");
+    const o = owners.find((x) => x.id === sel.value);
+    if (!o) { $("person").innerHTML = `<p class="empty">No owners yet. Add them under Owners.</p>`; return; }
+    const mine = lastRows.filter((r) => r.h.owner === o.id), net = sumNet(mine);
+    const debt = mine.reduce((t, r) => t + (r.debt_kwd || 0), 0);
+    const income = mine.reduce((t, r) => { const h = r.h, x = fx[h.currency || "KWD"] || 0;
+      return t + (h.kind === "property" ? 12 * Number(h.rent_month || 0) * x : h.kind === "sukuk" ? Number(h.value || 0) * Number(h.coupon_pct || 0) / 100 * x : 0); }, 0);
+    const byKind = sumBy(mine, DIMS.kind);
+    $("person").innerHTML = `<h2>${esc(o.name)}</h2>
+      <p class="muted">As of ${longDate(new Date().toISOString().slice(0, 10))}, from the Family Office.</p>
+      <div class="tiles" style="margin:.8rem 0 1rem">${[["Net worth", fmt(net)], ["Share of the family", lastTotal > 0 ? `${Math.round(100 * net / lastTotal)}%` : "–"],
+        ["Owed on property", debt ? fmt(debt) : "–"], ["Rent and sukuk profit a year", income ? fmt(income) : "–"]].map(([k, v]) => `<div class="tile"><span>${k}</span><b>${v}</b></div>`).join("")}</div>
+      ${mine.length ? `<div class="owns"><div class="pRing">${ring(byKind, net, "Net worth")}</div><div class="legend">${legend(byKind, net).replace(/<button type="button" class="pick[^"]*"/g, '<div class="pick"').replace(/<\/button>/g, "</div>")}</div></div>
+      <h3>Everything held</h3><table><thead><tr><th>Holding</th><th>Kind</th><th class="num">Value</th><th class="num">${esc(settings.show)}</th></tr></thead><tbody>${
+        mine.slice().sort((a, b) => (b.net_kwd || 0) - (a.net_kwd || 0)).map((r) => `<tr><td><b>${esc(holdingName(r.h))}</b></td><td>${esc(KINDS[r.h.kind])}</td>
+          <td class="num">${r.v != null ? native(r.v, r.cur) : "–"}</td><td class="num">${fmt(r.net_kwd)}</td></tr>`).join("")}</tbody></table>`
+      : `<p class="empty">Nothing held in this name yet.</p>`}
+      <p class="note">A record of what is held, not advice. Prices from Yahoo Finance's public data; values typed in are as of the day they were last changed.</p>`;
+    const pr = $("person").querySelector(".pRing"); if (pr) hoverRing(pr);
+  }
+  $("pOwner").addEventListener("change", drawPerson);
+  $("pPrint").addEventListener("click", () => { document.body.classList.add("print-person"); print(); });
+  addEventListener("afterprint", () => document.body.classList.remove("print-person"));
+
   // ---- The guided start: who, what, then the whole picture ----
   // Asks only what each kind needs to be valued; the rest can be added later under Holdings.
   const GUIDE_FIELDS = {
@@ -1643,7 +1803,32 @@
     "See the whole picture": "اعرض الصورة الكاملة",
     "The calendar, the insights and the monthly report are now worked out from these. Change or add anything under Holdings.":
       "التقويم والملاحظات والتقرير الشهري تُحسب الآن من هذه. عدّل أو أضف أي شيء من تبويب الأصول.",
-    "Add at least one; it can be you.": "أضف واحداً على الأقل؛ يمكن أن يكون أنت.", "Add at least one thing first.": "أضف شيئاً واحداً على الأقل أولاً.",
+    // Goals, Zakat and Each person (28 October 2026).
+    "Goals": "الأهداف", "Zakat": "الزكاة", "Each person": "كل فرد",
+    "What the family is working towards, and how close it is today, worked out from the Holdings tab.": "ما تسعى إليه العائلة، وكم اقتربت منه اليوم، محسوباً من تبويب الأصول.",
+    "Add a goal": "أضف هدفاً", "By": "بحلول", "Counted from": "يُحسب من", "Add goal": "أضف الهدف",
+    "The family's net worth": "صافي ثروة العائلة", "What could be cash within a week": "ما يمكن تسييله خلال أسبوع",
+    "No goals yet. Add the first one below.": "لا توجد أهداف بعد. أضف أولها في الأسفل.", "Nothing open.": "لا شيء مفتوح.",
+    "Reached.": "تحقق.", "The date has passed.": "مضى الموعد.", "Mark as done or dropped": "تسجيل كمُنجز أو متروك",
+    "Put in what the goal is.": "اكتب ما هو الهدف.", "Put in the amount.": "أدخل المبلغ.", "Put in the date.": "أدخل التاريخ.",
+    "Zakat, a rough estimate": "الزكاة، تقدير تقريبي",
+    "2.5% of what each person holds that counts for zakat, when it is above the nisab (the value of 85 grams of gold) and has been held for a full lunar year. Each person is worked out on their own. Scholars differ on shares, property and debts, so every holding below can be changed. A guide to take to your scholar or to Bait Al-Zakat, not a ruling.":
+      "2.5% مما يملكه كل فرد مما تجب فيه الزكاة، إذا بلغ النصاب (قيمة 85 غراماً من الذهب) وحال عليه حول قمري كامل. يُحسب كل فرد على حدة. يختلف العلماء في الأسهم والعقار والديون، لذا يمكن تعديل كل أصل أدناه. دليل تعرضه على عالمك أو على بيت الزكاة، وليس فتوى.",
+    "Take off loan payments due in the next 12 months": "اخصم أقساط القروض المستحقة خلال الـ12 شهراً القادمة",
+    "What counts": "ما يُحتسب",
+    "The usual starting point for each kind: cash, gold, crypto, sukuk and shares in full; a home or a rented property not counted (its rent is counted once it sits in the bank). Change any holding to match your scholar's view.":
+      "نقطة البداية المعتادة لكل نوع: النقد والذهب والعملات الرقمية والصكوك والأسهم كاملة؛ والمسكن أو العقار المؤجر لا يُحتسب (يُحتسب إيجاره حين يصبح في البنك). عدّل أي أصل ليوافق رأي عالمك.",
+    "Nisab today (85 g of gold)": "النصاب اليوم (85 غ ذهب)", "Gold, one gram": "الذهب، الغرام الواحد", "Estimate for all the people": "التقدير لجميع الأفراد",
+    "Counts for zakat": "يُحتسب للزكاة", "Taken off": "المخصوم", "The nisab": "النصاب", "Zakat, 2.5%": "الزكاة، 2.5%",
+    "Above": "يبلغه", "Below": "لا يبلغه", "In full": "كاملاً", "A part": "جزء منه", "Not counted": "لا يُحتسب", "Counted": "الاحتساب", "Counts": "المحتسب",
+    "No people yet. Under Owners, a person's kind is \"Person\".": "لا يوجد أفراد بعد. في تبويب المالكين، نوع الفرد هو \"فرد\".",
+    "Nothing held by a person yet.": "لا يملك أي فرد شيئاً بعد.",
+    "Show": "اعرض", "A page for one person, to keep or to share with them.": "صفحة لفرد واحد، للاحتفاظ بها أو مشاركتها معه.",
+    "Share of the family": "حصته من العائلة", "Everything held": "كل ما يملكه", "No owners yet. Add them under Owners.": "لا يوجد مالكون بعد. أضفهم من تبويب المالكين.",
+    "Nothing held in this name yet.": "لا يوجد شيء باسمه بعد.",
+    "A record of what is held, not advice. Prices from Yahoo Finance's public data; values typed in are as of the day they were last changed.":
+      "سجل لما يُملك، وليس نصيحة. الأسعار من بيانات ياهو فاينانس العامة؛ القيم المُدخلة يدوياً حسب آخر يوم عُدّلت فيه.",
+    "Add at least one; it can be you.":"أضف واحداً على الأقل؛ يمكن أن يكون أنت.", "Add at least one thing first.": "أضف شيئاً واحداً على الأقل أولاً.",
   };
   const PH = {
     "Find a holding, owner, country or currency": "ابحث عن أصل أو مالك أو دولة أو عملة",
@@ -1662,6 +1847,13 @@
     [/^([▲▼]) (.+) \((-?[\d.]+)%\) since (\d{4}-\d{2})$/, (m) => `${m[1]} ${m[2]} (${m[3]}%) منذ ${m[4]}`],
     [/^(\d+) holdings?, (.+), (-?\d+)% of the total$/, (m) => `${m[1]} ${m[1] === "1" ? "أصل" : "أصول"}، ${m[2]}، ${m[3]}% من المجموع`],
     [/^Showing (\d+) of (\d+)$/, (m) => `يظهر ${m[1]} من ${m[2]}`],
+    [/^Net worth of (.+)$/, (m) => `صافي ثروة ${w(m[1])}`],
+    [/^([^:]+): ((?:KWD |\$)[\d.,]+)$/, (m) => `${w(m[1])}: ${m[2]}`],
+    [/^(.+) of (.+) \((\d+)%\)$/, (m) => `${m[1]} من ${m[2]} (${m[3]}%)`],
+    [/^About (.+) a month more would reach it by (.+)\.$/, (m) => `حوالي ${m[1]} إضافية شهرياً تبلغه بحلول ${mon(m[2])}.`],
+    [/^Finished or dropped \((\d+)\)$/, (m) => `منجزة أو متروكة (${m[1]})`],
+    [/^Not worked out here: (.+)\. A company's or a trust's zakat follows its own rules\.$/, (m) => `لا تُحسب هنا: ${m[1].split(", ").map(w).join("، ")}. زكاة الشركة أو الصندوق لها أحكامها الخاصة.`],
+    [/^As of (.+), from the Family Office\.$/, (m) => `حتى ${mon(m[1])}، من المكتب العائلي.`],
     [/^Net worth today, (\d+) holdings, (\d+) owners?\.(?: (\d+) could not be valued just now \(see Holdings\)\.)?$/, (m) => `صافي الثروة اليوم: ${m[1]} أصول، ${m[2]} مالكين.${m[3] ? ` تعذّر تقييم ${m[3]} الآن (انظر الأصول).` : ""}`],
     [/^about (.+)$/, (m) => `حوالي ${m[1]}`],
     [/^A made-up family, with prices frozen on (.+?)\. Change anything or add your own: it stays in your own browser, on your own device, and is never sent anywhere\.$/,
