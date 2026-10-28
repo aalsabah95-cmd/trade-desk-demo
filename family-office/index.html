@@ -90,6 +90,14 @@
   .goal-head, .goal-foot { display: flex; justify-content: space-between; align-items: center; gap: .4rem 1rem; flex-wrap: wrap; }
   .goal .track { height: .75rem; margin: .5rem 0; background: color-mix(in srgb, var(--line) 70%, transparent); border-radius: 999px; overflow: hidden; }
   .goal .fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent-2)); border-radius: 999px; }
+  .wigrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr)); gap: .9rem 1.5rem; }
+  .wigrid label { display: flex; justify-content: space-between; font-size: .9rem; margin-bottom: .2rem; } .wigrid b { font-variant-numeric: tabular-nums; }
+  .wigrid input[type="range"] { width: 100%; padding: 0; border: 0; accent-color: var(--accent); background: none; }
+  .up { color: var(--good); } .down { color: var(--bad); } #wiKinds td.num, #wiOwners td.num { white-space: nowrap; }
+  label.filebtn { display: inline-block; border: 1px solid var(--line); background: var(--surface); border-radius: 10px; padding: .45rem .8rem; cursor: pointer; }
+  label.filebtn:hover { border-color: var(--accent); }
+  .doc { display: flex; justify-content: space-between; gap: 1rem; padding: .35rem 0; border-bottom: 1px solid var(--line); font-size: .92rem; }
+  .doc a { color: var(--accent); text-decoration: none; word-break: break-all; } .doc a:hover { text-decoration: underline; }
   th[data-sort] { cursor: pointer; } th[data-sort]:hover { color: var(--fg); } th.sorted { color: var(--accent); }
   .tools-row { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; margin: 0 0 .75rem; }
   .tools-row input[type="search"] { width: auto; flex: 1 1 14rem; max-width: 22rem; }
@@ -158,7 +166,7 @@
     <button data-tab="overview" aria-selected="true">Overview</button><button data-tab="holdings">Holdings</button>
     <button data-tab="calendar">Calendar</button><button data-tab="insights">Insights</button><button id="moreBtn" aria-haspopup="true" aria-expanded="false">More <span aria-hidden="true">▾</span></button>
   </nav>
-  <div class="more-menu" id="moreMenu" hidden><button data-tab="goals">Goals</button><button data-tab="zakat">Zakat</button><button data-tab="person">Each person</button><button data-tab="report">Report</button><button data-tab="options">Options</button><button data-tab="finder">Property finder</button><button data-tab="owners">Owners</button><button data-tab="settings">Settings</button></div>
+  <div class="more-menu" id="moreMenu" hidden><button data-tab="goals">Goals</button><button data-tab="zakat">Zakat</button><button data-tab="person">Each person</button><button data-tab="whatif">What if</button><button data-tab="report">Report</button><button data-tab="options">Options</button><button data-tab="finder">Property finder</button><button data-tab="owners">Owners</button><button data-tab="settings">Settings</button></div>
   </div>
 
   <div class="tab" id="tab-overview">
@@ -192,7 +200,11 @@
       <div class="scroll" id="holdingsTable"></div></div>
     <div class="card" id="formCard" hidden><h2 id="formTitle">Add something</h2>
       <form class="grid" id="hForm" onsubmit="return false"></form>
-      <div class="actions"><button class="primary" id="saveH">Save</button><button id="cancelH">Cancel</button><button id="archiveH" hidden>Mark as sold or closed</button><span class="note" id="formMsg"></span></div></div>
+      <div class="actions"><button class="primary" id="saveH">Save</button><button id="cancelH">Cancel</button><button id="archiveH" hidden>Mark as sold or closed</button><span class="note" id="formMsg"></span></div>
+      <div id="docBox" hidden style="margin-top:1.1rem;border-top:1px solid var(--line);padding-top:.9rem"><h3 style="margin:0 0 .4rem">Papers</h3>
+        <div id="docList"></div>
+        <div class="actions"><label class="filebtn" for="docFile">Add a paper</label><input type="file" id="docFile" multiple accept=".pdf,.png,.jpg,.jpeg,.heic,.webp,.gif,.txt,.csv,.doc,.docx,.xls,.xlsx" style="display:none"><span class="note" id="docMsg"></span></div>
+        <p class="note" id="docWhere">Title deeds, certificates, bank letters. In this demo they stay in this browser, on this device, and are never sent anywhere.</p></div></div>
   </div>
 
   <div class="tab" id="tab-calendar" hidden>
@@ -338,11 +350,35 @@
     <div class="card report" id="person"></div>
   </div>
 
+  <div class="tab" id="tab-whatif" hidden>
+    <div class="card"><h2>What if</h2>
+      <p class="muted">Move a slider to see what a rise or a fall would do to the family's total. Plain arithmetic on today's values, not a forecast; loans stay as they are.</p>
+      <div class="actions" id="wiPresets" style="margin:.2rem 0 1rem">
+        <button data-preset='{"property":-10}'>Property falls 10%</button><button data-preset='{"stock":-20}'>Shares fall 20%</button>
+        <button data-preset='{"gold":10}'>Gold rises 10%</button><button data-preset='{"fx":-5}'>Other currencies fall 5%</button>
+        <button data-preset='{"all":-15}'>Everything but cash falls 15%</button><button id="wiReset">Back to today</button></div>
+      <div class="wigrid" id="wiSliders"></div></div>
+    <div class="card"><h2>What it would mean</h2><div class="tiles" id="wiTiles"></div>
+      <div class="split" style="margin-top:1rem"><div class="scroll" id="wiKinds"></div><div class="scroll" id="wiOwners"></div></div></div>
+  </div>
+
   <div class="tab" id="tab-settings" hidden>
     <div class="card"><h2>Settings</h2>
       <div class="switch"><input type="checkbox" id="set_halal"><label for="set_halal"><b>Halal checks</b>: show which holdings pass a Shariah screen, and how much of the total does. Off hides them everywhere.</label></div>
       <p class="note">The same switch is on the Trade Desk. For US shares the Trade Desk's screen is used; for everything else you mark it yourself on each holding (an Islamic bank account, sukuk and gold usually pass; interest-bearing deposits and bonds do not). A screen, not a ruling.</p>
       <div class="actions"><span class="note" id="setMsg"></span></div></div>
+    <div class="card"><h2>Phone reminders</h2>
+      <div class="switch"><input type="checkbox" id="rem_on"><label for="rem_on"><b>Send a message to the phone</b> before money comes in or goes out.</label></div>
+      <form class="grid" onsubmit="return false" style="margin-top:.7rem"><div><label for="rem_days">How long before</label><select id="rem_days">
+        <option value="0">On the day</option><option value="1">A day before</option><option value="3">Three days before</option><option value="7">A week before</option></select></div></form>
+      <div class="chips" id="remKinds">
+        <label class="chip"><input type="checkbox" data-rem="rent" style="width:auto"> Rent coming in</label>
+        <label class="chip"><input type="checkbox" data-rem="loan" style="width:auto"> Loan payments</label>
+        <label class="chip"><input type="checkbox" data-rem="sukuk" style="width:auto"> Sukuk profit and maturity</label>
+        <label class="chip"><input type="checkbox" data-rem="fund" style="width:auto"> Fund cash calls and payouts</label>
+        <label class="chip"><input type="checkbox" data-rem="own" style="width:auto"> Your own dates</label></div>
+      <p class="note" id="remNote">In this demo nothing is sent; the full Family Office on a Mac sends these, one message a morning, only on days something is due.</p>
+      <span class="note" id="remMsg"></span></div>
   </div>
 
   <div class="modal" id="guide" hidden role="dialog" aria-modal="true" aria-labelledby="gTitle"><div class="sheet">
@@ -414,6 +450,33 @@
     if (u.pathname.endsWith("/api/ranges")) return json(D.ranges[`${(q.symbol || "").toUpperCase()}|${q.years}`] || { error: "Not in this demo." });
     return json({ error: "That part needs the full Family Office on a Mac." });
   };
+  // Papers kept with a holding: in this browser's own storage, never sent anywhere.
+  window.mobleeDocs = (function () {
+    const urls = {};
+    const db = () => new Promise((res, rej) => { const r = indexedDB.open("family-office-demo-docs", 1);
+      r.onupgradeneeded = () => r.result.createObjectStore("docs", { keyPath: "key" }); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
+    const all = async () => { const d = await db(); return new Promise((res, rej) => { const q = d.transaction("docs").objectStore("docs").getAll(); q.onsuccess = () => res(q.result); q.onerror = () => rej(q.error); }); };
+    return {
+      async list() {
+        try {
+          const out = {};
+          (await all()).forEach((x) => { (out[x.hid] = out[x.hid] || []).push({ name: x.name, size: x.blob.size, added: x.added }); urls[x.key] = urls[x.key] || URL.createObjectURL(x.blob); });
+          return out;
+        } catch (e) { return {}; }
+      },
+      async put(hid, file) {
+        if (file.size > 25 * 1024 * 1024) throw new Error("A paper can be up to 25 MB.");
+        const have = new Set((await all()).map((x) => x.key));
+        const dot = file.name.lastIndexOf("."), stem = dot > 0 ? file.name.slice(0, dot) : file.name, ext = dot > 0 ? file.name.slice(dot) : "";
+        let name = file.name, n = 2;
+        while (have.has(hid + "/" + name)) name = `${stem} (${n++})${ext}`;
+        const d = await db();
+        await new Promise((res, rej) => { const t = d.transaction("docs", "readwrite"); t.objectStore("docs").add({ key: hid + "/" + name, hid, name, blob: file, added: new Date().toISOString().slice(0, 10) }); t.oncomplete = res; t.onerror = () => rej(t.error); });
+        return { ok: true, name };
+      },
+      url: (hid, name) => urls[hid + "/" + name] || "#",
+    };
+  })();
   // Start empty, to put in your own family; kept only in this browser.
   window.startOwn = function () {
     if (!confirm("Start empty, to put in your own family? The sample is set aside, and what you add stays only in this browser, on this device.")) return;
@@ -545,6 +608,8 @@
       mobleeApp.load("finder").then((x) => Object.assign({ answers: {}, shortlist: [] }, x || {})), mobleeApp.load("area-notes").then((x) => x || []), mobleeApp.load("goals").then((x) => x || []),
     ]);
     $("showCur").value = settings.show; $("set_halal").checked = !!settings.halal; $("zDebts").checked = !!settings.zakat_debts;
+    docIndex = await docsApi.list();
+    drawReminders();
     await refreshPrices();
   }
   async function refreshPrices() {
@@ -702,7 +767,7 @@
     drawReport(rows, total);
     drawInsights(rows, total);
     drawFinder();
-    drawGoals(); drawZakat(); drawPerson();
+    drawGoals(); drawZakat(); drawPerson(); drawWhatIf();
     keepSnapshot(rows, total);
   }
 
@@ -734,7 +799,8 @@
           : h.kind === "private" && Number(h.committed) ? `<div class="muted small">Committed ${native(h.committed, h.currency)}, paid in ${native(h.called || 0, h.currency)}</div>`
           : h.kind === "sukuk" && h.maturity ? `<div class="muted small">${h.coupon_pct ? `${h.coupon_pct}% a year, ` : ""}matures ${esc(h.maturity)}</div>`
           : q ? `<div class="muted small">${native(q.price, q.currency)} each, ${q.change_pct >= 0 ? "+" : ""}${q.change_pct}% today</div>` : "";
-        return `<tr><td>${title}${extra}</td><td>${esc(ownerName(h.owner))}</td><td class="num">${isPriced(h) ? `${Number(h.qty || 0).toLocaleString("en-US")}${h.kind === "gold" ? (h.unit === "g" ? " g" : " oz") : ""}` : ""}</td>
+        const papers = (docIndex[h.id] || []).length;
+        return `<tr><td>${title}${extra}${papers ? `<div class="muted small">${papers} ${papers === 1 ? "paper" : "papers"} kept</div>` : ""}</td><td>${esc(ownerName(h.owner))}</td><td class="num">${isPriced(h) ? `${Number(h.qty || 0).toLocaleString("en-US")}${h.kind === "gold" ? (h.unit === "g" ? " g" : " oz") : ""}` : ""}</td>
           <td class="num">${r.v != null ? native(r.v, r.cur) : `<span class="badge unknown">no price</span>`}</td><td class="num">${fmt(r.net_kwd)}</td>
           ${settings.halal ? `<td><span class="badge ${hl}">${hl === "yes" ? "Passes" : hl === "no" ? "Does not" : "Not checked"}</span></td>` : ""}
           <td><button data-edit="${esc(h.id)}">Change</button></td></tr>`;
@@ -1348,6 +1414,7 @@
     $("formTitle").textContent = h ? "Change this holding" : "Add something";
     $("archiveH").hidden = !h;
     drawForm();
+    drawDocs(); $("docMsg").textContent = "";
     $("formCard").scrollIntoView({ behavior: "smooth", block: "start" });
     $("gForm").innerHTML = "";   // the guide's box uses the same field names
   }
@@ -1404,6 +1471,104 @@
 
   const longDate = (d) => new Date(d + "T00:00:00Z").toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
   const sumNet = (rows) => rows.reduce((t, r) => t + (r.net_kwd || 0), 0);
+
+  // ---- What if: today's values moved by the sliders, loans left as they are ----
+  let wi = {}, wiKeys = "";
+  const pctWords = (p) => `${p > 0 ? "+" : p < 0 ? "−" : ""}${Math.abs(p)}%`;
+  function wiRow(r) {
+    // A row's net worth in dinars once its kind and, if not in dinars, its currency have moved.
+    if (r.v == null || !fx[r.cur]) return null;
+    const k = (wi[r.h.kind] || 0) / 100, f = r.cur === "KWD" ? 0 : (wi.fx || 0) / 100;
+    const debt = r.h.kind === "property" ? Number(r.h.mortgage_left || 0) : 0;
+    return (r.v * (1 + k) - debt) * fx[r.cur] * (1 + f);
+  }
+  function drawWhatIf() {
+    const kinds = Object.keys(KINDS).filter((k) => lastRows.some((r) => r.h.kind === k));
+    const keys = kinds.join(",") + (lastRows.some((r) => r.cur !== "KWD") ? ",fx" : "");
+    if (keys !== wiKeys) {   // the sliders are drawn again only when the kinds held change, so a drag is never cut short
+      wiKeys = keys;
+      $("wiSliders").innerHTML = keys.split(",").filter(Boolean).map((k) => `<div><label for="wi_${k}"><span>${esc(k === "fx" ? "Other currencies against the dinar" : KINDS[k])}</span><b id="wiv_${k}">${pctWords(wi[k] || 0)}</b></label>
+        <input type="range" id="wi_${k}" data-wi="${k}" min="${k === "fx" ? -20 : -50}" max="${k === "fx" ? 20 : 50}" step="${k === "fx" ? 1 : 5}" value="${wi[k] || 0}"></div>`).join("")
+        || `<p class="empty">Nothing held yet.</p>`;
+      $("wiSliders").querySelectorAll("[data-wi]").forEach((s) => s.addEventListener("input", () => { wi[s.dataset.wi] = Number(s.value); $("wiv_" + s.dataset.wi).textContent = pctWords(wi[s.dataset.wi]); wiResult(); }));
+    }
+    wiResult();
+  }
+  function wiResult() {
+    const now = lastTotal, after = lastRows.reduce((t, r) => t + (wiRow(r) ?? (r.net_kwd || 0)), 0), d = after - now;
+    const cls = (x) => x > 0.5 ? "up" : x < -0.5 ? "down" : "";
+    const sign = (x) => `${x > 0.5 ? "+" : x < -0.5 ? "−" : ""}${fmt(Math.abs(x))}`;
+    $("wiTiles").innerHTML = [["Today", fmt(now)], ["After", fmt(after)], ["Difference", `<span class="${cls(d)}">${sign(d)} (${now ? pctWords(Math.round(1000 * d / now) / 10) : "0%"})</span>`]]
+      .map(([k, v]) => `<div class="tile"><span>${k}</span><b>${v}</b></div>`).join("");
+    const table = (title, key) => {
+      const groups = [...new Set(lastRows.map(key))];
+      return `<table><thead><tr><th>${title}</th><th class="num">Today</th><th class="num">After</th><th class="num">Difference</th></tr></thead><tbody>${groups.map((g) => {
+        const rows = lastRows.filter((r) => key(r) === g), a = sumNet(rows), b = rows.reduce((t, r) => t + (wiRow(r) ?? (r.net_kwd || 0)), 0);
+        return { g, a, b };
+      }).sort((x, y) => y.a - x.a).map(({ g, a, b }) => `<tr><td>${esc(g)}</td><td class="num">${fmt(a)}</td><td class="num">${fmt(b)}</td><td class="num ${cls(b - a)}">${sign(b - a)}</td></tr>`).join("")}</tbody></table>`;
+    };
+    $("wiKinds").innerHTML = lastRows.length ? table("Kind", DIMS.kind) : "";
+    $("wiOwners").innerHTML = lastRows.length ? table("Owner", DIMS.owner) : "";
+  }
+  $("wiPresets").querySelectorAll("[data-preset]").forEach((b) => b.addEventListener("click", () => {
+    const p = JSON.parse(b.dataset.preset);
+    wi = p.all != null ? Object.fromEntries(Object.keys(KINDS).filter((k) => k !== "cash").map((k) => [k, p.all])) : p;
+    wiKeys = ""; drawWhatIf();
+  }));
+  $("wiReset").addEventListener("click", () => { wi = {}; wiKeys = ""; drawWhatIf(); });
+
+  // ---- Phone reminders: the page keeps the choices; job.py sends the messages ----
+  const REM_DEFAULT = { on: false, days: 1, kinds: { rent: true, loan: true, sukuk: true, fund: true, own: true } };
+  function drawReminders() {
+    const r = Object.assign({}, REM_DEFAULT, settings.reminders || {});
+    $("rem_on").checked = !!r.on; $("rem_days").value = String(r.days);
+    document.querySelectorAll("[data-rem]").forEach((c) => { c.checked = (r.kinds || {})[c.dataset.rem] !== false; });
+  }
+  async function saveReminders() {
+    const kinds = {};
+    document.querySelectorAll("[data-rem]").forEach((c) => { kinds[c.dataset.rem] = c.checked; });
+    settings.reminders = { on: $("rem_on").checked, days: Number($("rem_days").value), kinds };
+    await mobleeApp.save("settings", settings);
+    $("remMsg").textContent = settings.reminders.on ? "Saved. Reminders are on." : "Saved. Reminders are off.";
+  }
+  ["rem_on", "rem_days"].forEach((id) => $(id).addEventListener("change", saveReminders));
+  document.querySelectorAll("[data-rem]").forEach((c) => c.addEventListener("change", saveReminders));
+
+  // ---- Papers kept with each holding ----
+  // On the Mac the server keeps them in a folder outside the wiki; the website demo
+  // puts its own stand-in in window.mobleeDocs, which keeps them in the visitor's browser.
+  const docsApi = window.mobleeDocs || {
+    list: () => fetch("/api/docs").then((r) => r.ok ? r.json() : {}).catch(() => ({})),
+    async put(hid, file) {
+      const r = await fetch(`/api/doc?h=${encodeURIComponent(hid)}&name=${encodeURIComponent(file.name)}`, { method: "POST", headers: { "X-Requested-By": "moblee-app" }, body: file });
+      const body = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(body.error || "It could not be kept.");
+      return body;
+    },
+    url: (hid, name) => `/api/doc/${encodeURIComponent(hid)}/${encodeURIComponent(name)}`,
+  };
+  let docIndex = {};
+  const sizeWords = (n) => n >= 1048576 ? `${(n / 1048576).toFixed(1)} MB` : `${Math.max(1, Math.round(n / 1024))} KB`;
+  function drawDocs() {
+    const h = editing;
+    $("docBox").hidden = !(h && h.id);
+    if (!h || !h.id) return;
+    const list = docIndex[h.id] || [];
+    $("docList").innerHTML = list.length ? list.map((d) => `<div class="doc"><a href="${esc(docsApi.url(h.id, d.name))}" target="_blank" rel="noopener">${esc(d.name)}</a><span class="muted small">${sizeWords(d.size)}, ${esc(d.added)}</span></div>`).join("")
+      : `<p class="muted small" style="margin:0">No papers kept with this holding yet.</p>`;
+  }
+  $("docFile").addEventListener("change", async () => {
+    const files = [...$("docFile").files], h = editing;
+    if (!files.length || !h || !h.id) return;
+    $("docMsg").textContent = "Keeping…";
+    try {
+      for (const f of files) await docsApi.put(h.id, f);
+      $("docMsg").textContent = files.length === 1 ? "Kept." : `Kept ${files.length}.`;
+    } catch (e) { $("docMsg").textContent = e.message; }
+    $("docFile").value = "";
+    docIndex = await docsApi.list();
+    drawDocs(); drawHoldings(lastRows);
+  });
 
   // ---- Goals ----
   // A target, a date, and which part of the family's wealth counts towards it.
@@ -1803,6 +1968,28 @@
     "See the whole picture": "اعرض الصورة الكاملة",
     "The calendar, the insights and the monthly report are now worked out from these. Change or add anything under Holdings.":
       "التقويم والملاحظات والتقرير الشهري تُحسب الآن من هذه. عدّل أو أضف أي شيء من تبويب الأصول.",
+    // Papers, phone reminders and What if (28 October 2026).
+    "Papers": "المستندات", "Add a paper": "أضف مستنداً", "No papers kept with this holding yet.": "لا توجد مستندات محفوظة مع هذا الأصل بعد.",
+    "Title deeds, certificates, bank letters. Kept on this Mac in a folder of their own, outside the wiki, and never sent anywhere.":
+      "صكوك الملكية، الشهادات، خطابات البنوك. تُحفظ على هذا الجهاز في مجلد خاص بها، ولا تُرسل إلى أي مكان.",
+    "Title deeds, certificates, bank letters. In this demo they stay in this browser, on this device, and are never sent anywhere.":
+      "صكوك الملكية، الشهادات، خطابات البنوك. في هذه النسخة التجريبية تبقى في متصفحك على جهازك، ولا تُرسل إلى أي مكان.",
+    "Keeping…": "جارٍ الحفظ…", "Kept.": "حُفظ.", "A paper can be up to 25 MB.": "الحد الأقصى للمستند 25 ميغابايت.",
+    "Only PDFs, pictures, text, Word and Excel files can be kept here.": "يمكن حفظ ملفات PDF والصور والنصوص وملفات Word وExcel فقط.",
+    "Phone reminders": "تذكيرات الهاتف", "Send a message to the phone": "أرسل رسالة إلى الهاتف", "before money comes in or goes out.": "قبل دخول المال أو خروجه.",
+    "How long before": "قبلها بكم", "On the day": "في اليوم نفسه", "A day before": "قبلها بيوم", "Three days before": "قبلها بثلاثة أيام", "A week before": "قبلها بأسبوع",
+    "Rent coming in": "الإيجار الداخل", "Loan payments": "أقساط القروض", "Sukuk profit and maturity": "أرباح الصكوك واستحقاقها",
+    "Fund cash calls and payouts": "طلبات تمويل الصناديق وتوزيعاتها", "Your own dates": "مواعيدك الخاصة",
+    "One message a morning, at 8, only on days something is due, to the phone chosen in the Moblee app. It works once the Family Office's reminder job is switched on in the Moblee app.":
+      "رسالة واحدة صباحاً في الثامنة، فقط في الأيام التي يستحق فيها شيء، إلى الهاتف المختار في تطبيق Moblee. تعمل بعد تشغيل مهمة التذكير للمكتب العائلي في تطبيق Moblee.",
+    "In this demo nothing is sent; the full Family Office on a Mac sends these, one message a morning, only on days something is due.":
+      "في هذه النسخة التجريبية لا يُرسل شيء؛ المكتب العائلي الكامل على الجهاز يرسلها، رسالة واحدة صباحاً، فقط في الأيام التي يستحق فيها شيء.",
+    "Saved. Reminders are on.": "حُفظ. التذكيرات مفعّلة.", "Saved. Reminders are off.": "حُفظ. التذكيرات متوقفة.",
+    "What if": "ماذا لو", "Move a slider to see what a rise or a fall would do to the family's total. Plain arithmetic on today's values, not a forecast; loans stay as they are.":
+      "حرّك المؤشر لترى أثر الارتفاع أو الانخفاض على مجموع العائلة. حساب بسيط على قيم اليوم، وليس توقعاً؛ القروض تبقى كما هي.",
+    "Property falls 10%": "العقار ينخفض 10%", "Shares fall 20%": "الأسهم تنخفض 20%", "Gold rises 10%": "الذهب يرتفع 10%",
+    "Other currencies fall 5%": "العملات الأخرى تنخفض 5%", "Everything but cash falls 15%": "كل شيء عدا النقد ينخفض 15%", "Back to today": "العودة إلى اليوم",
+    "What it would mean": "ماذا يعني ذلك", "Today": "اليوم", "After": "بعد", "Difference": "الفرق", "Other currencies against the dinar": "العملات الأخرى مقابل الدينار",
     // Goals, Zakat and Each person (28 October 2026).
     "Goals": "الأهداف", "Zakat": "الزكاة", "Each person": "كل فرد",
     "What the family is working towards, and how close it is today, worked out from the Holdings tab.": "ما تسعى إليه العائلة، وكم اقتربت منه اليوم، محسوباً من تبويب الأصول.",
@@ -1848,6 +2035,8 @@
     [/^(\d+) holdings?, (.+), (-?\d+)% of the total$/, (m) => `${m[1]} ${m[1] === "1" ? "أصل" : "أصول"}، ${m[2]}، ${m[3]}% من المجموع`],
     [/^Showing (\d+) of (\d+)$/, (m) => `يظهر ${m[1]} من ${m[2]}`],
     [/^Net worth of (.+)$/, (m) => `صافي ثروة ${w(m[1])}`],
+    [/^(\d+) papers? kept$/, (m) => `${m[1] === "1" ? "مستند محفوظ" : `${m[1]} مستندات محفوظة`}`],
+    [/^Kept (\d+)\.$/, (m) => `حُفظ ${m[1]}.`],
     [/^([^:]+): ((?:KWD |\$)[\d.,]+)$/, (m) => `${w(m[1])}: ${m[2]}`],
     [/^(.+) of (.+) \((\d+)%\)$/, (m) => `${m[1]} من ${m[2]} (${m[3]}%)`],
     [/^About (.+) a month more would reach it by (.+)\.$/, (m) => `حوالي ${m[1]} إضافية شهرياً تبلغه بحلول ${mon(m[2])}.`],
