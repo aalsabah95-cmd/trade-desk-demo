@@ -139,6 +139,59 @@
   .report h2 { font-size: 1.35rem; margin: 0; } .report h3 { font-size: 1rem; margin: 1.1rem 0 .4rem; }
   .report .rgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); gap: 1rem 1.5rem; }
   .report table { font-size: .9rem; } .report td.num { white-space: nowrap; } .report td { padding: .35rem .4rem; }
+  /* Performance, Family and Connected, and the pieces they share. */
+  .menu-sep { display: block; height: 1px; margin: .35rem .4rem; background: var(--line); }
+  .head-row { display: flex; justify-content: space-between; align-items: center; gap: .6rem; flex-wrap: wrap; } .head-row h2 { margin: 0; }
+  .seg-btns { display: inline-flex; padding: .2rem; gap: .15rem; border: 1px solid var(--line); border-radius: 999px; }
+  .seg-btns button { border: 0; background: none; border-radius: 999px; padding: .25rem .8rem; font-size: .85rem; color: var(--muted); }
+  .seg-btns button[aria-pressed="true"] { background: var(--accent); color: #fff; }
+  .tile { position: relative; overflow: hidden; } .tile > span, .tile > b { position: relative; z-index: 1; }
+  .tile .spark { position: absolute; inset: auto 0 0 0; width: 100%; height: 55%; pointer-events: none; }
+  .tile em.pill { position: relative; z-index: 1; align-self: flex-start; font-style: normal; font-size: .75rem; font-weight: 600; padding: .1rem .5rem; border-radius: 999px; }
+  em.pill.up { color: #16a34a; background: rgba(34,197,94,.14); border: 1px solid rgba(34,197,94,.35); }
+  em.pill.down { color: #e11d48; background: rgba(244,63,94,.12); border: 1px solid rgba(244,63,94,.35); }
+  .split.two { grid-template-columns: repeat(auto-fit, minmax(22rem, 1fr)); }
+  .ledger { display: grid; gap: .55rem; }
+  .lrow { display: grid; grid-template-columns: 1fr auto; gap: .2rem .8rem; font-size: .9rem; } .lrow b { font-variant-numeric: tabular-nums; }
+  .lrow b.up { color: #16a34a; } .lrow b.down { color: #e11d48; }
+  .ltrack { grid-column: 1 / -1; height: .5rem; border-radius: 999px; background: color-mix(in srgb, var(--fg) 7%, transparent); overflow: hidden; }
+  .ltrack i { display: block; height: 100%; border-radius: 999px; background: linear-gradient(90deg, #15803d, #4ade80); }
+  .ltrack i.out { background: linear-gradient(90deg, #be123c, #fb7185); }
+  .lrow.total { border-top: 1px solid var(--line); padding-top: .55rem; font-weight: 600; }
+  .checks { display: grid; grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr)); gap: .7rem; }
+  .check { display: flex; gap: .7rem; align-items: center; padding: .7rem .85rem; border: 1px solid var(--line); border-radius: 14px; }
+  .check i { flex: none; display: grid; place-items: center; width: 1.8rem; height: 1.8rem; border-radius: 50%; font-style: normal; font-weight: 700; font-size: .85rem; }
+  .check.ok i { background: rgba(34,197,94,.16); color: #22c55e; } .check.todo i { background: rgba(251,191,36,.16); color: #f59e0b; }
+  .check div { display: flex; flex-direction: column; } .check span { font-size: .8rem; color: var(--muted); }
+  .persons { display: grid; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); gap: 1rem; margin-bottom: 1rem; } .persons .card { margin: 0; }
+  .person .who { display: flex; align-items: center; gap: .7rem; } .person .who > div { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+  .avatar { flex: none; display: grid; place-items: center; width: 2.6rem; height: 2.6rem; border-radius: 50%; font-weight: 700; color: #fff;
+    background: radial-gradient(circle at 30% 25%, color-mix(in srgb, var(--c) 60%, #fff), var(--c) 70%); box-shadow: 0 0 0 3px color-mix(in srgb, var(--c) 25%, transparent); }
+  .person .share { font-size: .8rem; font-weight: 600; padding: .15rem .55rem; border-radius: 999px; background: color-mix(in srgb, var(--accent) 16%, transparent); }
+  .person .pv { font-size: 1.5rem; font-weight: 700; letter-spacing: -.01em; margin: .8rem 0 .45rem; font-variant-numeric: tabular-nums; }
+  .person .chips { display: flex; flex-wrap: wrap; gap: .3rem; margin: .7rem 0 .2rem; } .person .chip { font-size: .75rem; }
+  .person .actions { align-items: center; margin-top: .6rem; }
+  .series-legend { display: flex; flex-wrap: wrap; gap: .4rem 1rem; font-size: .85rem; margin: .2rem 0 .6rem; }
+  .series-legend span { display: inline-flex; align-items: center; gap: .4rem; } .series-legend i { width: .7rem; height: .7rem; border-radius: 50%; }
+  .series-legend b { font-weight: 600; font-variant-numeric: tabular-nums; }
+  .gauges { display: grid; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); gap: 1rem; }
+  .gauge { display: flex; flex-direction: column; align-items: center; text-align: center; gap: .1rem; padding: .6rem; border: 1px solid var(--line); border-radius: 16px; }
+  .gauge svg { width: 10rem; height: auto; } .gauge svg path + path { transition: stroke-dasharray .9s cubic-bezier(.2,.7,.2,1); }
+  .gauge b { font-size: 1.6rem; margin-top: -2.1rem; font-variant-numeric: tabular-nums; } .gauge > span:not(.muted) { font-weight: 600; font-size: .9rem; margin-top: .3rem; }
+  .sources { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: .8rem; margin-top: .6rem; }
+  .source { position: relative; display: flex; flex-direction: column; gap: .3rem; padding: .9rem 1rem; border: 1px solid var(--line); border-radius: 16px; min-height: 7.4rem; }
+  .src-top { display: flex; align-items: center; gap: .55rem; } .src-top b { flex: 1; }
+  .source .dot { width: .55rem; height: .55rem; border-radius: 50%; background: var(--muted); }
+  .source.on .dot { background: #22c55e; box-shadow: 0 0 0 4px rgba(34,197,94,.18); } .source.off .dot { background: #f43f5e; box-shadow: 0 0 0 4px rgba(244,63,94,.15); }
+  .toggle { width: 2.2rem; height: 1.25rem; border-radius: 999px; background: color-mix(in srgb, var(--fg) 14%, transparent); position: relative; transition: background .3s; }
+  .toggle i { position: absolute; top: .15rem; inset-inline-start: .15rem; width: .95rem; height: .95rem; border-radius: 50%; background: #fff; transition: inset-inline-start .3s; box-shadow: 0 1px 3px rgba(0,0,0,.3); }
+  .source.on .toggle { background: #22c55e; } .source.on .toggle i { inset-inline-start: 1.1rem; }
+  .src-detail { font-size: .85rem; margin-top: auto; font-variant-numeric: tabular-nums; }
+  .src-go { position: absolute; inset-inline-end: .8rem; bottom: .75rem; font-size: .8rem; padding: .2rem .7rem; border-radius: 999px; }
+  .mix { display: flex; height: 1.1rem; border-radius: 999px; overflow: hidden; gap: 3px; margin: .6rem 0 .8rem; background: color-mix(in srgb, var(--fg) 7%, transparent); }
+  .mix i { display: block; height: 100%; border-radius: 999px; transition: width .8s cubic-bezier(.2,.7,.2,1); }
+  .hbar .b { transition: opacity .2s; } svg:hover .hbar:not(.on) .b { opacity: .55; }
+  .cap { cursor: default; transition: transform .25s; transform-box: fill-box; transform-origin: center; } .cap:hover { transform: translateY(-3px); }
   /* The glass look: glowing frosted panels over deep navy, a side menu on wide screens, on when <html> has class="glass". */
   html.glass { --bg: #eceefb; --surface: #ffffff; --fg: #141633; --muted: #5d6390; --accent: #5b4ee6; --accent-2: #0891b2; --line: rgba(60,60,140,.12);
     --glass: rgba(255,255,255,.6); --glass-tile: rgba(255,255,255,.55); --glass-line: rgba(255,255,255,.8); --glow: rgba(91,78,230,.22);
@@ -296,6 +349,22 @@
     -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M8 16L16 8M9 8h7v7'/%3E%3C/svg%3E") center / .85rem no-repeat;
     mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M8 16L16 8M9 8h7v7'/%3E%3C/svg%3E") center / .85rem no-repeat; }
   @media (max-width: 560px) { html.glass .tile { min-height: 4.9rem; gap: .5rem; } html.glass .tile b { font-size: 1.3rem; } }
+  html.glass .check, html.glass .gauge, html.glass .source { background: linear-gradient(145deg, var(--sheen), transparent 60%), var(--glass-tile); border-color: var(--glass-line);
+    transition: transform .25s, border-color .25s, box-shadow .25s; }
+  html.glass .gauge:hover, html.glass .source:hover, html.glass .check:hover { transform: translateY(-3px); border-color: color-mix(in srgb, var(--fg) 22%, transparent); box-shadow: 0 14px 30px rgba(0,0,0,.25); }
+  html.glass .person.lead { background: linear-gradient(145deg, #9a91ff, #6a5fe0 55%, #4a41a8); border-color: rgba(200,192,255,.45); color: #fff; }
+  html.glass .person.lead .muted { color: rgba(255,255,255,.75); } html.glass .person.lead .share, html.glass .person.lead .chip { background: rgba(255,255,255,.18); color: #fff; }
+  html.glass .person.lead .ltrack { background: rgba(255,255,255,.2); } html.glass .person.lead .ltrack i { background: #fff !important; }
+  html.glass .person.lead button { background: rgba(255,255,255,.16); border-color: rgba(255,255,255,.35); color: #fff; }
+  html.glass:not([data-theme="light"]) em.pill.up, html.glass:not([data-theme="light"]) .lrow b.up { color: #86efac; }
+  html.glass:not([data-theme="light"]) em.pill.down, html.glass:not([data-theme="light"]) .lrow b.down { color: #fda4af; }
+  html.glass .tiles .tile:first-child em.pill { color: #fff; background: rgba(255,255,255,.18); border-color: rgba(255,255,255,.35); }
+  html.glass .seg-btns { border-color: var(--glass-line); background: rgba(255,255,255,.04); }
+  html.glass .seg-btns button { background: none; border: 0; } html.glass .seg-btns button[aria-pressed="true"] { background: linear-gradient(145deg, #948aff, #5f54dc); color: #fff; }
+  html.glass .menu-sep { background: var(--line); }
+  html.glass [data-tab="perf"] { --ni: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 12h4l3 8 4-16 3 8h4'/%3E%3C/svg%3E"); }
+  html.glass [data-tab="family"] { --ni: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='9' cy='7' r='3.5'/%3E%3Ccircle cx='17' cy='9' r='2.5'/%3E%3Cpath d='M2 21c0-4 3-6.5 7-6.5s7 2.5 7 6.5M16 14.6c3 .3 6 2.2 6 5.9'/%3E%3C/svg%3E"); }
+  html.glass [data-tab="connected"] { --ni: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 15l6-6M11 6l1.5-1.5a4.2 4.2 0 0 1 6 6L17 12M13 18l-1.5 1.5a4.2 4.2 0 0 1-6-6L7 12'/%3E%3C/svg%3E"); }
   html.glass[data-theme="light"] .tile::before { background: rgba(20,20,40,.05); border-color: rgba(20,20,40,.14); }
   html.glass[dir="rtl"] .tile::after { transform: scaleX(-1); }
   html.glass .tile:hover::after { background: var(--fg); transform: translate(1px, -1px); }
@@ -355,7 +424,7 @@
     <button data-tab="overview" aria-selected="true">Overview</button><button data-tab="holdings">Holdings</button>
     <button data-tab="calendar">Calendar</button><button data-tab="insights">Insights</button><button id="moreBtn" aria-haspopup="true" aria-expanded="false">More <span aria-hidden="true">▾</span></button>
   </nav>
-  <div class="more-menu" id="moreMenu" hidden><button data-tab="goals">Goals</button><button data-tab="zakat">Zakat</button><button data-tab="pack">Meeting pack</button><button data-tab="rent">Rent</button><button data-tab="person">Each person</button><button data-tab="whatif">What if</button><button data-tab="report">Report</button><button data-tab="options">Options</button><button data-tab="finder">Property finder</button><button data-tab="owners">Owners</button><button data-tab="settings">Settings</button></div>
+  <div class="more-menu" id="moreMenu" hidden><button data-tab="perf">Performance</button><button data-tab="family">Family</button><button data-tab="connected">Connected</button><span class="menu-sep" aria-hidden="true"></span><button data-tab="goals">Goals</button><button data-tab="zakat">Zakat</button><button data-tab="pack">Meeting pack</button><button data-tab="rent">Rent</button><button data-tab="person">Each person</button><button data-tab="whatif">What if</button><button data-tab="report">Report</button><button data-tab="options">Options</button><button data-tab="finder">Property finder</button><button data-tab="owners">Owners</button><button data-tab="settings">Settings</button></div>
   </div>
 
   <div class="tab" id="tab-overview">
@@ -375,7 +444,29 @@
       <div class="card"><h2>By country</h2><div class="bars" id="byCountry"></div></div>
     </div>
     <div class="card" id="halalCard"><h2>Halal</h2><div class="bars" id="byHalal"></div><p class="note" id="halalNote"></p></div>
-    <div class="card"><h2>Month by month</h2><div id="history"></div><p class="note" id="historyNote">The total is kept once a month, the latest look of each month, so you can see it grow. Nothing is deleted. <span>In this demo, the earlier months are made up.</span></p></div>
+    <div class="card"><div class="head-row"><h2>Month by month</h2><div class="seg-btns" role="group" aria-label="Show as"><button type="button" data-hist="line" aria-pressed="true">Line</button><button type="button" data-hist="bars" aria-pressed="false">Bars</button></div></div><div id="history"></div><p class="note" id="historyNote">The total is kept once a month, the latest look of each month, so you can see it grow. Nothing is deleted. <span>In this demo, the earlier months are made up.</span></p></div>
+  </div>
+
+  <div class="tab" id="tab-perf" hidden>
+    <div class="card"><div class="card-head"><div><h2>How the family is doing</h2><p class="muted small">From the totals kept each month. Facts, not advice.</p></div></div>
+      <div class="tiles" id="perfTiles"></div></div>
+    <div class="split two">
+      <div class="card"><h2>Net worth, quarter by quarter</h2><p class="muted small">Each capsule runs from the lowest month to the highest month of that quarter.</p><div id="perfCaps"></div></div>
+      <div class="card"><h2>Money in and out, next 12 months</h2><p class="muted small">Worked out from the holdings and the calendar. Expected, not promised.</p><div id="perfLedger"></div></div>
+    </div>
+    <div class="card"><h2>Checks</h2><div class="checks" id="perfChecks"></div></div>
+  </div>
+
+  <div class="tab" id="tab-family" hidden>
+    <div class="persons" id="famCards"></div>
+    <div class="card"><h2>Each person, month by month</h2><div class="series-legend" id="famLegend"></div><div id="famLines"></div></div>
+    <div class="card"><h2>At a glance</h2><div class="gauges" id="famGauges"></div></div>
+  </div>
+
+  <div class="tab" id="tab-connected" hidden>
+    <div class="card"><h2>What feeds the Family Office</h2><p class="muted small">Each thing the page reads from or sends to, whether it is working, and when it last did.</p>
+      <div class="sources" id="connCards"></div></div>
+    <div class="card"><h2>Where the numbers come from</h2><div id="connMix"></div></div>
   </div>
 
   <div class="tab" id="tab-holdings" hidden>
@@ -624,7 +715,7 @@
 
   <section><p class="note">A demo with a made-up family; what you change stays in your browser. Prices come from Yahoo Finance's public data and can be 15 minutes old; Boursa Kuwait prices are turned from fils into dinars. Values you type in (property, private holdings, cash) are as of the day you last changed them. Nothing here is advice.</p></section>
 </main>
-<script>window.DEMO = {"frozen": "2026-10-28", "data": {"owners": [{"id": "o-1", "name": "Parent (sample)", "kind": "person"}, {"id": "o-2", "name": "Daughter (sample)", "kind": "person"}, {"id": "o-3", "name": "Son (sample)", "kind": "person"}, {"id": "o-4", "name": "Family Holding Co. (sample)", "kind": "company"}], "holdings": [{"id": "h-1", "owner": "o-1", "kind": "stock", "symbol": "NBK.KW", "qty": 25000, "cost": 0.7, "halal": "no"}, {"id": "h-2", "owner": "o-1", "kind": "stock", "symbol": "KFH.KW", "qty": 40000, "halal": "yes"}, {"id": "h-3", "owner": "o-4", "kind": "stock", "symbol": "ZAIN.KW", "qty": 30000, "halal": "unknown"}, {"id": "h-4", "owner": "o-2", "kind": "stock", "symbol": "AAPL", "qty": 60, "halal": "auto"}, {"id": "h-5", "owner": "o-3", "kind": "stock", "symbol": "MSFT", "qty": 25, "halal": "auto"}, {"id": "h-6", "owner": "o-1", "kind": "cash", "name": "Islamic current account", "value": 45000, "currency": "KWD", "country": "Kuwait", "halal": "yes"}, {"id": "h-7", "owner": "o-4", "kind": "cash", "name": "Dollar deposit", "value": 150000, "currency": "USD", "country": "United States", "halal": "no"}, {"id": "h-8", "owner": "o-4", "kind": "property", "name": "Apartment building", "value": 780000, "currency": "KWD", "rent_month": 4500, "rent_day": 5, "costs_year": 6000, "empty_months": 1, "area": "Salmiya", "size_m2": 1400, "mortgage_left": 240000, "mortgage_payment": 2600, "mortgage_day": 15, "country": "Kuwait", "halal": "yes"}, {"id": "h-9", "owner": "o-1", "kind": "property", "name": "London flat", "value": 650000, "currency": "GBP", "rent_month": 2400, "rent_day": 1, "country": "United Kingdom", "halal": "yes"}, {"id": "h-10", "owner": "o-4", "kind": "sukuk", "name": "Gulf sukuk 2029", "value": 200000, "currency": "USD", "coupon_pct": 5.1, "per_year": 2, "maturity": "2029-06-30", "country": "Saudi Arabia", "halal": "yes"}, {"id": "h-11", "owner": "o-4", "kind": "private", "name": "Regional growth fund", "value": 120000, "currency": "USD", "committed": 250000, "called": 140000, "next_call_date": "2027-02-15", "next_call_amount": 30000, "country": "United Arab Emirates", "halal": "unknown"}, {"id": "h-12", "owner": "o-2", "kind": "gold", "name": "Gold bars", "qty": 1000, "unit": "g", "country": "Kuwait", "halal": "yes"}, {"id": "h-13", "owner": "o-3", "kind": "crypto", "symbol": "BTC-USD", "qty": 0.25, "halal": "unknown"}], "events": [{"id": "e-1", "title": "School fees (sample)", "date": "2027-01-10", "amount": 6000, "currency": "KWD", "dir": "out", "repeat": "yearly", "owner": "o-1"}, {"id": "e-2", "title": "Zakat reminder (sample)", "date": "2027-03-20", "amount": null, "currency": "KWD", "dir": "none", "repeat": "yearly", "owner": null}], "settings": {"halal": true, "show": "KWD", "deposit_rate": 4, "sukuk_rate": 5.1}, "finder": {"answers": {"country": "Kuwait", "areas": ["Salmiya", "Jabriya"], "type": "flat", "min": 100000, "max": 200000, "currency": "KWD", "size": 150, "purpose": "rent"}, "shortlist": [{"id": "p-1", "title": "3-bedroom flat (sample listing)", "area": "Salmiya", "type": "flat", "price": 165000, "currency": "KWD", "size_m2": 180, "rent_month": 650, "costs_year": 900, "source": "owner"}, {"id": "p-2", "title": "2-bedroom flat (sample listing)", "area": "Jabriya", "type": "flat", "price": 120000, "currency": "KWD", "size_m2": 120, "rent_month": 480, "source": "owner"}, {"id": "p-3", "title": "Villa (sample listing)", "area": "Mishref", "type": "villa", "price": 450000, "currency": "KWD", "size_m2": 400, "source": "owner"}]}, "area-notes": [{"area": "Salmiya", "country": "Kuwait", "date": "2026-10-28", "currency": "KWD", "price_m2_low": 800, "price_m2_high": 1000, "rent_note": "made-up figures for the demo, not real market data", "summary": "A sample note to show how an area note looks. In the full Family Office, Claude writes real ones from sources, with their dates.", "sources": []}], "goals": [{"id": "g-1", "title": "Deposit for the son's flat (sample)", "amount": 150000, "currency": "KWD", "date": "2028-06-30", "what": "kind:cash", "added": "2026-10-28"}], "rent-log": [{"holding": "h-8", "month": "2026-08", "status": "paid", "at": "2026-08-06T09:00"}, {"holding": "h-8", "month": "2026-09", "status": "paid", "at": "2026-09-06T09:00"}, {"holding": "h-8", "month": "2026-10", "status": "late", "at": "2026-10-10T09:00"}, {"holding": "h-9", "month": "2026-09", "status": "paid", "at": "2026-09-02T09:00"}, {"holding": "h-9", "month": "2026-10", "status": "paid", "at": "2026-10-02T09:00"}], "snapshots": [{"month": "2025-11", "taken": "2025-11-28T12:00", "kwd": 1019720, "usd": null, "made_up": true}, {"month": "2025-12", "taken": "2025-12-28T12:00", "kwd": 1027607, "usd": null, "made_up": true}, {"month": "2026-01", "taken": "2026-01-28T12:00", "kwd": 1043382, "usd": null, "made_up": true}, {"month": "2026-02", "taken": "2026-02-28T12:00", "kwd": 1037748, "usd": null, "made_up": true}, {"month": "2026-03", "taken": "2026-03-28T12:00", "kwd": 1052396, "usd": null, "made_up": true}, {"month": "2026-04", "taken": "2026-04-28T12:00", "kwd": 1067044, "usd": null, "made_up": true}, {"month": "2026-05", "taken": "2026-05-28T12:00", "kwd": 1060283, "usd": null, "made_up": true}, {"month": "2026-06", "taken": "2026-06-28T12:00", "kwd": 1076058, "usd": null, "made_up": true}, {"month": "2026-07", "taken": "2026-07-28T12:00", "kwd": 1090706, "usd": null, "made_up": true}, {"month": "2026-08", "taken": "2026-08-28T12:00", "kwd": 1097467, "usd": null, "made_up": true}, {"month": "2026-09", "taken": "2026-09-28T12:00", "kwd": 1113241, "usd": null, "made_up": true}]}, "prices": {"quotes": {"AAPL": {"symbol": "AAPL", "name": "Apple Inc.", "price": 343.8299865722656, "currency": "USD", "change_pct": -0.94, "date": "2026-10-28"}, "BTC-USD": {"symbol": "BTC-USD", "name": "Bitcoin USD", "price": 81165.5234375, "currency": "USD", "change_pct": 0.45, "date": "2026-10-28"}, "GC=F": {"symbol": "GC=F", "name": "Gold Dec 26", "price": 4084.10009765625, "currency": "USD", "change_pct": 0.23, "date": "2026-10-28"}, "KFH.KW": {"symbol": "KFH.KW", "name": "Kuwait Finance House K.S.C.P.", "price": 0.752, "currency": "KWD", "change_pct": -1.05, "date": "2026-10-28"}, "MSFT": {"symbol": "MSFT", "name": "Microsoft Corporation", "price": 531.010009765625, "currency": "USD", "change_pct": -0.06, "date": "2026-10-28"}, "NBK.KW": {"symbol": "NBK.KW", "name": "National Bank of Kuwait S.A.K.P.", "price": 0.851, "currency": "KWD", "change_pct": -0.82, "date": "2026-10-28"}, "ZAIN.KW": {"symbol": "ZAIN.KW", "name": "Mobile Telecommunications Company K.S.C.P.", "price": 0.583, "currency": "KWD", "change_pct": -1.85, "date": "2026-10-28"}}, "errors": {}}, "fx": {"kwd_per": {"KWD": 1.0, "USD": 0.31075000011113285, "GBP": 0.4141842055311862}, "errors": {}}, "events": {"NBK.KW": {"dividends": [{"date": "2026-04-02", "amount": 0.035, "currency": "KWD"}], "results": null, "errors": []}, "KFH.KW": {"dividends": [{"date": "2026-04-16", "amount": 0.014, "currency": "KWD"}, {"date": "2026-08-11", "amount": 0.01, "currency": "KWD"}], "results": null, "errors": []}, "ZAIN.KW": {"dividends": [{"date": "2025-11-12", "amount": 0.025, "currency": "KWD"}, {"date": "2026-09-29", "amount": 0.017, "currency": "KWD"}], "results": null, "errors": []}, "AAPL": {"dividends": [{"date": "2025-11-10", "amount": 0.26, "currency": "USD"}, {"date": "2026-02-09", "amount": 0.26, "currency": "USD"}, {"date": "2026-05-11", "amount": 0.27, "currency": "USD"}, {"date": "2026-08-10", "amount": 0.27, "currency": "USD"}], "results": "2026-11-02", "errors": []}, "MSFT": {"dividends": [{"date": "2025-11-20", "amount": 0.91, "currency": "USD"}, {"date": "2026-02-19", "amount": 0.91, "currency": "USD"}, {"date": "2026-05-21", "amount": 0.91, "currency": "USD"}, {"date": "2026-08-20", "amount": 0.91, "currency": "USD"}], "results": null, "errors": []}}, "halal": {"AAPL": {"symbol": "AAPL", "overall": "pass", "passed": 4, "total": 5}, "MSFT": {"symbol": "MSFT", "overall": "pass", "passed": 4, "total": 5}}, "ranges": {"SPY|1": {"symbol": "SPY", "years": 1, "n": 2260, "separate": 9, "since": "2016-10-31", "middle": 16.7, "bad": -5.0, "good": 33.0, "lower_pct": 14.0, "worst_drop": -33.7}, "SPY|3": {"symbol": "SPY", "years": 3, "n": 1756, "separate": 3, "since": "2016-10-31", "middle": 47.5, "bad": 29.7, "good": 80.2, "lower_pct": 0.0, "worst_drop": -33.7}, "SPY|5": {"symbol": "SPY", "years": 5, "n": 1252, "separate": 1, "since": "2016-10-31", "middle": 94.1, "bad": 64.8, "good": 114.0, "lower_pct": 0.0, "worst_drop": -33.7}, "SPUS|1": {"symbol": "SPUS", "years": 1, "n": 1472, "separate": 6, "since": "2019-12-18", "middle": 23.2, "bad": -7.8, "good": 37.7, "lower_pct": 16.0, "worst_drop": -30.8}, "SPUS|3": {"symbol": "SPUS", "years": 3, "n": 968, "separate": 2, "since": "2019-12-18", "middle": 50.7, "bad": 34.3, "good": 96.1, "lower_pct": 0.0, "worst_drop": -30.8}, "SPUS|5": {"symbol": "SPUS", "years": 5, "n": 464, "separate": 1, "since": "2019-12-18", "middle": 115.9, "bad": 100.9, "good": 127.2, "lower_pct": 0.0, "worst_drop": -30.8}, "GC=F|1": {"symbol": "GC=F", "years": 1, "n": 2262, "separate": 9, "since": "2016-10-28", "middle": 13.2, "bad": -4.2, "good": 41.4, "lower_pct": 23.3, "worst_drop": -24.9}, "GC=F|3": {"symbol": "GC=F", "years": 3, "n": 1758, "separate": 3, "since": "2016-10-28", "middle": 42.6, "bad": 11.3, "good": 128.3, "lower_pct": 1.9, "worst_drop": -24.9}, "GC=F|5": {"symbol": "GC=F", "years": 5, "n": 1254, "separate": 1, "since": "2016-10-28", "middle": 68.0, "bad": 41.8, "good": 141.6, "lower_pct": 0.0, "worst_drop": -24.9}}, "stockfacts": {"facts": {"NBK.KW": {"symbol": "NBK.KW", "higher_1y": 65.4, "separate": 9, "beat_market": 41.3, "middle_1y": 12.3, "bad_1y": -13.6, "dividend": 0.035, "results": null}, "KFH.KW": {"symbol": "KFH.KW", "higher_1y": 84.1, "separate": 9, "beat_market": 42.4, "middle_1y": 12.6, "bad_1y": -5.6, "dividend": 0.024, "results": null}, "ZAIN.KW": {"symbol": "ZAIN.KW", "higher_1y": 56.9, "separate": 9, "beat_market": 25.0, "middle_1y": 2.1, "bad_1y": -12.9, "dividend": 0.042, "results": null}, "AAPL": {"symbol": "AAPL", "higher_1y": 89.5, "separate": 9, "beat_market": 67.3, "middle_1y": 26.0, "bad_1y": -0.6, "dividend": 1.08, "results": "2026-11-02", "buys_3m": 0, "sells_3m": 16, "gifts_3m": 8}, "MSFT": {"symbol": "MSFT", "higher_1y": 83.6, "separate": 9, "beat_market": 71.0, "middle_1y": 31.5, "bad_1y": -6.9, "dividend": 3.64, "results": null, "buys_3m": 0, "sells_3m": 5, "gifts_3m": 26}}, "pairs": [{"a": "NBK.KW", "b": "KFH.KW", "pct": 49}, {"a": "NBK.KW", "b": "ZAIN.KW", "pct": 38}, {"a": "NBK.KW", "b": "MSFT", "pct": 22}, {"a": "KFH.KW", "b": "ZAIN.KW", "pct": 22}, {"a": "KFH.KW", "b": "MSFT", "pct": 12}, {"a": "AAPL", "b": "MSFT", "pct": 9}, {"a": "NBK.KW", "b": "AAPL", "pct": 4}, {"a": "KFH.KW", "b": "AAPL", "pct": 2}, {"a": "ZAIN.KW", "b": "AAPL", "pct": -7}, {"a": "ZAIN.KW", "b": "MSFT", "pct": -18}]}, "snapshots": []};</script>
+<script>window.DEMO = {"frozen": "2026-10-28", "data": {"owners": [{"id": "o-1", "name": "Parent (sample)", "kind": "person"}, {"id": "o-2", "name": "Daughter (sample)", "kind": "person"}, {"id": "o-3", "name": "Son (sample)", "kind": "person"}, {"id": "o-4", "name": "Family Holding Co. (sample)", "kind": "company"}], "holdings": [{"id": "h-1", "owner": "o-1", "kind": "stock", "symbol": "NBK.KW", "qty": 25000, "cost": 0.7, "halal": "no"}, {"id": "h-2", "owner": "o-1", "kind": "stock", "symbol": "KFH.KW", "qty": 40000, "halal": "yes"}, {"id": "h-3", "owner": "o-4", "kind": "stock", "symbol": "ZAIN.KW", "qty": 30000, "halal": "unknown"}, {"id": "h-4", "owner": "o-2", "kind": "stock", "symbol": "AAPL", "qty": 60, "halal": "auto"}, {"id": "h-5", "owner": "o-3", "kind": "stock", "symbol": "MSFT", "qty": 25, "halal": "auto"}, {"id": "h-6", "owner": "o-1", "kind": "cash", "name": "Islamic current account", "value": 45000, "currency": "KWD", "country": "Kuwait", "halal": "yes"}, {"id": "h-7", "owner": "o-4", "kind": "cash", "name": "Dollar deposit", "value": 150000, "currency": "USD", "country": "United States", "halal": "no"}, {"id": "h-8", "owner": "o-4", "kind": "property", "name": "Apartment building", "value": 780000, "currency": "KWD", "rent_month": 4500, "rent_day": 5, "costs_year": 6000, "empty_months": 1, "area": "Salmiya", "size_m2": 1400, "mortgage_left": 240000, "mortgage_payment": 2600, "mortgage_day": 15, "country": "Kuwait", "halal": "yes"}, {"id": "h-9", "owner": "o-1", "kind": "property", "name": "London flat", "value": 650000, "currency": "GBP", "rent_month": 2400, "rent_day": 1, "country": "United Kingdom", "halal": "yes"}, {"id": "h-10", "owner": "o-4", "kind": "sukuk", "name": "Gulf sukuk 2029", "value": 200000, "currency": "USD", "coupon_pct": 5.1, "per_year": 2, "maturity": "2029-06-30", "country": "Saudi Arabia", "halal": "yes"}, {"id": "h-11", "owner": "o-4", "kind": "private", "name": "Regional growth fund", "value": 120000, "currency": "USD", "committed": 250000, "called": 140000, "next_call_date": "2027-02-15", "next_call_amount": 30000, "country": "United Arab Emirates", "halal": "unknown"}, {"id": "h-12", "owner": "o-2", "kind": "gold", "name": "Gold bars", "qty": 1000, "unit": "g", "country": "Kuwait", "halal": "yes"}, {"id": "h-13", "owner": "o-3", "kind": "crypto", "symbol": "BTC-USD", "qty": 0.25, "halal": "unknown"}], "events": [{"id": "e-1", "title": "School fees (sample)", "date": "2027-01-10", "amount": 6000, "currency": "KWD", "dir": "out", "repeat": "yearly", "owner": "o-1"}, {"id": "e-2", "title": "Zakat reminder (sample)", "date": "2027-03-20", "amount": null, "currency": "KWD", "dir": "none", "repeat": "yearly", "owner": null}], "settings": {"halal": true, "show": "KWD", "deposit_rate": 4, "sukuk_rate": 5.1}, "finder": {"answers": {"country": "Kuwait", "areas": ["Salmiya", "Jabriya"], "type": "flat", "min": 100000, "max": 200000, "currency": "KWD", "size": 150, "purpose": "rent"}, "shortlist": [{"id": "p-1", "title": "3-bedroom flat (sample listing)", "area": "Salmiya", "type": "flat", "price": 165000, "currency": "KWD", "size_m2": 180, "rent_month": 650, "costs_year": 900, "source": "owner"}, {"id": "p-2", "title": "2-bedroom flat (sample listing)", "area": "Jabriya", "type": "flat", "price": 120000, "currency": "KWD", "size_m2": 120, "rent_month": 480, "source": "owner"}, {"id": "p-3", "title": "Villa (sample listing)", "area": "Mishref", "type": "villa", "price": 450000, "currency": "KWD", "size_m2": 400, "source": "owner"}]}, "area-notes": [{"area": "Salmiya", "country": "Kuwait", "date": "2026-10-28", "currency": "KWD", "price_m2_low": 800, "price_m2_high": 1000, "rent_note": "made-up figures for the demo, not real market data", "summary": "A sample note to show how an area note looks. In the full Family Office, Claude writes real ones from sources, with their dates.", "sources": []}], "goals": [{"id": "g-1", "title": "Deposit for the son's flat (sample)", "amount": 150000, "currency": "KWD", "date": "2028-06-30", "what": "kind:cash", "added": "2026-10-28"}], "rent-log": [{"holding": "h-8", "month": "2026-08", "status": "paid", "at": "2026-08-06T09:00"}, {"holding": "h-8", "month": "2026-09", "status": "paid", "at": "2026-09-06T09:00"}, {"holding": "h-8", "month": "2026-10", "status": "late", "at": "2026-10-10T09:00"}, {"holding": "h-9", "month": "2026-09", "status": "paid", "at": "2026-09-02T09:00"}, {"holding": "h-9", "month": "2026-10", "status": "paid", "at": "2026-10-02T09:00"}], "snapshots": [{"month": "2025-11", "taken": "2025-11-28T12:00", "kwd": 1016150, "usd": null, "made_up": true, "by_owner": {"Parent (sample)": 326875, "Family Holding Co. (sample)": 636706, "Daughter (sample)": 43242, "Son (sample)": 9327}}, {"month": "2025-12", "taken": "2025-12-28T12:00", "kwd": 1024336, "usd": null, "made_up": true, "by_owner": {"Parent (sample)": 329767, "Family Holding Co. (sample)": 641631, "Daughter (sample)": 43529, "Son (sample)": 9409}}, {"month": "2026-01", "taken": "2026-01-28T12:00", "kwd": 1040393, "usd": null, "made_up": true, "by_owner": {"Parent (sample)": 335199, "Family Holding Co. (sample)": 651480, "Daughter (sample)": 44150, "Son (sample)": 9564}}, {"month": "2026-02", "taken": "2026-02-28T12:00", "kwd": 1035106, "usd": null, "made_up": true, "by_owner": {"Parent (sample)": 333756, "Family Holding Co. (sample)": 647963, "Daughter (sample)": 43864, "Son (sample)": 9523}}, {"month": "2026-03", "taken": "2026-03-28T12:00", "kwd": 1050051, "usd": null, "made_up": true, "by_owner": {"Parent (sample)": 338839, "Family Holding Co. (sample)": 657109, "Daughter (sample)": 44435, "Son (sample)": 9668}}, {"month": "2026-04", "taken": "2026-04-28T12:00", "kwd": 1065006, "usd": null, "made_up": true, "by_owner": {"Parent (sample)": 343933, "Family Holding Co. (sample)": 666255, "Daughter (sample)": 45005, "Son (sample)": 9813}}, {"month": "2026-05", "taken": "2026-05-28T12:00", "kwd": 1058595, "usd": null, "made_up": true, "by_owner": {"Parent (sample)": 342129, "Family Holding Co. (sample)": 662033, "Daughter (sample)": 44671, "Son (sample)": 9762}}, {"month": "2026-06", "taken": "2026-06-28T12:00", "kwd": 1074687, "usd": null, "made_up": true, "by_owner": {"Parent (sample)": 347600, "Family Holding Co. (sample)": 671883, "Daughter (sample)": 45286, "Son (sample)": 9918}}, {"month": "2026-07", "taken": "2026-07-28T12:00", "kwd": 1089664, "usd": null, "made_up": true, "by_owner": {"Parent (sample)": 352718, "Family Holding Co. (sample)": 681029, "Daughter (sample)": 45853, "Son (sample)": 10064}}, {"month": "2026-08", "taken": "2026-08-28T12:00", "kwd": 1096767, "usd": null, "made_up": true, "by_owner": {"Parent (sample)": 355293, "Family Holding Co. (sample)": 685250, "Daughter (sample)": 46087, "Son (sample)": 10137}}, {"month": "2026-09", "taken": "2026-09-28T12:00", "kwd": 1112887, "usd": null, "made_up": true, "by_owner": {"Parent (sample)": 360794, "Family Holding Co. (sample)": 695100, "Daughter (sample)": 46699, "Son (sample)": 10294}}]}, "prices": {"quotes": {"AAPL": {"symbol": "AAPL", "name": "Apple Inc.", "price": 343.8299865722656, "currency": "USD", "change_pct": -0.94, "date": "2026-10-28"}, "BTC-USD": {"symbol": "BTC-USD", "name": "Bitcoin USD", "price": 81165.5234375, "currency": "USD", "change_pct": 0.45, "date": "2026-10-28"}, "GC=F": {"symbol": "GC=F", "name": "Gold Dec 26", "price": 4084.10009765625, "currency": "USD", "change_pct": 0.23, "date": "2026-10-28"}, "KFH.KW": {"symbol": "KFH.KW", "name": "Kuwait Finance House K.S.C.P.", "price": 0.752, "currency": "KWD", "change_pct": -1.05, "date": "2026-10-28"}, "MSFT": {"symbol": "MSFT", "name": "Microsoft Corporation", "price": 531.010009765625, "currency": "USD", "change_pct": -0.06, "date": "2026-10-28"}, "NBK.KW": {"symbol": "NBK.KW", "name": "National Bank of Kuwait S.A.K.P.", "price": 0.851, "currency": "KWD", "change_pct": -0.82, "date": "2026-10-28"}, "ZAIN.KW": {"symbol": "ZAIN.KW", "name": "Mobile Telecommunications Company K.S.C.P.", "price": 0.583, "currency": "KWD", "change_pct": -1.85, "date": "2026-10-28"}}, "errors": {}}, "fx": {"kwd_per": {"KWD": 1.0, "USD": 0.31075000011113285, "GBP": 0.4141842055311862}, "errors": {}}, "events": {"NBK.KW": {"dividends": [{"date": "2026-04-02", "amount": 0.035, "currency": "KWD"}], "results": null, "errors": []}, "KFH.KW": {"dividends": [{"date": "2026-04-16", "amount": 0.014, "currency": "KWD"}, {"date": "2026-08-11", "amount": 0.01, "currency": "KWD"}], "results": null, "errors": []}, "ZAIN.KW": {"dividends": [{"date": "2025-11-12", "amount": 0.025, "currency": "KWD"}, {"date": "2026-09-29", "amount": 0.017, "currency": "KWD"}], "results": null, "errors": []}, "AAPL": {"dividends": [{"date": "2025-11-10", "amount": 0.26, "currency": "USD"}, {"date": "2026-02-09", "amount": 0.26, "currency": "USD"}, {"date": "2026-05-11", "amount": 0.27, "currency": "USD"}, {"date": "2026-08-10", "amount": 0.27, "currency": "USD"}], "results": "2026-11-02", "errors": []}, "MSFT": {"dividends": [{"date": "2025-11-20", "amount": 0.91, "currency": "USD"}, {"date": "2026-02-19", "amount": 0.91, "currency": "USD"}, {"date": "2026-05-21", "amount": 0.91, "currency": "USD"}, {"date": "2026-08-20", "amount": 0.91, "currency": "USD"}], "results": null, "errors": []}}, "halal": {"AAPL": {"symbol": "AAPL", "overall": "pass", "passed": 4, "total": 5}, "MSFT": {"symbol": "MSFT", "overall": "pass", "passed": 4, "total": 5}}, "ranges": {"SPY|1": {"symbol": "SPY", "years": 1, "n": 2260, "separate": 9, "since": "2016-10-31", "middle": 16.7, "bad": -5.0, "good": 33.0, "lower_pct": 14.0, "worst_drop": -33.7}, "SPY|3": {"symbol": "SPY", "years": 3, "n": 1756, "separate": 3, "since": "2016-10-31", "middle": 47.5, "bad": 29.7, "good": 80.2, "lower_pct": 0.0, "worst_drop": -33.7}, "SPY|5": {"symbol": "SPY", "years": 5, "n": 1252, "separate": 1, "since": "2016-10-31", "middle": 94.1, "bad": 64.8, "good": 114.0, "lower_pct": 0.0, "worst_drop": -33.7}, "SPUS|1": {"symbol": "SPUS", "years": 1, "n": 1472, "separate": 6, "since": "2019-12-18", "middle": 23.2, "bad": -7.8, "good": 37.7, "lower_pct": 16.0, "worst_drop": -30.8}, "SPUS|3": {"symbol": "SPUS", "years": 3, "n": 968, "separate": 2, "since": "2019-12-18", "middle": 50.7, "bad": 34.3, "good": 96.1, "lower_pct": 0.0, "worst_drop": -30.8}, "SPUS|5": {"symbol": "SPUS", "years": 5, "n": 464, "separate": 1, "since": "2019-12-18", "middle": 115.9, "bad": 100.9, "good": 127.2, "lower_pct": 0.0, "worst_drop": -30.8}, "GC=F|1": {"symbol": "GC=F", "years": 1, "n": 2262, "separate": 9, "since": "2016-10-28", "middle": 13.2, "bad": -4.2, "good": 41.4, "lower_pct": 23.3, "worst_drop": -24.9}, "GC=F|3": {"symbol": "GC=F", "years": 3, "n": 1758, "separate": 3, "since": "2016-10-28", "middle": 42.6, "bad": 11.3, "good": 128.3, "lower_pct": 1.9, "worst_drop": -24.9}, "GC=F|5": {"symbol": "GC=F", "years": 5, "n": 1254, "separate": 1, "since": "2016-10-28", "middle": 68.0, "bad": 41.8, "good": 141.6, "lower_pct": 0.0, "worst_drop": -24.9}}, "stockfacts": {"facts": {"NBK.KW": {"symbol": "NBK.KW", "higher_1y": 65.4, "separate": 9, "beat_market": 41.3, "middle_1y": 12.3, "bad_1y": -13.6, "dividend": 0.035, "results": null}, "KFH.KW": {"symbol": "KFH.KW", "higher_1y": 84.1, "separate": 9, "beat_market": 42.4, "middle_1y": 12.6, "bad_1y": -5.6, "dividend": 0.024, "results": null}, "ZAIN.KW": {"symbol": "ZAIN.KW", "higher_1y": 56.9, "separate": 9, "beat_market": 25.0, "middle_1y": 2.1, "bad_1y": -12.9, "dividend": 0.042, "results": null}, "AAPL": {"symbol": "AAPL", "higher_1y": 89.5, "separate": 9, "beat_market": 67.3, "middle_1y": 26.0, "bad_1y": -0.6, "dividend": 1.08, "results": "2026-11-02", "buys_3m": 0, "sells_3m": 16, "gifts_3m": 8}, "MSFT": {"symbol": "MSFT", "higher_1y": 83.6, "separate": 9, "beat_market": 71.0, "middle_1y": 31.5, "bad_1y": -6.9, "dividend": 3.64, "results": null, "buys_3m": 0, "sells_3m": 5, "gifts_3m": 26}}, "pairs": [{"a": "NBK.KW", "b": "KFH.KW", "pct": 49}, {"a": "NBK.KW", "b": "ZAIN.KW", "pct": 38}, {"a": "NBK.KW", "b": "MSFT", "pct": 22}, {"a": "KFH.KW", "b": "ZAIN.KW", "pct": 22}, {"a": "KFH.KW", "b": "MSFT", "pct": 12}, {"a": "AAPL", "b": "MSFT", "pct": 9}, {"a": "NBK.KW", "b": "AAPL", "pct": 4}, {"a": "KFH.KW", "b": "AAPL", "pct": 2}, {"a": "ZAIN.KW", "b": "AAPL", "pct": -7}, {"a": "ZAIN.KW", "b": "MSFT", "pct": -18}]}, "snapshots": []};</script>
 <script>
 (function () {
   // The demo's stand-in for the server: answers from the frozen data, and keeps
@@ -983,6 +1074,7 @@
     drawInsights(rows, total);
     drawFinder();
     drawGoals(); drawZakat(); drawPerson(); drawWhatIf(); drawPack(); drawRent();
+    drawPerf(rows, total); drawFamily(rows, total); drawConnected(rows, total);
     keepSnapshot(rows, total);
   }
 
@@ -1599,7 +1691,10 @@
   function drawHistory() {
     drawChange();
     if (snapshots.length < 2) { $("history").innerHTML = `<p class="muted">${snapshots.length ? `${esc(snapshots[0].month)}: ${fmt(snapshots[0].kwd)}. The line appears from the second month.` : "Kept from the first complete look."}</p>`; return; }
-    const W = 640, H = 220, L = 78, R = 14, T = 30, B = 24, vals = snapshots.map((s) => s.kwd), n = snapshots.length;
+    const sp = $("tiles").querySelector(".tile");   // the net worth card carries the months as a faint line
+    if (sp && !sp.querySelector(".spark")) sp.insertAdjacentHTML("beforeend", spark(snapshots.map((s) => s.kwd)));
+    if (histMode === "bars") return drawHistoryBars();
+    const W = 640, H = 220, L = 98, R = 28, T = 30, B = 24, vals = snapshots.map((s) => s.kwd), n = snapshots.length;
     const lo = Math.min(...vals) * 0.98, hi = Math.max(...vals) * 1.02, x = (i) => L + i * (W - L - R) / (n - 1), y = (v) => T + (1 - (v - lo) / (hi - lo || 1)) * (H - T - B);
     const pts = snapshots.map((s, i) => `${x(i)},${y(s.kwd)}`).join(" "), every = Math.ceil(n / 8);
     $("history").innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Net worth month by month" style="width:100%;height:auto;touch-action:pan-y">
@@ -1607,7 +1702,7 @@
       <line x1="${L}" x2="${W - R}" y1="${H - B}" y2="${H - B}" stroke="var(--line)"/>
       <polygon fill="url(#nwFill)" points="${x(0)},${H - B} ${pts} ${x(n - 1)},${H - B}"/>
       <polyline fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round" points="${pts}"/>
-      ${snapshots.map((s, i) => i % every && i !== n - 1 ? "" : `<text x="${x(i)}" y="${H - 6}" text-anchor="middle">${esc(s.month)}</text>`).join("")}
+      ${snapshots.map((s, i) => skipTick(i, n, every) ? "" : `<text x="${x(i)}" y="${H - 6}" text-anchor="middle">${esc(s.month)}</text>`).join("")}
       <text x="${L - 8}" y="${y(hi) + 4}" text-anchor="end">${fmt(hi)}</text><text x="${L - 8}" y="${y(lo) + 4}" text-anchor="end">${fmt(lo)}</text>
       <g id="hTip" visibility="hidden"><line id="hTipLine" y1="${T - 6}" y2="${H - B}" stroke="var(--muted)" stroke-dasharray="3 3"/><circle id="hTipDot" r="5" fill="var(--accent)" stroke="var(--surface)" stroke-width="2"/>
         <text id="hTipText" y="${T - 12}" text-anchor="middle" style="fill:var(--fg);font-size:12px;font-weight:600"></text></g>
@@ -1621,6 +1716,188 @@
       $("hTipText").setAttribute("x", Math.min(Math.max(cx, L + 70), W - R - 70)); $("hTipText").textContent = `${s.month}: ${fmt(s.kwd)}`;
     }));
     svg.addEventListener("pointerleave", () => $("hTip").setAttribute("visibility", "hidden"));
+  }
+
+  // ---- Month by month as bars: the same totals, one bar a month ----
+  let histMode = "line";
+  document.querySelectorAll("[data-hist]").forEach((b) => b.addEventListener("click", () => {
+    histMode = b.dataset.hist;
+    document.querySelectorAll("[data-hist]").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+    drawHistory();
+  }));
+  function drawHistoryBars() {
+    const W = 640, H = 220, L = 98, R = 28, T = 30, B = 24, n = snapshots.length, vals = snapshots.map((s) => s.kwd);
+    const hi = Math.max(...vals) * 1.04, slot = (W - L - R) / n, bw = Math.min(34, slot * .62), y = (v) => T + (1 - v / (hi || 1)) * (H - T - B), every = Math.ceil(n / 8);
+    $("history").innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Net worth month by month" style="width:100%;height:auto">
+      <defs><linearGradient id="barFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a59dff"/><stop offset="1" stop-color="#5a4fd6" stop-opacity=".55"/></linearGradient></defs>
+      ${[0.25, 0.5, 0.75, 1].map((f) => `<line x1="${L}" x2="${W - R}" y1="${y(hi * f)}" y2="${y(hi * f)}" stroke="var(--line)" stroke-dasharray="2 4"/><text x="${L - 8}" y="${y(hi * f) + 4}" text-anchor="end">${fmt(hi * f)}</text>`).join("")}
+      ${snapshots.map((s, i) => `<g class="hbar" data-i="${i}"><rect x="${L + i * slot}" y="${T - 20}" width="${slot}" height="${H - B - T + 20}" fill="transparent"/>
+        <rect class="b" x="${L + i * slot + (slot - bw) / 2}" y="${y(s.kwd)}" width="${bw}" height="${H - B - y(s.kwd)}" rx="${Math.min(10, bw / 2)}" fill="url(#barFill)"/>
+        ${skipTick(i, n, every) ? "" : `<text x="${L + i * slot + slot / 2}" y="${H - 6}" text-anchor="middle">${esc(s.month)}</text>`}</g>`).join("")}
+      <g id="hbTip" visibility="hidden"><rect id="hbTipBox" height="22" rx="11" fill="#fff"/><text id="hbTipText" text-anchor="middle" style="fill:#17181d;font-size:12px;font-weight:600"></text></g></svg>`;
+    const svg = $("history").querySelector("svg");
+    svg.querySelectorAll(".hbar").forEach((g) => g.addEventListener("pointerenter", () => {
+      const i = Number(g.dataset.i), s = snapshots[i], t = `${s.month}: ${fmt(s.kwd)}`, w = t.length * 6.6 + 18;
+      const cx = Math.min(Math.max(L + i * slot + slot / 2, L + w / 2), W - R - w / 2), top = Math.max(2, y(s.kwd) - 28);
+      svg.querySelectorAll(".hbar").forEach((x) => x.classList.toggle("on", x === g));
+      $("hbTip").setAttribute("visibility", "visible");
+      $("hbTipBox").setAttribute("x", cx - w / 2); $("hbTipBox").setAttribute("y", top); $("hbTipBox").setAttribute("width", w);
+      $("hbTipText").setAttribute("x", cx); $("hbTipText").setAttribute("y", top + 15); $("hbTipText").textContent = t;
+    }));
+    svg.addEventListener("pointerleave", () => { $("hbTip").setAttribute("visibility", "hidden"); svg.querySelectorAll(".hbar").forEach((x) => x.classList.remove("on")); });
+  }
+  // A small line of the months kept, laid behind the net worth card on the Overview.
+  function spark(vals) {
+    if (vals.length < 2) return "";
+    const lo = Math.min(...vals), hi = Math.max(...vals), n = vals.length, x = (i) => i * 100 / (n - 1), y = (v) => 36 - (v - lo) / (hi - lo || 1) * 30;
+    const pts = vals.map((v, i) => `${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(" ");
+    return `<svg class="spark" viewBox="0 0 100 40" preserveAspectRatio="none" aria-hidden="true"><polygon points="0,40 ${pts} 100,40" fill="rgba(255,255,255,.14)"/><polyline points="${pts}" fill="none" stroke="rgba(255,255,255,.75)" stroke-width="1.6" vector-effect="non-scaling-stroke"/></svg>`;
+  }
+  const pill = (d, base) => !base ? "" : `<em class="pill ${d >= 0 ? "up" : "down"}">${d >= 0 ? "▲" : "▼"} ${Math.abs(100 * d / base).toFixed(1)}%</em>`;
+  // A month is labelled every few bars, and always the last, but not one so close to the last that the two overlap.
+  function skipTick(i, n, every) { return i === n - 1 ? false : i % every !== 0 || n - 1 - i < every; }
+  const quarterOf = (m) => `Q${Math.floor((Number(m.slice(5, 7)) - 1) / 3) + 1} ${m.slice(0, 4)}`;
+
+  // ---- Performance: how the family is doing, from the totals kept each month ----
+  function drawPerf(rows, total) {
+    const month = new Date().toISOString().slice(0, 7), qFirst = `${month.slice(0, 4)}-${String(Math.floor((Number(month.slice(5)) - 1) / 3) * 3 + 1).padStart(2, "0")}`;
+    const before = (m) => snapshots.filter((s) => s.month < m).slice(-1)[0];
+    const qBase = before(qFirst), yearAgo = snapshots.find((s) => s.month === `${Number(month.slice(0, 4)) - 1}${month.slice(4)}`) || snapshots.filter((s) => s.month < month)[0];
+    const income = rows.reduce((t, r) => t + (r.h.kind === "property" ? 12 * Number(r.h.rent_month || 0) * (fx[r.h.currency || "KWD"] || 0) : r.h.kind === "sukuk" ? Number(r.h.value || 0) * Number(r.h.coupon_pct || 0) / 100 * (fx[r.h.currency || "KWD"] || 0) : 0), 0);
+    const gross = rows.reduce((t, r) => t + (r.gross_kwd || 0), 0);
+    const tile = (k, v, extra) => `<div class="tile"><span>${k}</span><b>${v}</b>${extra || ""}</div>`;
+    $("perfTiles").innerHTML = !rows.length ? `<p class="empty">Nothing added yet.</p>` : [
+      tile("Net worth", fmt(total), spark(snapshots.map((s) => s.kwd))),
+      tile(qBase ? `Since ${qBase.month}` : "This quarter", qBase ? `${total - qBase.kwd >= 0 ? "+" : "−"}${fmt(Math.abs(total - qBase.kwd))}` : "–", pill(total - (qBase || {}).kwd, qBase && qBase.kwd)),
+      tile(yearAgo ? `Since ${yearAgo.month}` : "Over the year", yearAgo ? `${total - yearAgo.kwd >= 0 ? "+" : "−"}${fmt(Math.abs(total - yearAgo.kwd))}` : "–", pill(total - (yearAgo || {}).kwd, yearAgo && yearAgo.kwd)),
+      tile("Rent and sukuk profit a year", income ? fmt(income) : "–", income && gross ? `<em class="pill up">${(100 * income / gross).toFixed(1)}% of all owned</em>` : ""),
+    ].join("");
+    // Quarter capsules.
+    const qs = [];
+    snapshots.forEach((s) => { const q = quarterOf(s.month), last = qs[qs.length - 1]; if (last && last.q === q) last.v.push(s.kwd); else qs.push({ q, v: [s.kwd] }); });
+    const shown = qs.slice(-6);
+    if (shown.length < 1) $("perfCaps").innerHTML = `<p class="muted">Kept from the first complete look.</p>`;
+    else {
+      const W = 520, H = 230, T = 34, B = 26, L = 98, R = 10, all = shown.flatMap((q) => q.v), lo = Math.min(...all) * .97, hi = Math.max(...all) * 1.02;
+      const y = (v) => T + (1 - (v - lo) / (hi - lo || 1)) * (H - T - B), slot = (W - L - R) / shown.length, cw = Math.min(42, slot * .5);
+      $("perfCaps").innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Net worth by quarter" style="width:100%;height:auto">
+        <defs><linearGradient id="capFill" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#b9b3ff"/><stop offset=".55" stop-color="#7a70ee"/><stop offset="1" stop-color="#4a41a8"/></linearGradient></defs>
+        ${[lo, (lo + hi) / 2, hi].map((v) => `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)" stroke-dasharray="2 4"/><text x="${L - 8}" y="${y(v) + 4}" text-anchor="end">${fmt(v)}</text>`).join("")}
+        ${shown.map((q, i) => { const a = Math.max(...q.v), b = Math.min(...q.v), cx = L + i * slot + slot / 2, top = y(a), h = Math.max(cw * 1.7, y(b) - top + cw / 2);
+          return `<g class="cap" data-t="${esc(`${q.q}: ${fmt(b)} to ${fmt(a)}`)}" data-x="${cx}" data-y="${top - 14}"><rect x="${cx - cw / 2}" y="${top - cw / 4}" width="${cw}" height="${h}" rx="${cw / 2}" fill="url(#capFill)"/>
+            <rect x="${cx - cw / 2 + 5}" y="${top - cw / 4 + 4}" width="${cw / 3}" height="${Math.max(6, h - 8)}" rx="${cw / 6}" fill="rgba(255,255,255,.22)"/>
+            <text x="${cx}" y="${H - 8}" text-anchor="middle">${esc(q.q)}</text></g>`; }).join("")}
+        <g id="capTip" visibility="hidden"><rect id="capTipBox" height="22" rx="11" fill="#fff"/><text id="capTipText" text-anchor="middle" style="fill:#17181d;font-size:12px;font-weight:600"></text></g></svg>`;
+      const svg = $("perfCaps").querySelector("svg");
+      svg.querySelectorAll(".cap").forEach((g) => g.addEventListener("pointerenter", () => {
+        const t = g.dataset.t, w = t.length * 6.4 + 18, cx = Math.min(Math.max(Number(g.dataset.x), L + w / 2), W - R - w / 2), ty = Math.max(2, Number(g.dataset.y) - 8);
+        $("capTip").setAttribute("visibility", "visible"); $("capTipBox").setAttribute("x", cx - w / 2); $("capTipBox").setAttribute("y", ty); $("capTipBox").setAttribute("width", w);
+        $("capTipText").setAttribute("x", cx); $("capTipText").setAttribute("y", ty + 15); $("capTipText").textContent = t;
+      }));
+      svg.addEventListener("pointerleave", () => $("capTip").setAttribute("visibility", "hidden"));
+    }
+    // The ledger: the next twelve months of the calendar, by kind.
+    const cal = calendar().filter((x) => x.kwd != null), LEDGER = [
+      ["Rent", (x) => x.kind === "rent"], ["Sukuk profit and paybacks", (x) => x.kind === "sukuk"], ["Dividends (expected)", (x) => x.kind === "dividend"],
+      ["Fund payouts", (x) => x.kind === "fund" && x.dir === "in"], ["Your own dates, in", (x) => x.kind === "own" && x.dir === "in"],
+      ["Loan payments", (x) => x.kind === "mortgage"], ["Fund cash calls", (x) => x.kind === "fund" && x.dir === "out"], ["Your own dates, out", (x) => x.kind === "own" && x.dir === "out"],
+    ].map(([k, f]) => { const l = cal.filter(f); return [k, l.reduce((t, x) => t + x.kwd, 0), l.length ? l[0].dir : "in"]; }).filter(([, v]) => v > 0);
+    const big = Math.max(1, ...LEDGER.map(([, v]) => v)), net = LEDGER.reduce((t, [, v, d]) => t + (d === "out" ? -v : v), 0);
+    $("perfLedger").innerHTML = !LEDGER.length ? `<p class="muted">Nothing due in the next 12 months yet.</p>` : `<div class="ledger">${LEDGER.map(([k, v, d]) =>
+      `<div class="lrow"><span>${esc(k)}</span><b class="${d === "out" ? "down" : "up"}">${d === "out" ? "−" : "+"}${fmt(v)}</b><div class="ltrack"><i class="${d}" style="width:${(100 * v / big).toFixed(1)}%"></i></div></div>`).join("")}
+      <div class="lrow total"><span>Left over</span><b class="${net >= 0 ? "up" : "down"}">${net >= 0 ? "+" : "−"}${fmt(Math.abs(net))}</b></div></div>`;
+    // Checks: plain yes or no on the things that keep the numbers right.
+    const valued = rows.filter((r) => r.net_kwd != null).length, withPapers = rows.filter((r) => (docIndex[r.h.id] || []).length).length;
+    const thisMonth = snapshots.some((s) => s.month === month), halalDone = rows.filter((r) => halalOf(r.h) !== "unknown").length;
+    $("perfChecks").innerHTML = [
+      [valued === rows.length && rows.length > 0, "Every holding valued", `${valued} of ${rows.length}`],
+      [thisMonth, "This month's total kept", thisMonth ? month : "Not yet"],
+      [withPapers > 0, "Papers kept", `${withPapers} of ${rows.length} holdings`],
+      ...(settings.halal ? [[halalDone === rows.length && rows.length > 0, "Halal marked", `${halalDone} of ${rows.length}`]] : []),
+    ].map(([ok, k, v]) => `<div class="check ${ok ? "ok" : "todo"}"><i aria-hidden="true">${ok ? "✓" : "!"}</i><div><b>${k}</b><span>${esc(v)}</span></div></div>`).join("");
+  }
+
+  // ---- Family: one card a person, their line over the months, and three gauges ----
+  const SERIES = ["#9a91ff", "#4ade80", "#38bdf8", "#f472b6", "#fbbf24", "#2dd4bf", "#fb923c"];
+  function drawFamily(rows, total) {
+    const people = owners.map((o) => { const mine = rows.filter((r) => r.h.owner === o.id); return { o, mine, v: mine.reduce((t, r) => t + (r.net_kwd || 0), 0) }; }).sort((a, b) => b.v - a.v);
+    $("famCards").innerHTML = !people.length ? `<div class="card"><p class="empty">No owners yet. Add them under Owners.</p></div>` : people.map((p, i) => {
+      const top = p.mine.slice().sort((a, b) => (b.net_kwd || 0) - (a.net_kwd || 0)).slice(0, 3);
+      const share = total > 0 ? Math.round(100 * p.v / total) : 0;
+      return `<div class="card person${i === 0 ? " lead" : ""}"><div class="who"><span class="avatar" style="--c:${SERIES[i % SERIES.length]}">${esc((p.o.name || "?").trim().charAt(0).toUpperCase())}</span>
+        <div><b>${esc(p.o.name)}</b><span class="muted small">${esc(p.o.kind || "")}</span></div><span class="share">${share}%</span></div>
+        <div class="pv">${fmt(p.v)}</div><div class="ltrack"><i class="in" style="width:${share}%;background:${SERIES[i % SERIES.length]}"></i></div>
+        <div class="chips">${top.map((r) => `<span class="chip">${esc(r.h.symbol || r.h.name || KINDS[r.h.kind])}</span>`).join("")}${p.mine.length > 3 ? `<span class="chip">+${p.mine.length - 3}</span>` : ""}</div>
+        <div class="actions"><button data-person="${esc(p.o.id)}">Their page</button><span class="muted small">${p.mine.length} ${p.mine.length === 1 ? "holding" : "holdings"}</span></div></div>`;
+    }).join("");
+    $("famCards").querySelectorAll("[data-person]").forEach((b) => b.addEventListener("click", () => { $("pOwner").value = b.dataset.person; drawPerson(); show("person"); }));
+    // Each person's line: from the months that kept a split by owner, then today.
+    const month = new Date().toISOString().slice(0, 7);
+    const pts = snapshots.filter((s) => s.by_owner && s.month !== month).map((s) => ({ month: s.month, by: s.by_owner }))
+      .concat(rows.length ? [{ month, by: Object.fromEntries(people.map((p) => [p.o.name, p.v])) }] : []);
+    const names = people.map((p) => p.o.name);
+    $("famLegend").innerHTML = names.map((n, i) => `<span><i style="background:${SERIES[i % SERIES.length]}"></i>${esc(n)} <b data-fl="${i}"></b></span>`).join("");
+    if (pts.length < 2) { $("famLines").innerHTML = `<p class="muted">The lines appear once a second month has been kept with each person's share.</p>`; }
+    else {
+      const W = 640, H = 230, L = 98, R = 28, T = 16, B = 24, n = pts.length, vals = pts.flatMap((p) => names.map((k) => p.by[k] || 0));
+      const hi = Math.max(...vals) * 1.06, x = (i) => L + i * (W - L - R) / (n - 1), y = (v) => T + (1 - v / (hi || 1)) * (H - T - B), every = Math.ceil(n / 8);
+      $("famLines").innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Each person's net worth month by month" style="width:100%;height:auto">
+        ${[0, .5, 1].map((f) => `<line x1="${L}" x2="${W - R}" y1="${y(hi * f)}" y2="${y(hi * f)}" stroke="var(--line)" stroke-dasharray="2 4"/><text x="${L - 8}" y="${y(hi * f) + 4}" text-anchor="end">${fmt(hi * f)}</text>`).join("")}
+        <defs>${names.map((k, j) => `<linearGradient id="fa${j}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${SERIES[j % SERIES.length]}" stop-opacity=".22"/><stop offset="1" stop-color="${SERIES[j % SERIES.length]}" stop-opacity="0"/></linearGradient>`).join("")}</defs>
+        ${names.map((k, j) => `<polygon fill="url(#fa${j})" points="${x(0)},${H - B} ${pts.map((p, i) => `${x(i)},${y(p.by[k] || 0)}`).join(" ")} ${x(n - 1)},${H - B}"/>`).join("")}
+        ${names.map((k, j) => `<polyline class="fline" fill="none" stroke="${SERIES[j % SERIES.length]}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" points="${pts.map((p, i) => `${x(i)},${y(p.by[k] || 0)}`).join(" ")}"/>`).join("")}
+        <g id="flTip" visibility="hidden"><line id="flLine" y1="${T}" y2="${H - B}" stroke="var(--muted)" stroke-dasharray="3 3"/>${names.map((k, j) => `<circle data-fd="${j}" r="4.5" fill="${SERIES[j % SERIES.length]}" stroke="var(--surface)" stroke-width="2"/>`).join("")}</g>
+        ${pts.map((p, i) => (skipTick(i, n, every) ? "" : `<text x="${x(i)}" y="${H - 6}" text-anchor="middle">${esc(p.month)}</text>`) +
+          `<rect data-fi="${i}" x="${i ? (x(i - 1) + x(i)) / 2 : L}" width="${(i < n - 1 ? (x(i) + x(i + 1)) / 2 : W - R) - (i ? (x(i - 1) + x(i)) / 2 : L)}" y="0" height="${H - B}" fill="transparent"/>`).join("")}</svg>`;
+      const svg = $("famLines").querySelector("svg");
+      const at = (i) => { $("flTip").setAttribute("visibility", "visible"); $("flLine").setAttribute("x1", x(i)); $("flLine").setAttribute("x2", x(i));
+        names.forEach((k, j) => { const c = svg.querySelector(`[data-fd="${j}"]`); c.setAttribute("cx", x(i)); c.setAttribute("cy", y(pts[i].by[k] || 0)); const b = $("famLegend").querySelector(`[data-fl="${j}"]`); if (b) b.textContent = `${pts[i].month}: ${fmt(pts[i].by[k] || 0)}`; }); };
+      svg.querySelectorAll("[data-fi]").forEach((r) => r.addEventListener("pointerenter", () => at(Number(r.dataset.fi))));
+      svg.addEventListener("pointerleave", () => { $("flTip").setAttribute("visibility", "hidden"); $("famLegend").querySelectorAll("[data-fl]").forEach((b) => { b.textContent = ""; }); });
+    }
+    // Gauges.
+    const gross = rows.reduce((t, r) => t + (r.gross_kwd || 0), 0), debt = rows.reduce((t, r) => t + (r.debt_kwd || 0), 0);
+    const propVal = rows.filter((r) => r.h.kind === "property").reduce((t, r) => t + (r.gross_kwd || 0), 0);
+    const quick = rows.filter((r) => QUICK[r.h.kind] === "Within a week").reduce((t, r) => t + (r.net_kwd || 0), 0);
+    const halalYes = rows.filter((r) => halalOf(r.h) === "yes").reduce((t, r) => t + (r.net_kwd || 0), 0);
+    const gauge = (pct, label, sub, colour) => { const p = Math.max(0, Math.min(100, pct || 0));
+      return `<div class="gauge"><svg viewBox="0 0 120 70" aria-hidden="true"><path d="M10 62 A50 50 0 0 1 110 62" fill="none" stroke="var(--line)" stroke-width="11" stroke-linecap="round"/>
+        <path d="M10 62 A50 50 0 0 1 110 62" fill="none" stroke="${colour}" stroke-width="11" stroke-linecap="round" pathLength="100" stroke-dasharray="${p} 100"/></svg>
+        <b>${Math.round(p)}%</b><span>${label}</span><span class="muted small">${sub}</span></div>`; };
+    $("famGauges").innerHTML = !rows.length ? `<p class="empty">Nothing added yet.</p>` : [
+      gauge(total > 0 ? 100 * quick / total : 0, "Could be cash within a week", fmt(quick), "#4ade80"),
+      gauge(propVal > 0 ? 100 * debt / propVal : 0, "Owed against property", propVal ? fmt(debt) : "No property", "#f472b6"),
+      settings.halal ? gauge(total > 0 ? 100 * halalYes / total : 0, "Marked as passing halal", fmt(halalYes), "#9a91ff") : gauge(gross > 0 ? 100 * total / gross : 0, "Owned outright", fmt(total), "#9a91ff"),
+    ].join("");
+  }
+
+  // ---- Connected: what feeds the page, and whether it is working ----
+  async function drawConnected(rows, total) {
+    const priced = Object.keys(quotes).length, errs = Object.keys(priceErrors).length, screened = Object.keys(halalAuto).length;
+    const rem = Object.assign({}, REM_DEFAULT, settings.reminders || {}), papers = Object.values(docIndex).reduce((t, l) => t + l.length, 0);
+    const card = (on, name, what, detail, tab) => `<div class="source ${on === true ? "on" : on === false ? "off" : "na"}"><div class="src-top"><span class="dot"></span><b>${name}</b><span class="toggle" aria-hidden="true"><i></i></span></div>
+      <span class="muted small">${what}</span><span class="src-detail">${detail}</span>${tab ? `<button class="src-go" data-go="${tab}">Open</button>` : ""}</div>`;
+    let lock = null, reach = null;
+    if (!window.DEMO) {
+      lock = await fetch("/api/lock/state").then((r) => r.json()).catch(() => null);
+      reach = await fetch("/api/reach").then((r) => r.json()).catch(() => null);
+    }
+    $("connCards").innerHTML = [
+      card(priced > 0 && !errs, "Prices", "Yahoo Finance, public data", priced ? `${priced} read${errs ? `, ${errs} could not be read` : ""}` : "None needed yet", "holdings"),
+      card(!!fx.USD, "Currency rates", "Yahoo Finance, public data", fx.USD ? `One dinar is $${(1 / fx.USD).toFixed(4)}` : "Not read yet", null),
+      card(screened > 0 ? true : null, "Trade Desk", "Halal screen and share facts", screened ? `${screened} US shares screened` : "Not beside it, or no US shares", null),
+      card(!!rem.on, "Phone reminders", "One message a morning when something is due", rem.on ? `On, ${rem.days} ${rem.days === 1 ? "day" : "days"} ahead` : "Off", "settings"),
+      card(window.DEMO ? null : !!(lock && lock.set), "Lock", "A code before the page opens", window.DEMO ? "On the owner's Mac only" : lock && lock.set ? "On" : "Off", window.DEMO ? null : "settings"),
+      card(window.DEMO ? null : !!(reach && reach.url && lock && lock.set), "Phone access", "Open it from the phone, after the code", window.DEMO ? "On the owner's Mac only" : reach && reach.url ? "Set up" : "Not set up", window.DEMO ? null : "settings"),
+      card(papers > 0 ? true : null, "Papers", "Deeds, certificates and letters", papers ? `${papers} kept` : "None kept yet", "holdings"),
+      card(true, "Bank and broker files", "Bring holdings in from a statement", "Ready, under Holdings", "holdings"),
+    ].join("");
+    $("connCards").querySelectorAll("[data-go]").forEach((b) => b.addEventListener("click", () => show(b.dataset.go)));
+    // How much of the total moves with live prices, how much was typed in, how much has no value now.
+    const live = rows.filter((r) => isPriced(r.h) && r.net_kwd != null).reduce((t, r) => t + r.net_kwd, 0);
+    const typed = rows.filter((r) => !isPriced(r.h) && r.net_kwd != null).reduce((t, r) => t + r.net_kwd, 0), none = rows.filter((r) => r.net_kwd == null).length, sum = live + typed;
+    $("connMix").innerHTML = !rows.length ? `<p class="empty">Nothing added yet.</p>` : `<div class="mix"><i style="width:${sum ? (100 * live / sum).toFixed(1) : 0}%;background:linear-gradient(90deg,#5a4fd6,#a59dff)"></i><i style="width:${sum ? (100 * typed / sum).toFixed(1) : 0}%;background:linear-gradient(90deg,#15803d,#4ade80)"></i></div>
+      <div class="series-legend"><span><i style="background:#9a91ff"></i>Moves with live prices <b>${fmt(live)}</b></span><span><i style="background:#4ade80"></i>Typed in by the family <b>${fmt(typed)}</b></span>${none ? `<span><i style="background:var(--muted)"></i>Could not be valued just now <b>${none}</b></span>` : ""}</div>`;
   }
 
   // ---- Adding and changing ----
@@ -2424,6 +2701,28 @@
     "A record of what is held, not advice. Prices from Yahoo Finance's public data; values typed in are as of the day they were last changed.":
       "سجل لما يُملك، وليس نصيحة. الأسعار من بيانات ياهو فاينانس العامة؛ القيم المُدخلة يدوياً حسب آخر يوم عُدّلت فيه.",
     "Add at least one; it can be you.":"أضف واحداً على الأقل؛ يمكن أن يكون أنت.", "Add at least one thing first.": "أضف شيئاً واحداً على الأقل أولاً.",
+    // Performance, Family and Connected.
+    "Performance": "الأداء", "Family": "العائلة", "Connected": "الارتباطات", "Line": "خط", "Bars": "أعمدة",
+    "How the family is doing": "كيف حال العائلة", "From the totals kept each month. Facts, not advice.": "من المجاميع المحفوظة كل شهر. حقائق، وليست نصيحة.",
+    "Net worth, quarter by quarter": "صافي الثروة، ربعاً بعد ربع", "Each capsule runs from the lowest month to the highest month of that quarter.": "كل كبسولة تمتد من أدنى شهر إلى أعلى شهر في ذلك الربع.",
+    "Money in and out, next 12 months": "المال الداخل والخارج، الأشهر الـ12 القادمة", "Worked out from the holdings and the calendar. Expected, not promised.": "محسوب من الأصول والتقويم. متوقع، وليس مضموناً.",
+    "Checks": "الفحوصات", "This quarter": "هذا الربع", "Over the year": "خلال السنة",
+    "Sukuk profit and paybacks": "أرباح الصكوك واستردادها", "Dividends (expected)": "التوزيعات (متوقعة)", "Fund payouts": "توزيعات الصناديق",
+    "Your own dates, in": "مواعيدك الخاصة، داخل", "Loan payments": "أقساط القروض", "Fund cash calls": "طلبات تمويل الصناديق", "Your own dates, out": "مواعيدك الخاصة، خارج",
+    "Left over": "المتبقي", "Every holding valued": "كل الأصول مقيّمة", "This month's total kept": "مجموع هذا الشهر محفوظ", "Not yet": "ليس بعد",
+    "Papers kept": "المستندات المحفوظة", "Halal marked": "تحديد الحلال", "Nothing due in the next 12 months yet.": "لا شيء مستحق في الأشهر الـ12 القادمة بعد.",
+    "Each person, month by month": "كل فرد، شهراً بعد شهر", "At a glance": "نظرة سريعة", "Their page": "صفحته",
+    "The lines appear once a second month has been kept with each person's share.": "تظهر الخطوط بعد حفظ شهر ثانٍ بحصة كل فرد.",
+    "Marked as passing halal": "محدد كمطابق للحلال", "Owned outright": "مملوك بالكامل",
+    "What feeds the Family Office": "ما يغذّي المكتب العائلي", "Each thing the page reads from or sends to, whether it is working, and when it last did.": "كل ما تقرأ منه الصفحة أو ترسل إليه، وهل يعمل، ومتى عمل آخر مرة.",
+    "Where the numbers come from": "من أين تأتي الأرقام", "Prices": "الأسعار", "Yahoo Finance, public data": "ياهو فاينانس، بيانات عامة", "Currency rates": "أسعار العملات",
+    "Trade Desk": "مكتب التداول", "Halal screen and share facts": "الفحص الشرعي وحقائق الأسهم", "Not beside it, or no US shares": "غير موجود بجانبه، أو لا أسهم أمريكية",
+    "One message a morning when something is due": "رسالة واحدة صباحاً عند استحقاق شيء", "Lock": "القفل", "A code before the page opens": "رمز قبل فتح الصفحة",
+    "On the owner's Mac only": "على ماك المالك فقط", "Off": "متوقف", "Phone access": "الوصول من الهاتف", "Open it from the phone, after the code": "افتحه من الهاتف، بعد الرمز",
+    "Set up": "مُعد", "Not set up": "غير مُعد", "Papers": "المستندات", "Deeds, certificates and letters": "صكوك وشهادات وخطابات", "None kept yet": "لم يُحفظ شيء بعد",
+    "Bank and broker files": "ملفات البنوك والوسطاء", "Bring holdings in from a statement": "أدخل الأصول من كشف حساب", "Ready, under Holdings": "جاهز، في تبويب الأصول",
+    "None needed yet": "لا حاجة بعد", "Not read yet": "لم تُقرأ بعد", "Open": "افتح", "Moves with live prices": "يتحرك مع الأسعار الحية",
+    "Typed in by the family": "أدخلته العائلة يدوياً", "Could not be valued just now": "تعذّر تقييمه الآن",
   };
   const PH = {
     "Find a holding, owner, country or currency": "ابحث عن أصل أو مالك أو دولة أو عملة",
@@ -2531,6 +2830,18 @@
     [/^Could not read: (.+)$/, (m) => `تعذّرت القراءة: ${m[1]}`],
     [/^(\d+) ready to add:$/, (m) => `${m[1]} جاهزة للإضافة:`],
     [/^Lowest point on the way: (.+)$/, (m) => `أدنى نقطة في الطريق: ${m[1]}`],
+    [/^Since (\d{4}-\d{2})$/, (m) => `منذ ${m[1]}`],
+    [/^Q(\d) (\d{4})$/, (m) => `الربع ${m[1]} ${m[2]}`],
+    [/^Q(\d) (\d{4}): (.+) to (.+)$/, (m) => `الربع ${m[1]} ${m[2]}: من ${m[3]} إلى ${m[4]}`],
+    [/^([\d.]+)% of all owned$/, (m) => `${m[1]}% من كل ما يُملك`],
+    [/^(\d+) of (\d+)$/, (m) => `${m[1]} من ${m[2]}`],
+    [/^(\d+) of (\d+) holdings$/, (m) => `${m[1]} من ${m[2]} أصول`],
+    [/^(\d+) holdings?$/, (m) => `${m[1]} ${m[1] === "1" ? "أصل" : "أصول"}`],
+    [/^(\d+) read(?:, (\d+) could not be read)?$/, (m) => `قُرئ ${m[1]}${m[2] ? `، وتعذّرت قراءة ${m[2]}` : ""}`],
+    [/^One dinar is (.+)$/, (m) => `الدينار الواحد = ${m[1]}`],
+    [/^(\d+) US shares screened$/, (m) => `فُحص ${m[1]} من الأسهم الأمريكية`],
+    [/^On, (\d+) days? ahead$/, (m) => `يعمل، قبل ${m[1] === "1" ? "يوم" : `${m[1]} أيام`}`],
+    [/^(\d+) kept$/, (m) => `حُفظ ${m[1]}`],
   ];
 
   let ar = false;
