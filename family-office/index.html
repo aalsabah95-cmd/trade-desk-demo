@@ -379,19 +379,102 @@
   html.glass .bars .fill, html.glass .goal .fill, html.glass .minibar { background: linear-gradient(90deg, #5a4fd6, #a59dff); box-shadow: inset 0 1px 0 rgba(255,255,255,.35); }
   /* Buttons: the violet of the first card, quieter tabs. */
   html.glass button.primary, html.glass a.go:not(.quiet), html.glass nav.tabs button[aria-selected="true"] { background: linear-gradient(145deg, #948aff, #5f54dc); box-shadow: 0 6px 16px rgba(90,80,220,.3); }
-  /* Wide screens: a thin rail of icons that opens to show the names while the pointer or keyboard is on it. */
+  /* The window, as in the code.xr video: on wide screens the whole app sits in one rounded glass window over a smoky, faceted
+     background, with a rail of icons down its side, a top bar (search, date, round buttons) and "Hello" above the cards. */
+  .topbar, .hello, .me, .frame { display: none; } .wide-only { display: none !important; }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  html.glass:not([data-theme="light"]) { --outer: #060708; --see: rgba(30,31,38,.3); --glass: rgba(40,41,50,.34); --glass-tile: rgba(255,255,255,.035); }
+  html.glass[data-theme="light"] { --outer: #d6d7de; --see: rgba(255,255,255,.3); --glass: rgba(255,255,255,.42); }
+  html.glass:not([data-theme="light"]) body::before { inset: -24px; filter: blur(5px);
+    background: radial-gradient(50rem 34rem at 78% 12%, rgba(150,150,170,.22), transparent 62%), radial-gradient(40rem 30rem at 12% 88%, rgba(110,110,130,.18), transparent 60%),
+      var(--facets, none) center / cover no-repeat, linear-gradient(160deg, #17181d, #070809); }
+  html.glass .card, html.glass .sheet, html.glass header { -webkit-backdrop-filter: blur(26px) saturate(150%); backdrop-filter: blur(26px) saturate(150%); }
   @media (min-width: 1100px) {
-    html.glass body { padding-inline-start: 6.2rem; }
-    html.glass .navwrap { width: 4.3rem; padding: .8rem .55rem; overflow-x: hidden; transition: width .28s cubic-bezier(.2,.7,.2,1), box-shadow .28s;
-      background: linear-gradient(180deg, var(--sheen), transparent 40%), var(--glass); box-shadow: var(--glass-shadow); }
-    html.glass .navwrap:hover, html.glass .navwrap:focus-within { width: 15rem; box-shadow: var(--glass-shadow), 0 0 0 100vmax rgba(0,0,0,.18); }
-    html.glass .navwrap .side-logo { width: 2.2rem; height: 2.2rem; margin: .1rem .5rem .9rem; flex: none; border-radius: 12px; background: linear-gradient(145deg, #9a91ff, #5a4fd6); box-shadow: none; }
-    html.glass nav.tabs button, html.glass .more-menu button { padding: .62rem .9rem; white-space: nowrap; border-radius: 12px; border-inline-end: 3px solid transparent; }
-    html.glass nav.tabs button[aria-selected="true"], html.glass .more-menu button[aria-selected="true"] { background: color-mix(in srgb, var(--fg) 10%, transparent); color: var(--fg); box-shadow: none;
-      border-inline-end-color: #b8f03a; }
-    html.glass .navwrap button[data-tab]::before { background: var(--muted); }
-    html.glass .navwrap button[data-tab]:hover::before, html.glass .navwrap button[aria-selected="true"]::before { background: var(--fg); }
-    html.glass .navwrap:not(:hover):not(:focus-within) button[data-tab] { color: transparent; }
+    html.glass { background: var(--outer); }
+    html.glass body { padding: .75rem; padding-inline-start: calc(.75rem + 5.6rem); min-height: 100vh; }
+    html.glass .frame { display: block; position: fixed; inset: .75rem; z-index: 30; pointer-events: none; border-radius: 30px;
+      box-shadow: 0 0 0 100vmax var(--outer), inset 0 0 0 1px rgba(255,255,255,.13), inset 0 1px 0 1px rgba(255,255,255,.06); }
+    html.glass[data-theme="light"] .frame { box-shadow: 0 0 0 100vmax var(--outer), inset 0 0 0 1px rgba(255,255,255,.85); }
+    html.glass .modal { z-index: 60; }
+    /* The rail. */
+    html.glass .navwrap, html.glass .navwrap:hover, html.glass .navwrap:focus-within { position: fixed; top: .75rem; bottom: .75rem; inset-inline-start: .75rem; width: 5.6rem; margin: 0; z-index: 40;
+      display: flex; flex-direction: column; align-items: center; padding: 1.1rem 0 1rem; overflow: visible; border: 0; border-inline-end: 1px solid var(--glass-line);
+      border-radius: 0; border-start-start-radius: 30px; border-end-start-radius: 30px; background: rgba(255,255,255,.03); box-shadow: none;
+      -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px); transition: none; }
+    html.glass .navwrap .side-logo { width: 2.5rem; height: 2.5rem; margin: 0 0 1.6rem; border-radius: 50%; flex: none;
+      background: conic-gradient(from 200deg, #fff, #b9b3ff, #6a5fe0, #fff); box-shadow: 0 0 0 4px rgba(255,255,255,.06); }
+    html.glass nav.tabs { flex: 1; display: flex !important; flex-direction: column; align-items: center; gap: .45rem; width: 100%; }
+    html.glass .wide-only { display: flex !important; } html.glass .narrow-only { display: none !important; }
+    html.glass nav.tabs button { width: 3rem; height: 3rem; padding: 0; justify-content: center; gap: 0; font-size: 0; border: 1px solid transparent; border-radius: 14px; color: var(--muted);
+      background: none; box-shadow: none; position: relative; transition: background .2s, border-color .2s, color .2s; }
+    html.glass nav.tabs button[data-tab]::before, html.glass #moreBtn::before { width: 1.25rem; height: 1.25rem; background: var(--muted); }
+    html.glass #moreBtn { display: flex; align-items: center; }
+    html.glass #moreBtn::before { content: ""; -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='black'%3E%3Ccircle cx='5' cy='12' r='2'/%3E%3Ccircle cx='12' cy='12' r='2'/%3E%3Ccircle cx='19' cy='12' r='2'/%3E%3C/svg%3E") center / contain no-repeat;
+      mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='black'%3E%3Ccircle cx='5' cy='12' r='2'/%3E%3Ccircle cx='12' cy='12' r='2'/%3E%3Ccircle cx='19' cy='12' r='2'/%3E%3C/svg%3E") center / contain no-repeat; }
+    html.glass #moreBtn span { display: none; }
+    html.glass nav.tabs button:hover { background: rgba(255,255,255,.06); border-color: var(--glass-line); }
+    html.glass nav.tabs button:hover::before { background: var(--fg); }
+    html.glass nav.tabs button[aria-selected="true"]:not(#moreBtn), html.glass #moreBtn[aria-expanded="true"] { background: linear-gradient(145deg, rgba(255,255,255,.16), rgba(255,255,255,.05)); border-color: rgba(255,255,255,.18);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.15), 0 6px 16px rgba(0,0,0,.25); }
+    html.glass[data-theme="light"] nav.tabs button[aria-selected="true"]:not(#moreBtn) { background: #fff; border-color: rgba(20,20,40,.08); }
+    html.glass nav.tabs button[aria-selected="true"]:not(#moreBtn)::before { background: var(--fg); }
+    html.glass nav.tabs button[aria-selected="true"]:not(#moreBtn)::after { content: ""; position: absolute; inset-inline-end: -.95rem; top: 25%; bottom: 25%; width: 4px; border-radius: 4px;
+      background: #c4f442; box-shadow: 0 0 10px rgba(196,244,66,.6); }
+    html.glass #moreBtn[aria-selected="true"] { background: none; border-color: transparent; box-shadow: none; }
+    html.glass .rail-end { margin-top: auto; }
+    /* "More" opens as a glass card beside the rail, with names. */
+    html.glass .navwrap .more-menu[hidden] { display: none !important; }
+    html.glass .navwrap .more-menu { position: absolute; top: auto; bottom: 4.5rem; inset-inline-start: calc(100% + .7rem) !important; left: auto; display: flex !important; flex-direction: column;
+      width: 14rem; min-width: 0; padding: .45rem; gap: .1rem; border-radius: 18px; background: rgba(26,27,33,.95); border: 1px solid var(--glass-line); box-shadow: 0 20px 50px rgba(0,0,0,.5);
+      -webkit-backdrop-filter: blur(24px); backdrop-filter: blur(24px); animation: pop .22s cubic-bezier(.2,.7,.2,1); }
+    html.glass[data-theme="light"] .navwrap .more-menu { background: rgba(255,255,255,.96); }
+    html.glass[dir="ltr"] .navwrap .more-menu, html:not([dir="rtl"]).glass .navwrap .more-menu { left: calc(100% + .7rem) !important; }
+    html.glass[dir="rtl"] .navwrap .more-menu { left: auto !important; right: calc(100% + .7rem) !important; }
+    html.glass .navwrap .more-menu button { display: flex; align-items: center; gap: .7rem; width: 100%; padding: .55rem .75rem; font-size: .92rem; color: var(--fg); border: 0; border-radius: 10px; background: none; }
+    html.glass .navwrap .more-menu button::before { background: var(--muted); }
+    html.glass .navwrap .more-menu button:hover, html.glass .navwrap .more-menu button[aria-selected="true"] { background: rgba(255,255,255,.08); color: var(--fg); box-shadow: none; }
+    @keyframes pop { from { opacity: 0; transform: translateX(-6px) scale(.97); } to { opacity: 1; transform: none; } }
+    /* The top bar and the greeting, in place of the big header panel. */
+    html.glass header, html.glass:not([data-theme="light"]) header { max-width: 68rem; margin: 0 auto; padding: 1.2rem 1rem .2rem; background: none; border: 0; border-radius: 0; box-shadow: none;
+      -webkit-backdrop-filter: none; backdrop-filter: none; color: var(--fg); }
+    html.glass header h1, html.glass header .big, html.glass header .hdr-tools > label { display: none; }
+    html.glass .topbar { display: flex; align-items: center; gap: 1rem; flex: 1; }
+    html.glass .search { display: flex; align-items: center; gap: .5rem; width: min(22rem, 100%); padding: 0 .9rem; border-radius: 999px; border: 1px solid var(--glass-line); background: rgba(255,255,255,.05); }
+    html.glass .search::before { content: ""; width: 1rem; height: 1rem; flex: none; background: var(--muted);
+      -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='M21 21l-5-5'/%3E%3C/svg%3E") center / contain no-repeat;
+      mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='M21 21l-5-5'/%3E%3C/svg%3E") center / contain no-repeat; }
+    html.glass .search input { border: 0; background: none; box-shadow: none; padding: .55rem 0; font-size: .88rem; color: var(--fg); width: 100%; }
+    html.glass .search:focus-within { border-color: color-mix(in srgb, var(--accent) 60%, transparent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent); }
+    html.glass .today { color: #7fb2ff; font-size: .88rem; font-weight: 500; white-space: nowrap; }
+    html.glass .hdr-tools select, html.glass .hdr-tools button { height: 2.4rem; border-radius: 999px; background: rgba(255,255,255,.05); border-color: var(--glass-line); color: var(--fg); }
+    html.glass .hdr-tools #themeBtn, html.glass .hdr-tools #langBtn { min-width: 2.4rem; padding: 0 .8rem; }
+    html.glass .me { display: grid; place-items: center; width: 2.4rem; height: 2.4rem; border-radius: 50%; font-weight: 700; color: #fff;
+      background: radial-gradient(circle at 30% 25%, #c9c4ff, #6a5fe0 70%); box-shadow: 0 0 0 2px rgba(255,255,255,.18), 0 0 0 4px rgba(74,222,128,0); }
+    html.glass .hello { display: inline-flex; align-items: baseline; margin: 1.3rem 0 0; }
+    html.glass .hello h2 { margin: 0; font-size: 1.6rem; font-weight: 700; letter-spacing: -.02em; }
+    html.glass header #status { display: inline; margin: 0; margin-inline-start: .6rem; font-size: .88rem; color: var(--muted); opacity: 1; }
+    html.glass .navwrap { margin: 0; } html.glass main { padding-top: .6rem; }
+  }
+  /* Movement: pages rise in out of a blur, bars grow up, lines draw themselves, gauges fill, numbers count up (in the script). */
+  @keyframes rise { from { opacity: 0; transform: translateY(18px) scale(.985); filter: blur(6px); } to { opacity: 1; transform: none; filter: none; } }
+  @keyframes grow { from { transform: scaleY(0); } to { transform: none; } }
+  @keyframes growx { from { transform: scaleX(0); } to { transform: none; } }
+  @keyframes draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+  @keyframes fillarc { from { stroke-dashoffset: var(--p); } to { stroke-dashoffset: 0; } }
+  html.glass .hbar .b, html.glass .cap > rect { transform-box: fill-box; transform-origin: 50% 100%; animation: grow .9s cubic-bezier(.2,.8,.2,1) both; animation-delay: calc(var(--i, 0) * 45ms + .1s); }
+  html.glass .cap > rect + rect { animation-delay: calc(var(--i, 0) * 45ms + .3s); }
+  html.glass .bars .fill, html.glass .ltrack i, html.glass .goal .fill, html.glass .minibar { transform-origin: 0 50%; animation: growx 1s cubic-bezier(.2,.8,.2,1) both .1s; }
+  html.glass[dir="rtl"] .bars .fill, html.glass[dir="rtl"] .ltrack i, html.glass[dir="rtl"] .goal .fill, html.glass[dir="rtl"] .minibar { transform-origin: 100% 50%; }
+  html.glass polyline.draw { stroke-dasharray: 1; animation: draw 1.4s cubic-bezier(.4,.1,.2,1) both .15s; }
+  html.glass .gauge svg path[style] { animation: fillarc 1.2s cubic-bezier(.2,.8,.2,1) both .2s; }
+  html.glass .mix i { transform-origin: 0 50%; animation: growx 1s cubic-bezier(.2,.8,.2,1) both .1s; }
+  html.glass .tab > .persons > .card, html.glass .sources > .source, html.glass .tiles > .tile, html.glass .checks > .check, html.glass .gauges > .gauge { animation: rise .55s cubic-bezier(.2,.7,.2,1) backwards; }
+  html.glass .tiles > .tile:nth-child(2), html.glass .sources > .source:nth-child(2), html.glass .persons > .card:nth-child(2), html.glass .gauges > .gauge:nth-child(2), html.glass .checks > .check:nth-child(2) { animation-delay: .06s; }
+  html.glass .tiles > .tile:nth-child(3), html.glass .sources > .source:nth-child(3), html.glass .persons > .card:nth-child(3), html.glass .gauges > .gauge:nth-child(3), html.glass .checks > .check:nth-child(3) { animation-delay: .12s; }
+  html.glass .tiles > .tile:nth-child(n+4), html.glass .sources > .source:nth-child(n+4), html.glass .persons > .card:nth-child(n+4), html.glass .checks > .check:nth-child(n+4) { animation-delay: .18s; }
+  @media (prefers-reduced-motion: reduce) {
+    html.glass .hbar .b, html.glass .cap > rect, html.glass .bars .fill, html.glass .ltrack i, html.glass .goal .fill, html.glass .minibar, html.glass polyline.draw, html.glass .gauge svg path[style], html.glass .mix i,
+    html.glass .tab > .persons > .card, html.glass .sources > .source, html.glass .tiles > .tile, html.glass .checks > .check, html.glass .gauges > .gauge { animation: none; }
   }
   @media print {
     html.glass body::before { display: none; } html.glass .card { background: #fff; -webkit-backdrop-filter: none; backdrop-filter: none; }
@@ -408,12 +491,15 @@
 </style>
 </head>
 <body>
+<div class="frame" aria-hidden="true"></div>
 <header><div class="in">
   <div class="top"><h1>Family Office</h1>
+    <div class="topbar"><label class="search"><span class="sr">Search</span><input id="topSearch" type="search" placeholder="Search holdings, owners, countries…" autocomplete="off"></label><span class="today" id="today"></span></div>
     <div class="hdr-tools" id="hdrTools"><label for="showCur">Show in</label>
       <select id="showCur"><option value="KWD">Kuwaiti dinars</option><option value="USD">US dollars</option></select>
-      <button type="button" id="themeBtn">Dark</button></div></div>
+      <button type="button" id="themeBtn">Dark</button><span class="me" aria-hidden="true">F</span></div></div>
   <div class="big"><b id="nwMain">–</b> <span id="nwOther"></span> <span class="chg" id="nwChange" hidden></span></div>
+  <div class="hello"><h2>Hello <span aria-hidden="true">👋</span></h2></div>
   <p id="status">Loading…</p>
 </div></header>
 <main>
@@ -422,9 +508,12 @@
   <div class="side-logo" aria-hidden="true"></div>
   <nav class="tabs" role="tablist">
     <button data-tab="overview" aria-selected="true">Overview</button><button data-tab="holdings">Holdings</button>
-    <button data-tab="calendar">Calendar</button><button data-tab="insights">Insights</button><button id="moreBtn" aria-haspopup="true" aria-expanded="false">More <span aria-hidden="true">▾</span></button>
+    <button data-tab="calendar">Calendar</button><button data-tab="insights">Insights</button>
+    <button data-tab="perf" class="wide-only">Performance</button><button data-tab="family" class="wide-only">Family</button><button data-tab="connected" class="wide-only">Connected</button>
+    <button id="moreBtn" aria-haspopup="true" aria-expanded="false">More <span aria-hidden="true">▾</span></button>
+    <button data-tab="settings" class="wide-only rail-end">Settings</button>
   </nav>
-  <div class="more-menu" id="moreMenu" hidden><button data-tab="perf">Performance</button><button data-tab="family">Family</button><button data-tab="connected">Connected</button><span class="menu-sep" aria-hidden="true"></span><button data-tab="goals">Goals</button><button data-tab="zakat">Zakat</button><button data-tab="pack">Meeting pack</button><button data-tab="rent">Rent</button><button data-tab="person">Each person</button><button data-tab="whatif">What if</button><button data-tab="report">Report</button><button data-tab="options">Options</button><button data-tab="finder">Property finder</button><button data-tab="owners">Owners</button><button data-tab="settings">Settings</button></div>
+  <div class="more-menu" id="moreMenu" hidden><button data-tab="perf" class="narrow-only">Performance</button><button data-tab="family" class="narrow-only">Family</button><button data-tab="connected" class="narrow-only">Connected</button><span class="menu-sep narrow-only" aria-hidden="true"></span><button data-tab="goals">Goals</button><button data-tab="zakat">Zakat</button><button data-tab="pack">Meeting pack</button><button data-tab="rent">Rent</button><button data-tab="person">Each person</button><button data-tab="whatif">What if</button><button data-tab="report">Report</button><button data-tab="options">Options</button><button data-tab="finder">Property finder</button><button data-tab="owners">Owners</button><button data-tab="settings">Settings</button></div>
   </div>
 
   <div class="tab" id="tab-overview">
@@ -715,7 +804,7 @@
 
   <section><p class="note">A demo with a made-up family; what you change stays in your browser. Prices come from Yahoo Finance's public data and can be 15 minutes old; Boursa Kuwait prices are turned from fils into dinars. Values you type in (property, private holdings, cash) are as of the day you last changed them. Nothing here is advice.</p></section>
 </main>
-<script>window.DEMO = {"frozen": "2026-10-28", "data": {"owners": [{"id": "o-1", "name": "Parent (sample)", "kind": "person"}, {"id": "o-2", "name": "Daughter (sample)", "kind": "person"}, {"id": "o-3", "name": "Son (sample)", "kind": "person"}, {"id": "o-4", "name": "Family Holding Co. (sample)", "kind": "company"}], "holdings": [{"id": "h-1", "owner": "o-1", "kind": "stock", "symbol": "NBK.KW", "qty": 25000, "cost": 0.7, "halal": "no"}, {"id": "h-2", "owner": "o-1", "kind": "stock", "symbol": "KFH.KW", "qty": 40000, "halal": "yes"}, {"id": "h-3", "owner": "o-4", "kind": "stock", "symbol": "ZAIN.KW", "qty": 30000, "halal": "unknown"}, {"id": "h-4", "owner": "o-2", "kind": "stock", "symbol": "AAPL", "qty": 60, "halal": "auto"}, {"id": "h-5", "owner": "o-3", "kind": "stock", "symbol": "MSFT", "qty": 25, "halal": "auto"}, {"id": "h-6", "owner": "o-1", "kind": "cash", "name": "Islamic current account", "value": 45000, "currency": "KWD", "country": "Kuwait", "halal": "yes"}, {"id": "h-7", "owner": "o-4", "kind": "cash", "name": "Dollar deposit", "value": 150000, "currency": "USD", "country": "United States", "halal": "no"}, {"id": "h-8", "owner": "o-4", "kind": "property", "name": "Apartment building", "value": 780000, "currency": "KWD", "rent_month": 4500, "rent_day": 5, "costs_year": 6000, "empty_months": 1, "area": "Salmiya", "size_m2": 1400, "mortgage_left": 240000, "mortgage_payment": 2600, "mortgage_day": 15, "country": "Kuwait", "halal": "yes"}, {"id": "h-9", "owner": "o-1", "kind": "property", "name": "London flat", "value": 650000, "currency": "GBP", "rent_month": 2400, "rent_day": 1, "country": "United Kingdom", "halal": "yes"}, {"id": "h-10", "owner": "o-4", "kind": "sukuk", "name": "Gulf sukuk 2029", "value": 200000, "currency": "USD", "coupon_pct": 5.1, "per_year": 2, "maturity": "2029-06-30", "country": "Saudi Arabia", "halal": "yes"}, {"id": "h-11", "owner": "o-4", "kind": "private", "name": "Regional growth fund", "value": 120000, "currency": "USD", "committed": 250000, "called": 140000, "next_call_date": "2027-02-15", "next_call_amount": 30000, "country": "United Arab Emirates", "halal": "unknown"}, {"id": "h-12", "owner": "o-2", "kind": "gold", "name": "Gold bars", "qty": 1000, "unit": "g", "country": "Kuwait", "halal": "yes"}, {"id": "h-13", "owner": "o-3", "kind": "crypto", "symbol": "BTC-USD", "qty": 0.25, "halal": "unknown"}], "events": [{"id": "e-1", "title": "School fees (sample)", "date": "2027-01-10", "amount": 6000, "currency": "KWD", "dir": "out", "repeat": "yearly", "owner": "o-1"}, {"id": "e-2", "title": "Zakat reminder (sample)", "date": "2027-03-20", "amount": null, "currency": "KWD", "dir": "none", "repeat": "yearly", "owner": null}], "settings": {"halal": true, "show": "KWD", "deposit_rate": 4, "sukuk_rate": 5.1}, "finder": {"answers": {"country": "Kuwait", "areas": ["Salmiya", "Jabriya"], "type": "flat", "min": 100000, "max": 200000, "currency": "KWD", "size": 150, "purpose": "rent"}, "shortlist": [{"id": "p-1", "title": "3-bedroom flat (sample listing)", "area": "Salmiya", "type": "flat", "price": 165000, "currency": "KWD", "size_m2": 180, "rent_month": 650, "costs_year": 900, "source": "owner"}, {"id": "p-2", "title": "2-bedroom flat (sample listing)", "area": "Jabriya", "type": "flat", "price": 120000, "currency": "KWD", "size_m2": 120, "rent_month": 480, "source": "owner"}, {"id": "p-3", "title": "Villa (sample listing)", "area": "Mishref", "type": "villa", "price": 450000, "currency": "KWD", "size_m2": 400, "source": "owner"}]}, "area-notes": [{"area": "Salmiya", "country": "Kuwait", "date": "2026-10-28", "currency": "KWD", "price_m2_low": 800, "price_m2_high": 1000, "rent_note": "made-up figures for the demo, not real market data", "summary": "A sample note to show how an area note looks. In the full Family Office, Claude writes real ones from sources, with their dates.", "sources": []}], "goals": [{"id": "g-1", "title": "Deposit for the son's flat (sample)", "amount": 150000, "currency": "KWD", "date": "2028-06-30", "what": "kind:cash", "added": "2026-10-28"}], "rent-log": [{"holding": "h-8", "month": "2026-08", "status": "paid", "at": "2026-08-06T09:00"}, {"holding": "h-8", "month": "2026-09", "status": "paid", "at": "2026-09-06T09:00"}, {"holding": "h-8", "month": "2026-10", "status": "late", "at": "2026-10-10T09:00"}, {"holding": "h-9", "month": "2026-09", "status": "paid", "at": "2026-09-02T09:00"}, {"holding": "h-9", "month": "2026-10", "status": "paid", "at": "2026-10-02T09:00"}], "snapshots": [{"month": "2025-11", "taken": "2025-11-28T12:00", "kwd": 1016150, "usd": null, "made_up": true, "by_owner": {"Parent (sample)": 326875, "Family Holding Co. (sample)": 636706, "Daughter (sample)": 43242, "Son (sample)": 9327}}, {"month": "2025-12", "taken": "2025-12-28T12:00", "kwd": 1024336, "usd": null, "made_up": true, "by_owner": {"Parent (sample)": 329767, "Family Holding Co. (sample)": 641631, "Daughter (sample)": 43529, "Son (sample)": 9409}}, {"month": "2026-01", "taken": "2026-01-28T12:00", "kwd": 1040393, "usd": null, "made_up": true, "by_owner": {"Parent (sample)": 335199, "Family Holding Co. (sample)": 651480, "Daughter (sample)": 44150, "Son (sample)": 9564}}, {"month": "2026-02", "taken": "2026-02-28T12:00", "kwd": 1035106, "usd": null, "made_up": true, "by_owner": {"Parent (sample)": 333756, "Family Holding Co. (sample)": 647963, "Daughter (sample)": 43864, "Son (sample)": 9523}}, {"month": "2026-03", "taken": "2026-03-28T12:00", "kwd": 1050051, "usd": null, "made_up": true, "by_owner": {"Parent (sample)": 338839, "Family Holding Co. (sample)": 657109, "Daughter (sample)": 44435, "Son (sample)": 9668}}, {"month": "2026-04", "taken": "2026-04-28T12:00", "kwd": 1065006, "usd": null, "made_up": true, "by_owner": {"Parent (sample)": 343933, "Family Holding Co. (sample)": 666255, "Daughter (sample)": 45005, "Son (sample)": 9813}}, {"month": "2026-05", "taken": "2026-05-28T12:00", "kwd": 1058595, "usd": null, "made_up": true, "by_owner": {"Parent (sample)": 342129, "Family Holding Co. (sample)": 662033, "Daughter (sample)": 44671, "Son (sample)": 9762}}, {"month": "2026-06", "taken": "2026-06-28T12:00", "kwd": 1074687, "usd": null, "made_up": true, "by_owner": {"Parent (sample)": 347600, "Family Holding Co. (sample)": 671883, "Daughter (sample)": 45286, "Son (sample)": 9918}}, {"month": "2026-07", "taken": "2026-07-28T12:00", "kwd": 1089664, "usd": null, "made_up": true, "by_owner": {"Parent (sample)": 352718, "Family Holding Co. (sample)": 681029, "Daughter (sample)": 45853, "Son (sample)": 10064}}, {"month": "2026-08", "taken": "2026-08-28T12:00", "kwd": 1096767, "usd": null, "made_up": true, "by_owner": {"Parent (sample)": 355293, "Family Holding Co. (sample)": 685250, "Daughter (sample)": 46087, "Son (sample)": 10137}}, {"month": "2026-09", "taken": "2026-09-28T12:00", "kwd": 1112887, "usd": null, "made_up": true, "by_owner": {"Parent (sample)": 360794, "Family Holding Co. (sample)": 695100, "Daughter (sample)": 46699, "Son (sample)": 10294}}]}, "prices": {"quotes": {"AAPL": {"symbol": "AAPL", "name": "Apple Inc.", "price": 343.8299865722656, "currency": "USD", "change_pct": -0.94, "date": "2026-10-28"}, "BTC-USD": {"symbol": "BTC-USD", "name": "Bitcoin USD", "price": 81165.5234375, "currency": "USD", "change_pct": 0.45, "date": "2026-10-28"}, "GC=F": {"symbol": "GC=F", "name": "Gold Dec 26", "price": 4084.10009765625, "currency": "USD", "change_pct": 0.23, "date": "2026-10-28"}, "KFH.KW": {"symbol": "KFH.KW", "name": "Kuwait Finance House K.S.C.P.", "price": 0.752, "currency": "KWD", "change_pct": -1.05, "date": "2026-10-28"}, "MSFT": {"symbol": "MSFT", "name": "Microsoft Corporation", "price": 531.010009765625, "currency": "USD", "change_pct": -0.06, "date": "2026-10-28"}, "NBK.KW": {"symbol": "NBK.KW", "name": "National Bank of Kuwait S.A.K.P.", "price": 0.851, "currency": "KWD", "change_pct": -0.82, "date": "2026-10-28"}, "ZAIN.KW": {"symbol": "ZAIN.KW", "name": "Mobile Telecommunications Company K.S.C.P.", "price": 0.583, "currency": "KWD", "change_pct": -1.85, "date": "2026-10-28"}}, "errors": {}}, "fx": {"kwd_per": {"KWD": 1.0, "USD": 0.31075000011113285, "GBP": 0.4141842055311862}, "errors": {}}, "events": {"NBK.KW": {"dividends": [{"date": "2026-04-02", "amount": 0.035, "currency": "KWD"}], "results": null, "errors": []}, "KFH.KW": {"dividends": [{"date": "2026-04-16", "amount": 0.014, "currency": "KWD"}, {"date": "2026-08-11", "amount": 0.01, "currency": "KWD"}], "results": null, "errors": []}, "ZAIN.KW": {"dividends": [{"date": "2025-11-12", "amount": 0.025, "currency": "KWD"}, {"date": "2026-09-29", "amount": 0.017, "currency": "KWD"}], "results": null, "errors": []}, "AAPL": {"dividends": [{"date": "2025-11-10", "amount": 0.26, "currency": "USD"}, {"date": "2026-02-09", "amount": 0.26, "currency": "USD"}, {"date": "2026-05-11", "amount": 0.27, "currency": "USD"}, {"date": "2026-08-10", "amount": 0.27, "currency": "USD"}], "results": "2026-11-02", "errors": []}, "MSFT": {"dividends": [{"date": "2025-11-20", "amount": 0.91, "currency": "USD"}, {"date": "2026-02-19", "amount": 0.91, "currency": "USD"}, {"date": "2026-05-21", "amount": 0.91, "currency": "USD"}, {"date": "2026-08-20", "amount": 0.91, "currency": "USD"}], "results": null, "errors": []}}, "halal": {"AAPL": {"symbol": "AAPL", "overall": "pass", "passed": 4, "total": 5}, "MSFT": {"symbol": "MSFT", "overall": "pass", "passed": 4, "total": 5}}, "ranges": {"SPY|1": {"symbol": "SPY", "years": 1, "n": 2260, "separate": 9, "since": "2016-10-31", "middle": 16.7, "bad": -5.0, "good": 33.0, "lower_pct": 14.0, "worst_drop": -33.7}, "SPY|3": {"symbol": "SPY", "years": 3, "n": 1756, "separate": 3, "since": "2016-10-31", "middle": 47.5, "bad": 29.7, "good": 80.2, "lower_pct": 0.0, "worst_drop": -33.7}, "SPY|5": {"symbol": "SPY", "years": 5, "n": 1252, "separate": 1, "since": "2016-10-31", "middle": 94.1, "bad": 64.8, "good": 114.0, "lower_pct": 0.0, "worst_drop": -33.7}, "SPUS|1": {"symbol": "SPUS", "years": 1, "n": 1472, "separate": 6, "since": "2019-12-18", "middle": 23.2, "bad": -7.8, "good": 37.7, "lower_pct": 16.0, "worst_drop": -30.8}, "SPUS|3": {"symbol": "SPUS", "years": 3, "n": 968, "separate": 2, "since": "2019-12-18", "middle": 50.7, "bad": 34.3, "good": 96.1, "lower_pct": 0.0, "worst_drop": -30.8}, "SPUS|5": {"symbol": "SPUS", "years": 5, "n": 464, "separate": 1, "since": "2019-12-18", "middle": 115.9, "bad": 100.9, "good": 127.2, "lower_pct": 0.0, "worst_drop": -30.8}, "GC=F|1": {"symbol": "GC=F", "years": 1, "n": 2262, "separate": 9, "since": "2016-10-28", "middle": 13.2, "bad": -4.2, "good": 41.4, "lower_pct": 23.3, "worst_drop": -24.9}, "GC=F|3": {"symbol": "GC=F", "years": 3, "n": 1758, "separate": 3, "since": "2016-10-28", "middle": 42.6, "bad": 11.3, "good": 128.3, "lower_pct": 1.9, "worst_drop": -24.9}, "GC=F|5": {"symbol": "GC=F", "years": 5, "n": 1254, "separate": 1, "since": "2016-10-28", "middle": 68.0, "bad": 41.8, "good": 141.6, "lower_pct": 0.0, "worst_drop": -24.9}}, "stockfacts": {"facts": {"NBK.KW": {"symbol": "NBK.KW", "higher_1y": 65.4, "separate": 9, "beat_market": 41.3, "middle_1y": 12.3, "bad_1y": -13.6, "dividend": 0.035, "results": null}, "KFH.KW": {"symbol": "KFH.KW", "higher_1y": 84.1, "separate": 9, "beat_market": 42.4, "middle_1y": 12.6, "bad_1y": -5.6, "dividend": 0.024, "results": null}, "ZAIN.KW": {"symbol": "ZAIN.KW", "higher_1y": 56.9, "separate": 9, "beat_market": 25.0, "middle_1y": 2.1, "bad_1y": -12.9, "dividend": 0.042, "results": null}, "AAPL": {"symbol": "AAPL", "higher_1y": 89.5, "separate": 9, "beat_market": 67.3, "middle_1y": 26.0, "bad_1y": -0.6, "dividend": 1.08, "results": "2026-11-02", "buys_3m": 0, "sells_3m": 16, "gifts_3m": 8}, "MSFT": {"symbol": "MSFT", "higher_1y": 83.6, "separate": 9, "beat_market": 71.0, "middle_1y": 31.5, "bad_1y": -6.9, "dividend": 3.64, "results": null, "buys_3m": 0, "sells_3m": 5, "gifts_3m": 26}}, "pairs": [{"a": "NBK.KW", "b": "KFH.KW", "pct": 49}, {"a": "NBK.KW", "b": "ZAIN.KW", "pct": 38}, {"a": "NBK.KW", "b": "MSFT", "pct": 22}, {"a": "KFH.KW", "b": "ZAIN.KW", "pct": 22}, {"a": "KFH.KW", "b": "MSFT", "pct": 12}, {"a": "AAPL", "b": "MSFT", "pct": 9}, {"a": "NBK.KW", "b": "AAPL", "pct": 4}, {"a": "KFH.KW", "b": "AAPL", "pct": 2}, {"a": "ZAIN.KW", "b": "AAPL", "pct": -7}, {"a": "ZAIN.KW", "b": "MSFT", "pct": -18}]}, "snapshots": []};</script>
+<script>window.DEMO = {"frozen": "2026-10-28", "data": {"owners": [{"id": "o-1", "name": "Parent (sample)", "kind": "person"}, {"id": "o-2", "name": "Daughter (sample)", "kind": "person"}, {"id": "o-3", "name": "Son (sample)", "kind": "person"}, {"id": "o-4", "name": "Family Holding Co. (sample)", "kind": "company"}], "holdings": [{"id": "h-1", "owner": "o-1", "kind": "stock", "symbol": "NBK.KW", "qty": 25000, "cost": 0.7, "halal": "no"}, {"id": "h-2", "owner": "o-1", "kind": "stock", "symbol": "KFH.KW", "qty": 40000, "halal": "yes"}, {"id": "h-3", "owner": "o-4", "kind": "stock", "symbol": "ZAIN.KW", "qty": 30000, "halal": "unknown"}, {"id": "h-4", "owner": "o-2", "kind": "stock", "symbol": "AAPL", "qty": 60, "halal": "auto"}, {"id": "h-5", "owner": "o-3", "kind": "stock", "symbol": "MSFT", "qty": 25, "halal": "auto"}, {"id": "h-6", "owner": "o-1", "kind": "cash", "name": "Islamic current account", "value": 45000, "currency": "KWD", "country": "Kuwait", "halal": "yes"}, {"id": "h-7", "owner": "o-4", "kind": "cash", "name": "Dollar deposit", "value": 150000, "currency": "USD", "country": "United States", "halal": "no"}, {"id": "h-8", "owner": "o-4", "kind": "property", "name": "Apartment building", "value": 780000, "currency": "KWD", "rent_month": 4500, "rent_day": 5, "costs_year": 6000, "empty_months": 1, "area": "Salmiya", "size_m2": 1400, "mortgage_left": 240000, "mortgage_payment": 2600, "mortgage_day": 15, "country": "Kuwait", "halal": "yes"}, {"id": "h-9", "owner": "o-1", "kind": "property", "name": "London flat", "value": 650000, "currency": "GBP", "rent_month": 2400, "rent_day": 1, "country": "United Kingdom", "halal": "yes"}, {"id": "h-10", "owner": "o-4", "kind": "sukuk", "name": "Gulf sukuk 2029", "value": 200000, "currency": "USD", "coupon_pct": 5.1, "per_year": 2, "maturity": "2029-06-30", "country": "Saudi Arabia", "halal": "yes"}, {"id": "h-11", "owner": "o-4", "kind": "private", "name": "Regional growth fund", "value": 120000, "currency": "USD", "committed": 250000, "called": 140000, "next_call_date": "2027-02-15", "next_call_amount": 30000, "country": "United Arab Emirates", "halal": "unknown"}, {"id": "h-12", "owner": "o-2", "kind": "gold", "name": "Gold bars", "qty": 1000, "unit": "g", "country": "Kuwait", "halal": "yes"}, {"id": "h-13", "owner": "o-3", "kind": "crypto", "symbol": "BTC-USD", "qty": 0.25, "halal": "unknown"}], "events": [{"id": "e-1", "title": "School fees (sample)", "date": "2027-01-10", "amount": 6000, "currency": "KWD", "dir": "out", "repeat": "yearly", "owner": "o-1"}, {"id": "e-2", "title": "Zakat reminder (sample)", "date": "2027-03-20", "amount": null, "currency": "KWD", "dir": "none", "repeat": "yearly", "owner": null}], "settings": {"halal": true, "show": "KWD", "deposit_rate": 4, "sukuk_rate": 5.1}, "finder": {"answers": {"country": "Kuwait", "areas": ["Salmiya", "Jabriya"], "type": "flat", "min": 100000, "max": 200000, "currency": "KWD", "size": 150, "purpose": "rent"}, "shortlist": [{"id": "p-1", "title": "3-bedroom flat (sample listing)", "area": "Salmiya", "type": "flat", "price": 165000, "currency": "KWD", "size_m2": 180, "rent_month": 650, "costs_year": 900, "source": "owner"}, {"id": "p-2", "title": "2-bedroom flat (sample listing)", "area": "Jabriya", "type": "flat", "price": 120000, "currency": "KWD", "size_m2": 120, "rent_month": 480, "source": "owner"}, {"id": "p-3", "title": "Villa (sample listing)", "area": "Mishref", "type": "villa", "price": 450000, "currency": "KWD", "size_m2": 400, "source": "owner"}]}, "area-notes": [{"area": "Salmiya", "country": "Kuwait", "date": "2026-10-28", "currency": "KWD", "price_m2_low": 800, "price_m2_high": 1000, "rent_note": "made-up figures for the demo, not real market data", "summary": "A sample note to show how an area note looks. In the full Family Office, Claude writes real ones from sources, with their dates.", "sources": []}], "goals": [{"id": "g-1", "title": "Deposit for the son's flat (sample)", "amount": 150000, "currency": "KWD", "date": "2028-06-30", "what": "kind:cash", "added": "2026-10-28"}], "rent-log": [{"holding": "h-8", "month": "2026-08", "status": "paid", "at": "2026-08-06T09:00"}, {"holding": "h-8", "month": "2026-09", "status": "paid", "at": "2026-09-06T09:00"}, {"holding": "h-8", "month": "2026-10", "status": "late", "at": "2026-10-10T09:00"}, {"holding": "h-9", "month": "2026-09", "status": "paid", "at": "2026-09-02T09:00"}, {"holding": "h-9", "month": "2026-10", "status": "paid", "at": "2026-10-02T09:00"}], "snapshots": [{"month": "2025-11", "taken": "2025-11-28T12:00", "kwd": 1016102, "usd": null, "made_up": true, "by_owner": {"Parent (sample)": 326894, "Family Holding Co. (sample)": 636706, "Daughter (sample)": 43187, "Son (sample)": 9315}}, {"month": "2025-12", "taken": "2025-12-28T12:00", "kwd": 1024288, "usd": null, "made_up": true, "by_owner": {"Parent (sample)": 329786, "Family Holding Co. (sample)": 641631, "Daughter (sample)": 43474, "Son (sample)": 9397}}, {"month": "2026-01", "taken": "2026-01-28T12:00", "kwd": 1040344, "usd": null, "made_up": true, "by_owner": {"Parent (sample)": 335218, "Family Holding Co. (sample)": 651480, "Daughter (sample)": 44094, "Son (sample)": 9552}}, {"month": "2026-02", "taken": "2026-02-28T12:00", "kwd": 1035058, "usd": null, "made_up": true, "by_owner": {"Parent (sample)": 333776, "Family Holding Co. (sample)": 647963, "Daughter (sample)": 43808, "Son (sample)": 9511}}, {"month": "2026-03", "taken": "2026-03-28T12:00", "kwd": 1050002, "usd": null, "made_up": true, "by_owner": {"Parent (sample)": 338859, "Family Holding Co. (sample)": 657109, "Daughter (sample)": 44378, "Son (sample)": 9656}}, {"month": "2026-04", "taken": "2026-04-28T12:00", "kwd": 1064957, "usd": null, "made_up": true, "by_owner": {"Parent (sample)": 343954, "Family Holding Co. (sample)": 666255, "Daughter (sample)": 44947, "Son (sample)": 9801}}, {"month": "2026-05", "taken": "2026-05-28T12:00", "kwd": 1058546, "usd": null, "made_up": true, "by_owner": {"Parent (sample)": 342150, "Family Holding Co. (sample)": 662033, "Daughter (sample)": 44614, "Son (sample)": 9749}}, {"month": "2026-06", "taken": "2026-06-28T12:00", "kwd": 1074638, "usd": null, "made_up": true, "by_owner": {"Parent (sample)": 347621, "Family Holding Co. (sample)": 671883, "Daughter (sample)": 45229, "Son (sample)": 9905}}, {"month": "2026-07", "taken": "2026-07-28T12:00", "kwd": 1089614, "usd": null, "made_up": true, "by_owner": {"Parent (sample)": 352739, "Family Holding Co. (sample)": 681029, "Daughter (sample)": 45795, "Son (sample)": 10051}}, {"month": "2026-08", "taken": "2026-08-28T12:00", "kwd": 1096718, "usd": null, "made_up": true, "by_owner": {"Parent (sample)": 355314, "Family Holding Co. (sample)": 685250, "Daughter (sample)": 46029, "Son (sample)": 10125}}, {"month": "2026-09", "taken": "2026-09-28T12:00", "kwd": 1112835, "usd": null, "made_up": true, "by_owner": {"Parent (sample)": 360815, "Family Holding Co. (sample)": 695100, "Daughter (sample)": 46639, "Son (sample)": 10281}}]}, "prices": {"quotes": {"AAPL": {"symbol": "AAPL", "name": "Apple Inc.", "price": 343.8299865722656, "currency": "USD", "change_pct": -0.94, "date": "2026-10-28"}, "BTC-USD": {"symbol": "BTC-USD", "name": "Bitcoin USD", "price": 80993.9609375, "currency": "USD", "change_pct": 0.23, "date": "2026-10-28"}, "GC=F": {"symbol": "GC=F", "name": "Gold Dec 26", "price": 4078.10009765625, "currency": "USD", "change_pct": 0.09, "date": "2026-10-28"}, "KFH.KW": {"symbol": "KFH.KW", "name": "Kuwait Finance House K.S.C.P.", "price": 0.752, "currency": "KWD", "change_pct": -1.05, "date": "2026-10-28"}, "MSFT": {"symbol": "MSFT", "name": "Microsoft Corporation", "price": 531.010009765625, "currency": "USD", "change_pct": -0.06, "date": "2026-10-28"}, "NBK.KW": {"symbol": "NBK.KW", "name": "National Bank of Kuwait S.A.K.P.", "price": 0.851, "currency": "KWD", "change_pct": -0.82, "date": "2026-10-28"}, "ZAIN.KW": {"symbol": "ZAIN.KW", "name": "Mobile Telecommunications Company K.S.C.P.", "price": 0.583, "currency": "KWD", "change_pct": -1.85, "date": "2026-10-28"}}, "errors": {}}, "fx": {"kwd_per": {"KWD": 1.0, "USD": 0.31075000011113285, "GBP": 0.4142173601678195}, "errors": {}}, "events": {"NBK.KW": {"dividends": [{"date": "2026-04-02", "amount": 0.035, "currency": "KWD"}], "results": null, "errors": []}, "KFH.KW": {"dividends": [{"date": "2026-04-16", "amount": 0.014, "currency": "KWD"}, {"date": "2026-08-11", "amount": 0.01, "currency": "KWD"}], "results": null, "errors": []}, "ZAIN.KW": {"dividends": [{"date": "2025-11-12", "amount": 0.025, "currency": "KWD"}, {"date": "2026-09-29", "amount": 0.017, "currency": "KWD"}], "results": null, "errors": []}, "AAPL": {"dividends": [{"date": "2025-11-10", "amount": 0.26, "currency": "USD"}, {"date": "2026-02-09", "amount": 0.26, "currency": "USD"}, {"date": "2026-05-11", "amount": 0.27, "currency": "USD"}, {"date": "2026-08-10", "amount": 0.27, "currency": "USD"}], "results": "2026-11-02", "errors": []}, "MSFT": {"dividends": [{"date": "2025-11-20", "amount": 0.91, "currency": "USD"}, {"date": "2026-02-19", "amount": 0.91, "currency": "USD"}, {"date": "2026-05-21", "amount": 0.91, "currency": "USD"}, {"date": "2026-08-20", "amount": 0.91, "currency": "USD"}], "results": null, "errors": []}}, "halal": {"AAPL": {"symbol": "AAPL", "overall": "pass", "passed": 4, "total": 5}, "MSFT": {"symbol": "MSFT", "overall": "pass", "passed": 4, "total": 5}}, "ranges": {"SPY|1": {"symbol": "SPY", "years": 1, "n": 2260, "separate": 9, "since": "2016-10-31", "middle": 16.7, "bad": -5.0, "good": 33.0, "lower_pct": 14.0, "worst_drop": -33.7}, "SPY|3": {"symbol": "SPY", "years": 3, "n": 1756, "separate": 3, "since": "2016-10-31", "middle": 47.5, "bad": 29.7, "good": 80.2, "lower_pct": 0.0, "worst_drop": -33.7}, "SPY|5": {"symbol": "SPY", "years": 5, "n": 1252, "separate": 1, "since": "2016-10-31", "middle": 94.1, "bad": 64.8, "good": 114.0, "lower_pct": 0.0, "worst_drop": -33.7}, "SPUS|1": {"symbol": "SPUS", "years": 1, "n": 1472, "separate": 6, "since": "2019-12-18", "middle": 23.2, "bad": -7.8, "good": 37.7, "lower_pct": 16.0, "worst_drop": -30.8}, "SPUS|3": {"symbol": "SPUS", "years": 3, "n": 968, "separate": 2, "since": "2019-12-18", "middle": 50.7, "bad": 34.3, "good": 96.1, "lower_pct": 0.0, "worst_drop": -30.8}, "SPUS|5": {"symbol": "SPUS", "years": 5, "n": 464, "separate": 1, "since": "2019-12-18", "middle": 115.9, "bad": 100.9, "good": 127.2, "lower_pct": 0.0, "worst_drop": -30.8}, "GC=F|1": {"symbol": "GC=F", "years": 1, "n": 2262, "separate": 9, "since": "2016-10-28", "middle": 13.2, "bad": -4.2, "good": 41.4, "lower_pct": 23.3, "worst_drop": -24.9}, "GC=F|3": {"symbol": "GC=F", "years": 3, "n": 1758, "separate": 3, "since": "2016-10-28", "middle": 42.6, "bad": 11.3, "good": 128.3, "lower_pct": 1.9, "worst_drop": -24.9}, "GC=F|5": {"symbol": "GC=F", "years": 5, "n": 1254, "separate": 1, "since": "2016-10-28", "middle": 68.0, "bad": 41.8, "good": 141.6, "lower_pct": 0.0, "worst_drop": -24.9}}, "stockfacts": {"facts": {"NBK.KW": {"symbol": "NBK.KW", "higher_1y": 65.4, "separate": 9, "beat_market": 41.3, "middle_1y": 12.3, "bad_1y": -13.6, "dividend": 0.035, "results": null}, "KFH.KW": {"symbol": "KFH.KW", "higher_1y": 84.1, "separate": 9, "beat_market": 42.4, "middle_1y": 12.6, "bad_1y": -5.6, "dividend": 0.024, "results": null}, "ZAIN.KW": {"symbol": "ZAIN.KW", "higher_1y": 56.9, "separate": 9, "beat_market": 25.0, "middle_1y": 2.1, "bad_1y": -12.9, "dividend": 0.042, "results": null}, "AAPL": {"symbol": "AAPL", "higher_1y": 89.5, "separate": 9, "beat_market": 67.3, "middle_1y": 26.0, "bad_1y": -0.6, "dividend": 1.08, "results": "2026-11-02", "buys_3m": 0, "sells_3m": 16, "gifts_3m": 8}, "MSFT": {"symbol": "MSFT", "higher_1y": 83.6, "separate": 9, "beat_market": 71.0, "middle_1y": 31.5, "bad_1y": -6.9, "dividend": 3.64, "results": null, "buys_3m": 0, "sells_3m": 5, "gifts_3m": 26}}, "pairs": [{"a": "NBK.KW", "b": "KFH.KW", "pct": 49}, {"a": "NBK.KW", "b": "ZAIN.KW", "pct": 38}, {"a": "NBK.KW", "b": "MSFT", "pct": 22}, {"a": "KFH.KW", "b": "ZAIN.KW", "pct": 22}, {"a": "KFH.KW", "b": "MSFT", "pct": 12}, {"a": "AAPL", "b": "MSFT", "pct": 9}, {"a": "NBK.KW", "b": "AAPL", "pct": 4}, {"a": "KFH.KW", "b": "AAPL", "pct": 2}, {"a": "ZAIN.KW", "b": "AAPL", "pct": -7}, {"a": "ZAIN.KW", "b": "MSFT", "pct": -18}]}, "snapshots": []};</script>
 <script>
 (function () {
   // The demo's stand-in for the server: answers from the frozen data, and keeps
@@ -1028,6 +1117,8 @@
     const d = lastTotal - prev.kwd;
     $("nwChange").hidden = false;
     $("nwChange").textContent = `${d >= 0 ? "▲" : "▼"} ${fmt(Math.abs(d))} (${(100 * d / prev.kwd).toFixed(1)}%) since ${prev.month}`;
+    const t1 = $("tiles").querySelector(".tile");   // the net worth card carries the same change as a pill
+    if (t1 && !t1.querySelector(".pill")) t1.insertAdjacentHTML("beforeend", pill(d, prev.kwd));
   }
   function render() {
     const live = holdings.filter((h) => !h.closed);
@@ -1701,7 +1792,7 @@
       <defs><linearGradient id="nwFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--accent)" stop-opacity=".28"/><stop offset="1" stop-color="var(--accent)" stop-opacity="0"/></linearGradient></defs>
       <line x1="${L}" x2="${W - R}" y1="${H - B}" y2="${H - B}" stroke="var(--line)"/>
       <polygon fill="url(#nwFill)" points="${x(0)},${H - B} ${pts} ${x(n - 1)},${H - B}"/>
-      <polyline fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round" points="${pts}"/>
+      <polyline class="draw" pathLength="1" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round" points="${pts}"/>
       ${snapshots.map((s, i) => skipTick(i, n, every) ? "" : `<text x="${x(i)}" y="${H - 6}" text-anchor="middle">${esc(s.month)}</text>`).join("")}
       <text x="${L - 8}" y="${y(hi) + 4}" text-anchor="end">${fmt(hi)}</text><text x="${L - 8}" y="${y(lo) + 4}" text-anchor="end">${fmt(lo)}</text>
       <g id="hTip" visibility="hidden"><line id="hTipLine" y1="${T - 6}" y2="${H - B}" stroke="var(--muted)" stroke-dasharray="3 3"/><circle id="hTipDot" r="5" fill="var(--accent)" stroke="var(--surface)" stroke-width="2"/>
@@ -1731,7 +1822,7 @@
     $("history").innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Net worth month by month" style="width:100%;height:auto">
       <defs><linearGradient id="barFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a59dff"/><stop offset="1" stop-color="#5a4fd6" stop-opacity=".55"/></linearGradient></defs>
       ${[0.25, 0.5, 0.75, 1].map((f) => `<line x1="${L}" x2="${W - R}" y1="${y(hi * f)}" y2="${y(hi * f)}" stroke="var(--line)" stroke-dasharray="2 4"/><text x="${L - 8}" y="${y(hi * f) + 4}" text-anchor="end">${fmt(hi * f)}</text>`).join("")}
-      ${snapshots.map((s, i) => `<g class="hbar" data-i="${i}"><rect x="${L + i * slot}" y="${T - 20}" width="${slot}" height="${H - B - T + 20}" fill="transparent"/>
+      ${snapshots.map((s, i) => `<g class="hbar" data-i="${i}" style="--i:${i}"><rect x="${L + i * slot}" y="${T - 20}" width="${slot}" height="${H - B - T + 20}" fill="transparent"/>
         <rect class="b" x="${L + i * slot + (slot - bw) / 2}" y="${y(s.kwd)}" width="${bw}" height="${H - B - y(s.kwd)}" rx="${Math.min(10, bw / 2)}" fill="url(#barFill)"/>
         ${skipTick(i, n, every) ? "" : `<text x="${L + i * slot + slot / 2}" y="${H - 6}" text-anchor="middle">${esc(s.month)}</text>`}</g>`).join("")}
       <g id="hbTip" visibility="hidden"><rect id="hbTipBox" height="22" rx="11" fill="#fff"/><text id="hbTipText" text-anchor="middle" style="fill:#17181d;font-size:12px;font-weight:600"></text></g></svg>`;
@@ -1783,9 +1874,9 @@
       $("perfCaps").innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Net worth by quarter" style="width:100%;height:auto">
         <defs><linearGradient id="capFill" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#b9b3ff"/><stop offset=".55" stop-color="#7a70ee"/><stop offset="1" stop-color="#4a41a8"/></linearGradient></defs>
         ${[lo, (lo + hi) / 2, hi].map((v) => `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)" stroke-dasharray="2 4"/><text x="${L - 8}" y="${y(v) + 4}" text-anchor="end">${fmt(v)}</text>`).join("")}
-        ${shown.map((q, i) => { const a = Math.max(...q.v), b = Math.min(...q.v), cx = L + i * slot + slot / 2, top = y(a), h = Math.max(cw * 1.7, y(b) - top + cw / 2);
-          return `<g class="cap" data-t="${esc(`${q.q}: ${fmt(b)} to ${fmt(a)}`)}" data-x="${cx}" data-y="${top - 14}"><rect x="${cx - cw / 2}" y="${top - cw / 4}" width="${cw}" height="${h}" rx="${cw / 2}" fill="url(#capFill)"/>
-            <rect x="${cx - cw / 2 + 5}" y="${top - cw / 4 + 4}" width="${cw / 3}" height="${Math.max(6, h - 8)}" rx="${cw / 6}" fill="rgba(255,255,255,.22)"/>
+        ${shown.map((q, i) => { const a = Math.max(...q.v), b = Math.min(...q.v), cx = L + i * slot + slot / 2, top = y(a), h = Math.max(cw * 1.7, y(b) - top + cw / 2), y0 = Math.min(top - cw / 4, H - B - 10 - h);
+          return `<g class="cap" style="--i:${i}" data-t="${esc(`${q.q}: ${fmt(b)} to ${fmt(a)}`)}" data-x="${cx}" data-y="${y0 - 6}"><rect x="${cx - cw / 2}" y="${y0}" width="${cw}" height="${h}" rx="${cw / 2}" fill="url(#capFill)"/>
+            <rect x="${cx - cw / 2 + 5}" y="${y0 + 4}" width="${cw / 3}" height="${Math.max(6, h - 8)}" rx="${cw / 6}" fill="rgba(255,255,255,.22)"/>
             <text x="${cx}" y="${H - 8}" text-anchor="middle">${esc(q.q)}</text></g>`; }).join("")}
         <g id="capTip" visibility="hidden"><rect id="capTipBox" height="22" rx="11" fill="#fff"/><text id="capTipText" text-anchor="middle" style="fill:#17181d;font-size:12px;font-weight:600"></text></g></svg>`;
       const svg = $("perfCaps").querySelector("svg");
@@ -1845,7 +1936,7 @@
         ${[0, .5, 1].map((f) => `<line x1="${L}" x2="${W - R}" y1="${y(hi * f)}" y2="${y(hi * f)}" stroke="var(--line)" stroke-dasharray="2 4"/><text x="${L - 8}" y="${y(hi * f) + 4}" text-anchor="end">${fmt(hi * f)}</text>`).join("")}
         <defs>${names.map((k, j) => `<linearGradient id="fa${j}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${SERIES[j % SERIES.length]}" stop-opacity=".22"/><stop offset="1" stop-color="${SERIES[j % SERIES.length]}" stop-opacity="0"/></linearGradient>`).join("")}</defs>
         ${names.map((k, j) => `<polygon fill="url(#fa${j})" points="${x(0)},${H - B} ${pts.map((p, i) => `${x(i)},${y(p.by[k] || 0)}`).join(" ")} ${x(n - 1)},${H - B}"/>`).join("")}
-        ${names.map((k, j) => `<polyline class="fline" fill="none" stroke="${SERIES[j % SERIES.length]}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" points="${pts.map((p, i) => `${x(i)},${y(p.by[k] || 0)}`).join(" ")}"/>`).join("")}
+        ${names.map((k, j) => `<polyline class="fline draw" pathLength="1" fill="none" stroke="${SERIES[j % SERIES.length]}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" points="${pts.map((p, i) => `${x(i)},${y(p.by[k] || 0)}`).join(" ")}"/>`).join("")}
         <g id="flTip" visibility="hidden"><line id="flLine" y1="${T}" y2="${H - B}" stroke="var(--muted)" stroke-dasharray="3 3"/>${names.map((k, j) => `<circle data-fd="${j}" r="4.5" fill="${SERIES[j % SERIES.length]}" stroke="var(--surface)" stroke-width="2"/>`).join("")}</g>
         ${pts.map((p, i) => (skipTick(i, n, every) ? "" : `<text x="${x(i)}" y="${H - 6}" text-anchor="middle">${esc(p.month)}</text>`) +
           `<rect data-fi="${i}" x="${i ? (x(i - 1) + x(i)) / 2 : L}" width="${(i < n - 1 ? (x(i) + x(i + 1)) / 2 : W - R) - (i ? (x(i - 1) + x(i)) / 2 : L)}" y="0" height="${H - B}" fill="transparent"/>`).join("")}</svg>`;
@@ -1862,7 +1953,7 @@
     const halalYes = rows.filter((r) => halalOf(r.h) === "yes").reduce((t, r) => t + (r.net_kwd || 0), 0);
     const gauge = (pct, label, sub, colour) => { const p = Math.max(0, Math.min(100, pct || 0));
       return `<div class="gauge"><svg viewBox="0 0 120 70" aria-hidden="true"><path d="M10 62 A50 50 0 0 1 110 62" fill="none" stroke="var(--line)" stroke-width="11" stroke-linecap="round"/>
-        <path d="M10 62 A50 50 0 0 1 110 62" fill="none" stroke="${colour}" stroke-width="11" stroke-linecap="round" pathLength="100" stroke-dasharray="${p} 100"/></svg>
+        <path d="M10 62 A50 50 0 0 1 110 62" fill="none" stroke="${colour}" stroke-width="11" stroke-linecap="round" pathLength="100" stroke-dasharray="${p} 100" style="--p:${p}"/></svg>
         <b>${Math.round(p)}%</b><span>${label}</span><span class="muted small">${sub}</span></div>`; };
     $("famGauges").innerHTML = !rows.length ? `<p class="empty">Nothing added yet.</p>` : [
       gauge(total > 0 ? 100 * quick / total : 0, "Could be cash within a week", fmt(quick), "#4ade80"),
@@ -2416,8 +2507,52 @@
       tile.style.setProperty("--ry", (px * 7).toFixed(2) + "deg");
     }
   }, { passive: true });
+  // The top bar: today's date, and a search that opens Holdings with the words typed.
+  document.getElementById("today").textContent = "Today, " + new Date().toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" }).replace(",", "");
+  const ts = document.getElementById("topSearch"), hs = document.getElementById("hSearch");
+  ts.addEventListener("input", () => {
+    hs.value = ts.value; hs.dispatchEvent(new Event("input"));
+    const b = document.querySelector('nav.tabs [data-tab="holdings"]');
+    if (b.getAttribute("aria-selected") !== "true") b.click();
+  });
+  // The side rail shows icons only, so each says its name when pointed at.
+  document.querySelectorAll("#navwrap nav.tabs button").forEach((b) => b.setAttribute("title", b.textContent.replace("▾", "").trim()));
+  // The smoky, faceted background behind the glass, drawn once: a field of grey triangles, lighter towards the top right.
+  (() => {
+    let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+    const C = 12, R = 8, W = 1200, H = 800, p = [];
+    for (let j = 0; j <= R; j++) for (let i = 0; i <= C; i++) p.push([i * W / C + (i % C && j % R ? (rnd() - .5) * 80 : 0), j * H / R + (i % C && j % R ? (rnd() - .5) * 80 : 0)]);
+    const at = (i, j) => p[j * (C + 1) + i], tri = [];
+    for (let j = 0; j < R; j++) for (let i = 0; i < C; i++) {
+      const a = at(i, j), b = at(i + 1, j), c = at(i, j + 1), d = at(i + 1, j + 1), lift = (i / C) * .5 + (1 - j / R) * .5;
+      [[a, b, d], [a, d, c]].forEach((t) => tri.push(`<polygon points="${t.map((q) => q.map(Math.round).join(",")).join(" ")}" fill="rgb(255,255,255)" fill-opacity="${(.012 + rnd() * .05 + lift * .05).toFixed(3)}"/>`));
+    }
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid slice">${tri.join("")}</svg>`;
+    root.style.setProperty("--facets", `url("data:image/svg+xml,${encodeURIComponent(svg)}")`);
+  })();
   // The big total counts up the first time it appears.
   if (still) return;
+  // Numbers on cards count up each time a page opens.
+  const count = (el) => {
+    const m = el.textContent.match(/^(\D*?)(\d[\d,]*)(\.\d+)?(.*)$/);
+    if (!m || el.dataset.counting) return;
+    const target = Number(m[2].replace(/,/g, "") + (m[3] || "")), dp = m[3] ? m[3].length - 1 : 0, t0 = performance.now(), grouped = m[2].includes(",");
+    if (!target) return;
+    el.dataset.counting = "1";
+    let last = el.textContent;
+    const step = (t) => {
+      if (el.textContent !== last) { delete el.dataset.counting; return; }   // redrawn since; leave it
+      const k = Math.min(1, (t - t0) / 850), v = target * (1 - Math.pow(1 - k, 3));
+      const s = grouped ? v.toLocaleString("en-US", { minimumFractionDigits: dp, maximumFractionDigits: dp }) : v.toFixed(dp);
+      last = el.textContent = m[1] + s + m[4];
+      if (k < 1) requestAnimationFrame(step); else delete el.dataset.counting;
+    };
+    requestAnimationFrame(step);
+  };
+  const countAll = () => { const tab = document.querySelector(".tab:not([hidden])"); if (tab) tab.querySelectorAll(".tile b, .pv, .gauge b").forEach(count); };
+  document.querySelectorAll("[data-tab]").forEach((b) => b.addEventListener("click", () => setTimeout(countAll, 30)));
+  const firstTiles = new MutationObserver(() => { if (document.querySelector("#tiles .tile")) { firstTiles.disconnect(); setTimeout(countAll, 30); } });
+  firstTiles.observe(document.getElementById("tiles"), { childList: true });
   const big = document.getElementById("nwMain");
   let done = false;
   new MutationObserver(() => {
@@ -2723,12 +2858,14 @@
     "Bank and broker files": "ملفات البنوك والوسطاء", "Bring holdings in from a statement": "أدخل الأصول من كشف حساب", "Ready, under Holdings": "جاهز، في تبويب الأصول",
     "None needed yet": "لا حاجة بعد", "Not read yet": "لم تُقرأ بعد", "Open": "افتح", "Moves with live prices": "يتحرك مع الأسعار الحية",
     "Typed in by the family": "أدخلته العائلة يدوياً", "Could not be valued just now": "تعذّر تقييمه الآن",
+    "Hello": "مرحباً", "Search": "بحث",
   };
   const PH = {
     "Find a holding, owner, country or currency": "ابحث عن أصل أو مالك أو دولة أو عملة",
     "e.g. School fees": "مثل: رسوم مدرسية", "any country, e.g. Kuwait, Spain, Japan": "أي دولة، مثل: الكويت، إسبانيا، اليابان", "e.g. Salmiya, Jabriya": "مثل: السالمية، الجابرية",
     "e.g. KWD, EUR": "مثل: KWD، EUR", "e.g. KWD": "مثل: KWD", "ask your bank": "اسأل بنكك", "from the offer": "من العرض", "e.g. a family member or a family company": "مثل: فرد أو شركة للعائلة",
     "e.g. 3-bedroom flat, sea view": "مثل: شقة 3 غرف بإطلالة بحرية", "100 means no loan": "100 تعني بلا تمويل", "e.g. 100000": "مثل: 100000", "e.g. 500000": "مثل: 500000",
+    "Search holdings, owners, countries…": "ابحث في الأصول والمالكين والدول…",
     "e.g. 3000": "مثل: 3000", "e.g. 4000": "مثل: 4000", "e.g. 1": "مثل: 1", "e.g. 10000": "مثل: 10000", "e.g. 15": "مثل: 15",
   };
   const MONTHS = { January: "يناير", February: "فبراير", March: "مارس", April: "أبريل", May: "مايو", June: "يونيو", July: "يوليو", August: "أغسطس",
@@ -2842,6 +2979,7 @@
     [/^(\d+) US shares screened$/, (m) => `فُحص ${m[1]} من الأسهم الأمريكية`],
     [/^On, (\d+) days? ahead$/, (m) => `يعمل، قبل ${m[1] === "1" ? "يوم" : `${m[1]} أيام`}`],
     [/^(\d+) kept$/, (m) => `حُفظ ${m[1]}`],
+    [/^Today, (Mon|Tue|Wed|Thu|Fri|Sat|Sun) (\d+) (\w+)$/, (m) => `اليوم، ${({ Mon: "الاثنين", Tue: "الثلاثاء", Wed: "الأربعاء", Thu: "الخميس", Fri: "الجمعة", Sat: "السبت", Sun: "الأحد" })[m[1]]} ${m[2]} ${mon(m[3])}`],
   ];
 
   let ar = false;
