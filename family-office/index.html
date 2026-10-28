@@ -570,11 +570,11 @@
   <nav class="tabs" role="tablist">
     <button data-tab="overview" aria-selected="true">Overview</button><button data-tab="holdings">Holdings</button>
     <button data-tab="calendar">Calendar</button><button data-tab="insights">Insights</button>
-    <button data-tab="perf" class="wide-only">Performance</button><button data-tab="family" class="wide-only">Family</button><button data-tab="connected" class="wide-only">Connected</button>
+    <button data-tab="perf" class="wide-only">Performance</button><button data-tab="family" class="wide-only">Family</button><button data-tab="connected" class="wide-only">Data sources</button>
     <button id="moreBtn" aria-haspopup="true" aria-expanded="false">More <span aria-hidden="true">▾</span></button>
     <button data-tab="settings" class="wide-only rail-end">Settings</button>
   </nav>
-  <div class="more-menu" id="moreMenu" hidden><button data-tab="perf" class="narrow-only">Performance</button><button data-tab="family" class="narrow-only">Family</button><button data-tab="connected" class="narrow-only">Connected</button><span class="menu-sep narrow-only" aria-hidden="true"></span><button data-tab="goals">Goals</button><button data-tab="zakat">Zakat</button><button data-tab="pack">Meeting pack</button><button data-tab="rent">Rent</button><button data-tab="person">Each person</button><button data-tab="whatif">What if</button><button data-tab="report">Report</button><button data-tab="options">Options</button><button data-tab="finder">Property finder</button><button data-tab="owners">Owners</button><button data-tab="settings">Settings</button></div>
+  <div class="more-menu" id="moreMenu" hidden><button data-tab="perf" class="narrow-only">Performance</button><button data-tab="family" class="narrow-only">Family</button><button data-tab="connected" class="narrow-only">Data sources</button><span class="menu-sep narrow-only" aria-hidden="true"></span><button data-tab="goals">Goals</button><button data-tab="zakat">Zakat</button><button data-tab="pack">Meeting pack</button><button data-tab="rent">Rent</button><button data-tab="person">Each person</button><button data-tab="whatif">What if</button><button data-tab="report">Report</button><button data-tab="options">Options</button><button data-tab="finder">Property finder</button><button data-tab="owners">Owners</button><button data-tab="settings">Settings</button></div>
   </div>
 
   <div class="tab" id="tab-overview">
@@ -756,6 +756,7 @@
         <div><label for="o_name">Name</label><input id="o_name" placeholder="e.g. a family member or a family company"></div>
         <div><label for="o_kind">Kind</label><select id="o_kind"><option value="person">Person</option><option value="company">Company</option><option value="trust">Trust or fund</option></select></div>
       </form>
+      <div class="switch" style="margin-top:.4rem"><input type="checkbox" id="o_ok"><label for="o_ok"><b>They agreed</b> to their holdings being kept here (not needed for yourself or a company you run).</label></div>
       <div class="actions"><button class="primary" id="addOwner">Add owner</button><span class="note" id="ownerMsg"></span></div></div>
   </div>
 
@@ -1317,9 +1318,17 @@
   $("hSort").addEventListener("change", () => drawHoldings(lastRows));
 
   function drawOwners(rows) {
-    $("ownersTable").innerHTML = owners.length ? `<table><thead><tr><th>Owner</th><th>Kind</th><th class="num">Holdings</th><th class="num">Net worth</th></tr></thead><tbody>${
-      owners.map((o) => { const mine = rows.filter((r) => r.h.owner === o.id); return `<tr><td><b>${esc(o.name)}</b></td><td>${esc(o.kind)}</td><td class="num">${mine.length}</td><td class="num">${fmt(mine.reduce((t, r) => t + (r.net_kwd || 0), 0))}</td></tr>`; }).join("")
+    $("ownersTable").innerHTML = owners.length ? `<table><thead><tr><th>Owner</th><th>Kind</th><th>Agreed</th><th class="num">Holdings</th><th class="num">Net worth</th></tr></thead><tbody>${
+      owners.map((o) => { const mine = rows.filter((r) => r.h.owner === o.id); return `<tr><td><b>${esc(o.name)}</b></td><td>${esc(o.kind)}</td><td>${o.agreed ? esc(o.agreed) : o.kind === "person" ? `<button data-agree="${esc(o.id)}">They agreed</button>` : "–"}</td><td class="num">${mine.length}</td><td class="num">${fmt(mine.reduce((t, r) => t + (r.net_kwd || 0), 0))}</td></tr>`; }).join("")
     }</tbody></table>` : `<p class="empty">No owners yet. Add the first one below; it can be you.</p>`;
+    // A family member or friend agreeing to their holdings being kept here is noted with the day they said so.
+    $("ownersTable").querySelectorAll("[data-agree]").forEach((b) => b.addEventListener("click", async () => {
+      const o = owners.find((x) => x.id === b.dataset.agree);
+      if (!o) return;
+      o.agreed = new Date().toISOString().slice(0, 10);
+      await mobleeApp.save("owners", owners);
+      drawOwners(lastRows);
+    }));
   }
 
   // ---- The calendar ----
@@ -2180,9 +2189,9 @@
   $("addOwner").addEventListener("click", async () => {
     const name = $("o_name").value.trim();
     if (!name) { $("ownerMsg").textContent = "Put in a name."; return; }
-    owners.push({ id: `o-${Date.now()}`, name, kind: $("o_kind").value });
+    owners.push(Object.assign({ id: `o-${Date.now()}`, name, kind: $("o_kind").value }, $("o_ok").checked ? { agreed: new Date().toISOString().slice(0, 10) } : {}));
     await mobleeApp.save("owners", owners);
-    $("o_name").value = ""; $("ownerMsg").textContent = `Added ${name}.`;
+    $("o_name").value = ""; $("o_ok").checked = false; $("ownerMsg").textContent = `Added ${name}.`;
     render();
   });
   $("filterOwner").addEventListener("change", () => drawHoldings(lastRows));
@@ -3034,6 +3043,9 @@
     "payment due in the next 30 days.": "دفعة مستحقة في الأيام الـ30 القادمة.", "payments due in the next 30 days.": "دفعات مستحقة في الأيام الـ30 القادمة.",
     "Nobody added yet.": "لم يُضف أحد بعد.", "vs last month": "مقارنة بالشهر الماضي",
     "Check this price": "تحقق من هذا السعر", "Price is late": "السعر متأخر",
+    "They agreed": "وافقوا", "Agreed": "الموافقة", "Data sources": "مصادر البيانات",
+    " to their holdings being kept here (not needed for yourself or a company you run).": " على حفظ أصولهم هنا (لا يلزم لك أو لشركة تديرها).",
+    "to their holdings being kept here (not needed for yourself or a company you run).": "على حفظ أصولهم هنا (لا يلزم لك أو لشركة تديرها).",
     "Simple menu": "قائمة مبسطة", ": show only the main pages (Overview, Holdings, Calendar, Family, Zakat, Rent and Settings). Off shows every page.":
       ": تُظهر الصفحات الرئيسية فقط (نظرة عامة، الأصول، التقويم، العائلة، الزكاة، الإيجارات والإعدادات). عند الإيقاف تظهر كل الصفحات.",
     "Saved. The menu shows the main pages.": "حُفظ. القائمة تُظهر الصفحات الرئيسية.", "Saved. The menu shows every page.": "حُفظ. القائمة تُظهر كل الصفحات.",
